@@ -6,17 +6,17 @@ import (
 )
 
 type CreateInvitationResponse struct {
-	InvitationURL string `json:"invitation_url,omitempty"`
 	ConnectionID  string `json:"connection_id,omitempty"`
+	InvitationURL string `json:"invitation_url,omitempty"`
 	Invitation    struct {
-		ImageURL        string   `json:"imageUrl,omitempty"`
-		Label           string   `json:"label,omitempty"`
-		ServiceEndpoint string   `json:"serviceEndpoint,omitempty"`
-		RecipientKeys   []string `json:"recipientKeys,omitempty"`
-		RoutingKeys     []string `json:"routingKeys,omitempty"`
+		Type            string   `json:"@type,omitempty"`
 		ID              string   `json:"@id,omitempty"`
 		DID             string   `json:"did,omitempty"`
-		Type            string   `json:"@type,omitempty"`
+		ImageURL        string   `json:"imageUrl,omitempty"`
+		Label           string   `json:"label,omitempty"`
+		RecipientKeys   []string `json:"recipientKeys,omitempty"`
+		RoutingKeys     []string `json:"routingKeys,omitempty"`
+		ServiceEndpoint string   `json:"serviceEndpoint,omitempty"`
 	} `json:"invitation,omitempty"`
 }
 
@@ -32,22 +32,22 @@ func (c *Client) CreateInvitation(alias string, autoAccept bool, multiUse bool, 
 }
 
 type ReceiveInvitationResponse struct {
-	InboundConnectionID string `json:"inbound_connection_id,omitempty"`
-	InvitationKey       string `json:"invitation_key,omitempty"`
-	MyDid               string `json:"my_did,omitempty"`
-	TheirDid            string `json:"their_did,omitempty"`
-	TheirRole           string `json:"their_role,omitempty"`
-	RequestID           string `json:"request_id,omitempty"`
-	State               string `json:"state,omitempty"`
-	ConnectionID        string `json:"connection_id,omitempty"`
-	Alias               string `json:"alias,omitempty"`
-	InvitationMode      string `json:"invitation_mode,omitempty"`
-	CreatedAt           string `json:"created_at,omitempty"`
 	Accept              string `json:"accept,omitempty"`
-	Initiator           string `json:"initiator,omitempty"`
+	Alias               string `json:"alias,omitempty"`
+	ConnectionID        string `json:"connection_id,omitempty"`
+	CreatedAt           string `json:"created_at,omitempty"`
 	ErrorMsg            string `json:"error_msg,omitempty"`
-	TheirLabel          string `json:"their_label,omitempty"`
+	InboundConnectionID string `json:"inbound_connection_id,omitempty"`
+	Initiator           string `json:"initiator,omitempty"`
+	InvitationKey       string `json:"invitation_key,omitempty"`
+	InvitationMode      string `json:"invitation_mode,omitempty"`
+	MyDid               string `json:"my_did,omitempty"`
+	RequestID           string `json:"request_id,omitempty"`
 	RoutingState        string `json:"routing_state,omitempty"`
+	State               string `json:"state,omitempty"`
+	TheirDid            string `json:"their_did,omitempty"`
+	TheirLabel          string `json:"their_label,omitempty"`
+	TheirRole           string `json:"their_role,omitempty"`
 	UpdatedAt           string `json:"updated_at,omitempty"`
 }
 
@@ -62,13 +62,13 @@ func (c *Client) ReceiveInvitation(invitation Invitation) (ReceiveInvitationResp
 }
 
 type Invitation struct {
-	ImageURL        string   `json:"imageUrl,omitempty"`
-	Label           string   `json:"label,omitempty"`
-	ServiceEndpoint string   `json:"serviceEndpoint,omitempty"`
-	RecipientKeys   []string `json:"recipientKeys,omitempty"`
-	RoutingKeys     []string `json:"routingKeys,omitempty"`
 	ID              string   `json:"@id,omitempty"`
 	DID             string   `json:"did,omitempty"`
+	ImageURL        string   `json:"imageUrl,omitempty"`
+	Label           string   `json:"label,omitempty"`
+	RecipientKeys   []string `json:"recipientKeys,omitempty"`
+	RoutingKeys     []string `json:"routingKeys,omitempty"`
+	ServiceEndpoint string   `json:"serviceEndpoint,omitempty"`
 }
 
 func (c *Client) AcceptInvitation(connectionID string) (Connection, error) {

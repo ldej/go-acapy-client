@@ -34,7 +34,8 @@ func (app *App) ReadCommands() {
 	(5) Accept invitation
 	(6) Accept request
 	(7) Send basic message
-	(8) Query connections`)
+	(8) Query connections
+	(exit) Exit`)
 		fmt.Print("Enter Command: ")
 		scanner.Scan()
 		command := scanner.Text()
@@ -134,10 +135,11 @@ func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 func main() {
 	var port = "4455"
 	var ledgerURL = "http://localhost:9000"
-	var acapyURL = "http://0.0.0.0:11000"
+	var acapyURL = "http://localhost:11000"
 
 	flag.StringVar(&port, "port", "4455", "port")
-	flag.StringVar(&acapyURL, "acapy", "http://localhost:11000", "acapy")
+	flag.StringVar(&ledgerURL, "ledger", "http://localhost:9000", "Ledger URL")
+	flag.StringVar(&acapyURL, "acapy", "http://localhost:11000", "ACA-py URL")
 	flag.Parse()
 
 	app := App{
