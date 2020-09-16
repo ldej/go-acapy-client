@@ -1,4 +1,4 @@
-module github.com/ldej/go-acapy-client/example
+module github.com/ldej/go-acapy-client/examples/connecting
 
 go 1.15
 
@@ -7,4 +7,4 @@ require (
 	github.com/ldej/go-acapy-client v0.0.0-20200915091109-9e6b8050e891
 )
 
-replace github.com/ldej/go-acapy-client => ../
+replace github.com/ldej/go-acapy-client => ../../

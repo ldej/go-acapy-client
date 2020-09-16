@@ -17,3 +17,7 @@ A library for interacting with ACA-py in Go.
 | RemoveConnection    | POST \<why though :man_facepalming:> | /connections/{id}/remove                     | :heavy_check_mark: |
 | SendBasicMessage    | POST                | /connections/send-message                    | :heavy_check_mark: |
 | SendPing               | POST               | /connections/send-ping                       | :heavy_check_mark: |
+
+## Examples
+
+Examples can be found in the [examples](./examples) folder.
