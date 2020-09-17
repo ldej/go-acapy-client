@@ -12,5 +12,5 @@ func (c *Client) SendBasicMessage(connectionID string, message string) error {
 		Content: message,
 	}
 
-	return c.post(fmt.Sprintf("%s/connections/%s/send-message", c.AcapyURL, connectionID), nil, basicMessage, nil)
+	return c.post(fmt.Sprintf("%s/connections/%s/send-message", c.ACApyURL, connectionID), nil, basicMessage, nil)
 }

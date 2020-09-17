@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Webhooks(
+func WebhookHandler(
 	connectionsEventHandler func(event ConnectionsEvent),
 	basicMessagesEventHandler func(event BasicMessagesEvent),
 	problemReportEventHandler func(event ProblemReportEvent),
@@ -30,6 +30,12 @@ func Webhooks(
 			var problemReportEvent ProblemReportEvent
 			json.NewDecoder(r.Body).Decode(&problemReportEvent)
 			problemReportEventHandler(problemReportEvent)
+		case "issue_credential":
+			// TODO
+		case "oob-invitation":
+			// TODO
+		case "present_proof":
+			// TODO
 		default:
 			fmt.Printf("Topic not supported: %q\n", topic)
 			w.WriteHeader(404)

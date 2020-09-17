@@ -9,7 +9,7 @@ import (
 
 type Client struct {
 	LedgerURL string
-	AcapyURL  string
+	ACApyURL  string
 
 	HTTPClient http.Client
 }
@@ -17,7 +17,7 @@ type Client struct {
 func NewClient(ledgerURL string, acapyURL string) *Client {
 	return &Client{
 		LedgerURL:  ledgerURL,
-		AcapyURL:   acapyURL,
+		ACApyURL:   acapyURL,
 		HTTPClient: http.Client{},
 	}
 }
@@ -28,6 +28,10 @@ func (c *Client) post(url string, queryParam map[string]string, body interface{}
 
 func (c *Client) get(url string, queryParams map[string]string, response interface{}) error {
 	return c.request(http.MethodGet, url, queryParams, nil, response)
+}
+
+func (c *Client) patch(url string, queryParams map[string]string, body interface{}, response interface{}) error {
+	return c.request(http.MethodPatch, url, queryParams, body, response)
 }
 
 func (c *Client) request(method string, url string, queryParams map[string]string, body interface{}, response interface{}) error {

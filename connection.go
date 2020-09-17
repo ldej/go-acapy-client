@@ -22,13 +22,17 @@ type CreateInvitationResponse struct {
 
 func (c *Client) CreateInvitation(alias string, autoAccept bool, multiUse bool, public bool) (CreateInvitationResponse, error) {
 	var createInvitationResponse CreateInvitationResponse
-	err := c.post(c.AcapyURL+"/connections/create-invitation", map[string]string{
+	queryParams := map[string]string{
 		"alias":       alias,
 		"auto_accept": strconv.FormatBool(autoAccept),
 		"multi_use":   strconv.FormatBool(multiUse),
 		"public":      strconv.FormatBool(public),
-	}, nil, &createInvitationResponse)
-	return createInvitationResponse, err
+	}
+	err := c.post(c.ACApyURL+"/connections/create-invitation", queryParams, nil, &createInvitationResponse)
+	if err != nil {
+		return CreateInvitationResponse{}, err
+	}
+	return createInvitationResponse, nil
 }
 
 type ReceiveInvitationResponse struct {
@@ -53,12 +57,14 @@ type ReceiveInvitationResponse struct {
 
 func (c *Client) ReceiveInvitation(invitation Invitation) (ReceiveInvitationResponse, error) {
 	var receiveInvitationResponse ReceiveInvitationResponse
-
-	err := c.post(c.AcapyURL+"/connections/receive-invitation", map[string]string{
+	err := c.post(c.ACApyURL+"/connections/receive-invitation", map[string]string{
 		"alias":       invitation.Label,
 		"auto_accept": strconv.FormatBool(false),
 	}, invitation, &receiveInvitationResponse)
-	return receiveInvitationResponse, err
+	if err != nil {
+		return ReceiveInvitationResponse{}, err
+	}
+	return receiveInvitationResponse, nil
 }
 
 type Invitation struct {
@@ -73,14 +79,20 @@ type Invitation struct {
 
 func (c *Client) AcceptInvitation(connectionID string) (Connection, error) {
 	var connection Connection
-	err := c.post(fmt.Sprintf("%s/connections/%s/accept-invitation", c.AcapyURL, connectionID), nil, nil, &connection)
-	return connection, err
+	err := c.post(fmt.Sprintf("%s/connections/%s/accept-invitation", c.ACApyURL, connectionID), nil, nil, &connection)
+	if err != nil {
+		return Connection{}, err
+	}
+	return connection, nil
 }
 
 func (c *Client) AcceptRequest(connectionID string) (Connection, error) {
 	var connection Connection
-	err := c.post(fmt.Sprintf("%s/connections/%s/accept-request", c.AcapyURL, connectionID), nil, nil, &connection)
-	return connection, err
+	err := c.post(fmt.Sprintf("%s/connections/%s/accept-request", c.ACApyURL, connectionID), nil, nil, &connection)
+	if err != nil {
+		return Connection{}, err
+	}
+	return connection, nil
 }
 
 type Connection struct {
@@ -132,8 +144,8 @@ type QueryConnectionsParams struct {
 }
 
 func (c *Client) QueryConnections(params QueryConnectionsParams) ([]Connection, error) {
-	var connections = struct {
-		Result []Connection `json:"results"`
+	var results = struct {
+		Connections []Connection `json:"results"`
 	}{}
 
 	var queryParams = map[string]string{
@@ -145,18 +157,24 @@ func (c *Client) QueryConnections(params QueryConnectionsParams) ([]Connection, 
 		"their_did":        params.TheirDID,
 		"their_role":       params.TheirRole,
 	}
-	err := c.get(c.AcapyURL+"/connections", queryParams, &connections)
-	return connections.Result, err
+	err := c.get(c.ACApyURL+"/results", queryParams, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results.Connections, nil
 }
 
 func (c *Client) GetConnection(connectionID string) (Connection, error) {
 	var connection Connection
-	err := c.get(fmt.Sprintf("%s/connections/%s", c.AcapyURL, connectionID), nil, &connection)
-	return connection, err
+	err := c.get(fmt.Sprintf("%s/connections/%s", c.ACApyURL, connectionID), nil, &connection)
+	if err != nil {
+		return Connection{}, err
+	}
+	return connection, nil
 }
 
 func (c *Client) RemoveConnection(connectionID string) error {
-	return c.post(fmt.Sprintf("%s/connections/%s", c.AcapyURL, connectionID), nil, nil, nil)
+	return c.post(fmt.Sprintf("%s/connections/%s", c.ACApyURL, connectionID), nil, nil, nil)
 }
 
 type Thread struct {
@@ -170,6 +188,9 @@ func (c *Client) SendPing(connectionID string) (Thread, error) {
 		Comment: "ping",
 	}
 	var thread Thread
-	err := c.post(fmt.Sprintf("%s/connections/%s/send-ping", c.AcapyURL, connectionID), nil, ping, &thread)
-	return thread, err
+	err := c.post(fmt.Sprintf("%s/connections/%s/send-ping", c.ACApyURL, connectionID), nil, ping, &thread)
+	if err != nil {
+		return Thread{}, err
+	}
+	return thread, nil
 }

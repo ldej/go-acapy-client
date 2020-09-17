@@ -130,13 +130,13 @@ func (app *App) StartACApy() {
 
 func (app *App) StartWebserver() {
 	r := mux.NewRouter()
-	webhooksHandler := acapy.Webhooks(
+	webhookHandler := acapy.WebhookHandler(
 		app.ConnectionsEventHandler,
 		app.BasicMessagesEventHandler,
 		app.ProblemReportEventHandler,
 	)
 
-	r.HandleFunc("/webhooks/topic/{topic}/", webhooksHandler).Methods(http.MethodPost)
+	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
 	fmt.Printf("Listening on %v\n", app.port)
 
 	app.server = &http.Server{
@@ -210,7 +210,7 @@ func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDRespons
 	return didResponse, nil
 }
 
-func (app *App) RegisterSchema() (acapy.SchemaResponse, error) {
+func (app *App) RegisterSchema() (acapy.Schema, error) {
 	schemaResponse, err := app.client.RegisterSchema(
 		"Laurence",
 		"1.0",
@@ -218,7 +218,7 @@ func (app *App) RegisterSchema() (acapy.SchemaResponse, error) {
 	)
 	if err != nil {
 		log.Printf("Failed to register schema: %+v", err)
-		return acapy.SchemaResponse{}, err
+		return acapy.Schema{}, err
 	}
 	fmt.Printf("Registered schema: %+v\n", schemaResponse)
 	return schemaResponse, nil

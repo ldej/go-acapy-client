@@ -23,8 +23,7 @@ func (c *Client) RegisterDID(alias string, seed string, role string) (RegisterDI
 	}
 	err := c.post(c.LedgerURL+"/register", nil, registerDID, &registerDIDResponse)
 	if err != nil {
-		return registerDIDResponse, err
+		return RegisterDIDResponse{}, err
 	}
-
 	return registerDIDResponse, nil
 }
