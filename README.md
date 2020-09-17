@@ -20,6 +20,10 @@ To become a Aries developer, follow these courses by the Linux Foundation on [ed
 $ go get -u github.com/ldej/go-acapy-client
 ```
 
+## Compatibility
+
+Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports version v0.5.4 but might support older and newer versions as well, but no guarantees.
+
 ## Development
 
 Start a local Indy ledger network VON-network. Make a checkout of [github.com/bcgov/von-network](https://github.com/bcgov/von-network). Then run:
