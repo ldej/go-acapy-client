@@ -9,7 +9,7 @@ You can create your own Self-Sovereign Identity solution using the Hyperledger U
 - [The Story of Open SSI Standards](https://www.youtube.com/watch?v=RllH91rcFdE)
 - [Decentralized Identifiers (DIDs) - The Fundamental Building Block of Self Sovereign Identity](https://www.youtube.com/watch?v=Jcfy9wd5bZI&)
 
-To become a Aries developer, follow these courses by the Linux Foundation on [edx.org](https://edx.org):
+To become an Aries developer, attend these courses by the Linux Foundation on [edx.org](https://edx.org):
 
 - [Introduction to Hyperledger Sovereign Identity Blockchain Solutions: Indy, Aries & Ursa](https://courses.edx.org/courses/course-v1:LinuxFoundationX+LFS172x+3T2019/course/)
 - [Becoming a Hyperledger Aries Developer](https://courses.edx.org/courses/course-v1:LinuxFoundationX+LFS173x+1T2020/course/) 
