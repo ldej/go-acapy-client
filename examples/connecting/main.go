@@ -98,7 +98,7 @@ func (app *App) ReadCommands() {
 		case "8":
 			connections, _ := app.QueryConnections(acapy.QueryConnectionsParams{})
 			for _, connection := range connections {
-				fmt.Printf("%s - %s - %s - %s\n", connection.Alias, connection.ConnectionID, connection.State, connection.TheirDid)
+				fmt.Printf("%s - %s - %s - %s\n", connection.Alias, connection.ConnectionID, connection.State, connection.TheirDID)
 			}
 		}
 	}

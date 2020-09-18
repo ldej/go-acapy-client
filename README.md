@@ -44,11 +44,39 @@ Start an Aries-Cloud-Agent-Python (ACA-py) instance and configure the right comm
 
 ## Examples
 
+Create a client, register a DID in the ledger and create an invitation.
+
+```go
+package main
+
+import "github.com/ldej/go-acapy-client"
+
+func main() {
+    var ledgerURL = "http://localhost:9000"
+    var acapyURL = "http://localhost:8000"
+    client := acapy.NewClient(ledgerURL, acapyURL)
+    
+    didResponse, err := client.RegisterDID("Alice", "Alice", "ENDORSER")
+    if err != nil {
+    	// handle error
+    }
+
+    // Start aca-py with registered DID
+    
+    invitation, err := client.CreateInvitation("Bob", false, false, false)
+    if err != nil {
+        // handle error
+    }
+}
+```
+
 Examples can be found in the [examples](./examples) folder.
 
 ## Implemented Endpoints
 
 ### Connections
+
+`{id}` = connection identifier
 
 | Function Name                  | Method                               | Endpoint                                     | Implemented |
 |----------------------------------------------|------------------------------|------------------------------|------------------------------|
@@ -61,8 +89,13 @@ Examples can be found in the [examples](./examples) folder.
 | RemoveConnection    | POST \<why though :man_facepalming:> | /connections/{id}/remove                     | :heavy_check_mark: |
 | SendBasicMessage    | POST                | /connections/send-message                    | :heavy_check_mark: |
 | SendPing               | POST               | /connections/send-ping                       | :heavy_check_mark: |
+| - | POST | /connections/{id}/start-introduction | :exclamation: |
+| - | POST | /connections/{id}/create-static | :exclamation: |
+| - | POST | /connections/{id}/establish-inbound/{ref_id} | :exclamation: |
 
 ### Schemas
+
+`{id}` = schema identifier
 
 | Function Name  | Method | Endpoint         | Implemented        |
 | -------------- | ------ | ---------------- | ------------------ |
@@ -82,15 +115,39 @@ Examples can be found in the [examples](./examples) folder.
 | GetDIDEndpoint | GET    | /wallet/get-public-did           | :heavy_check_mark: |
 | RotateKeypair  | PATCH  | /wallet/did/local/rotate-keypair | :heavy_check_mark: |
 
-### Credentials
-
-TODO
-
 ### Credential Definitions
 
-TODO
+`{id}` = credential definition identifier
 
-### Issue Credentials
+| Function Name               | Method | Endpoint                        | Implemented        |
+| --------------------------- | ------ | ------------------------------- | ------------------ |
+| CreateCredentialDefinitions | POST   | /credential-definitions         | :heavy_check_mark: |
+| QueryCredentialDefintions   | GET    | /credential-definitions/created | :heavy_check_mark: |
+| GetCredentialDefinition     | GET    | /credential-definitions/{id}    | :heavy_check_mark: |
+
+### Issue Credentials (Credential Exchange v1.0)
+
+`{id}` = credential exchange identifier
+
+| Function Name                     | Method | Endpoint                                    | Implemented        |
+| --------------------------------- | ------ | ------------------------------------------- | ------------------ |
+| QueryCredentialExchange           | GET    | /issue-credential/records                   | :heavy_check_mark: |
+| GetCredentialExchange             | GET    | /issue-credential/records/{id}              | :heavy_check_mark: |
+| CreateCredentialExchange          | POST   | /issue-credential/create                    | :heavy_check_mark: |
+| SendCredentialExchange            | POST   | /issue-credential/send                      | :heavy_check_mark: |
+| SendCredentialExchangeProposal    | POST   | /issue-credential/send-proposal             | :heavy_check_mark: |
+| SendCredentialExchangeOffer       | POST   | /issue-credential/send-offer                | :heavy_check_mark: |
+| SendCredentialExchangeOfferByID   | POST   | /issue-credential/{id}/send-offer           | :heavy_check_mark: |
+| SendCredentialExchangeRequestByID | POST   | /issue-credential/{id}/send-request         | :heavy_check_mark: |
+| SendCredentialByID                | POST   | /issue-credential/{id}/issue                | :heavy_check_mark: |
+| StoreReceivedCredential           | POST   | /issue-credential/{id}/store                | :heavy_check_mark: |
+| RemoveCredentialExchange          | POST   | /issue-credential/{id}/remove               | :heavy_check_mark: |
+| ReportCredentialExchangeProblem   | POST   | /issue-credential/{id}/problem-report       | :heavy_check_mark: |
+| RevokeIssuedCredential            | POST   | /issue-credential/revoke                    | :heavy_check_mark: |
+| -                                 | POST   | /issue-credential/publish-revocations       | :exclamation:      |
+| -                                 | POST   | /issue-credential/clear-pending-revocations | :exclamation:      |
+
+### Credentials
 
 TODO
 

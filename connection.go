@@ -45,11 +45,11 @@ type ReceiveInvitationResponse struct {
 	Initiator           string `json:"initiator,omitempty"`
 	InvitationKey       string `json:"invitation_key,omitempty"`
 	InvitationMode      string `json:"invitation_mode,omitempty"`
-	MyDid               string `json:"my_did,omitempty"`
+	MyDID               string `json:"my_did,omitempty"`
 	RequestID           string `json:"request_id,omitempty"`
 	RoutingState        string `json:"routing_state,omitempty"`
 	State               string `json:"state,omitempty"`
-	TheirDid            string `json:"their_did,omitempty"`
+	TheirDID            string `json:"their_did,omitempty"`
 	TheirLabel          string `json:"their_label,omitempty"`
 	TheirRole           string `json:"their_role,omitempty"`
 	UpdatedAt           string `json:"updated_at,omitempty"`
@@ -105,11 +105,11 @@ type Connection struct {
 	Initiator           string `json:"initiator"`
 	InvitationKey       string `json:"invitation_key"`
 	InvitationMode      string `json:"invitation_mode"`
-	MyDid               string `json:"my_did"`
+	MyDID               string `json:"my_did"`
 	RequestID           string `json:"request_id"`
 	RoutingState        string `json:"routing_state"`
 	State               string `json:"state"`
-	TheirDid            string `json:"their_did"`
+	TheirDID            string `json:"their_did"`
 	TheirLabel          string `json:"their_label"`
 	TheirRole           string `json:"their_role"`
 	UpdatedAt           string `json:"updated_at"`
