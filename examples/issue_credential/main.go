@@ -210,7 +210,7 @@ func (app *App) StartWebserver() {
 		app.ConnectionsEventHandler,
 		app.BasicMessagesEventHandler,
 		app.ProblemReportEventHandler,
-		app.IssueCredentialEventHandler,
+		app.CredentialExchangeEventHandler,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -250,7 +250,7 @@ func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
 	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.Alias, event.ConnectionID, event.Content)
 }
 
-func (app *App) IssueCredentialEventHandler(event acapy.CredentialExchange) {
+func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.Alias, event.State)
 }

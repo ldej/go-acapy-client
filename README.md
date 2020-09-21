@@ -199,11 +199,16 @@ func ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 	fmt.Printf("\n -> Received problem report: %+v\n", event)
 }
 
+func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
+	fmt.Printf("\n -> Credential Exchange update: %s - %s\n", event.CredentialExchangeID, event.State)
+}
+
 r := mux.NewRouter()
 webhooksHandler := acapy.WebhookHandler(
     ConnectionsEventHandler,
     BasicMessagesEventHandler,
     ProblemReportEventHandler,
+    CredentialExchangeEventHandler,
 )
 
 r.HandleFunc("/webhooks/topic/{topic}/", webhooksHandler).Methods(http.MethodPost)
