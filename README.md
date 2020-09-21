@@ -149,7 +149,14 @@ Examples can be found in the [examples](./examples) folder.
 
 ### Credentials
 
-TODO
+`{id}` = credential identifier, also known as referent
+
+| Function Name       | Method | Endpoint                    | Implemented        |
+| ------------------- | ------ | --------------------------- | ------------------ |
+| GetCredential       | GET    | /credential/{id}            | :heavy_check_mark: |
+| GetCredentials      | GET    | /credential__s__            | :heavy_check_mark: |
+| RemoveCredential    | POST   | /credential/{id}/remove     | :heavy_check_mark: |
+| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
 
 ### Present Proof
 

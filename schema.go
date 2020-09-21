@@ -5,12 +5,12 @@ import (
 )
 
 type Schema struct {
-	Ver       string   `json:"ver"`
-	ID        string   `json:"id"`
-	Name      string   `json:"name"`
-	Version   string   `json:"version"`
-	AttrNames []string `json:"attrNames"`
-	SeqNo     int      `json:"seqNo"`
+	Ver            string   `json:"ver"`
+	ID             string   `json:"id"`
+	Name           string   `json:"name"`
+	Version        string   `json:"version"`
+	AttributeNames []string `json:"attrNames"`
+	SeqNo          int      `json:"seqNo"`
 }
 
 type schemaRequest struct {

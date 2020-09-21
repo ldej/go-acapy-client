@@ -55,11 +55,11 @@ type ReceiveInvitationResponse struct {
 	UpdatedAt           string `json:"updated_at,omitempty"`
 }
 
-func (c *Client) ReceiveInvitation(invitation Invitation) (ReceiveInvitationResponse, error) {
+func (c *Client) ReceiveInvitation(invitation Invitation, autoAccept bool) (ReceiveInvitationResponse, error) {
 	var receiveInvitationResponse ReceiveInvitationResponse
 	err := c.post(c.ACApyURL+"/connections/receive-invitation", map[string]string{
 		"alias":       invitation.Label,
-		"auto_accept": strconv.FormatBool(false),
+		"auto_accept": strconv.FormatBool(autoAccept),
 	}, invitation, &receiveInvitationResponse)
 	if err != nil {
 		return ReceiveInvitationResponse{}, err

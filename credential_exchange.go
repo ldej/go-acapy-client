@@ -6,23 +6,31 @@ import (
 )
 
 type CredentialExchange struct {
-	CredentialExchangeID   string             `json:"credential_exchange_id"`
-	CredentialDefinitionID string             `json:"credential_definition_id"`
-	ConnectionID           string             `json:"connection_id"`
-	ThreadID               string             `json:"thread_id"`
-	SchemaID               string             `json:"schema_id"`
-	State                  string             `json:"state"`
-	CredentialOffer        CredentialOffer    `json:"credential_offer"`
-	CredentialOfferMap     CredentialOfferMap `json:"credential_offer_dict"`
-	CredentialProposalMap  CredentialProposal `json:"credential_proposal_dict"`
-	CredentialRequest      CredentialRequest  `json:"credential_request"`
-	Initiator              string             `json:"initiator"`
-	CreatedAt              string             `json:"created_at"`
-	UpdatedAt              string             `json:"updated_at"`
-	Trace                  bool               `json:"trace"`
-	AutoOffer              bool               `json:"auto_offer"`
-	AutoIssue              bool               `json:"auto_issue"`
-	AutoRemove             bool               `json:"auto_remove"`
+	CredentialExchangeID      string                    `json:"credential_exchange_id"`
+	CredentialDefinitionID    string                    `json:"credential_definition_id"`
+	ConnectionID              string                    `json:"connection_id"`
+	ThreadID                  string                    `json:"thread_id"`
+	ParentThreadID            string                    `json:"parent_thread_id"`
+	SchemaID                  string                    `json:"schema_id"`
+	RevocationID              string                    `json:"revocation_id"`
+	RevocationRegistryID      string                    `json:"revoc_reg_id"`
+	State                     string                    `json:"state"`
+	CredentialOffer           CredentialOffer           `json:"credential_offer"`
+	CredentialOfferMap        CredentialOfferMap        `json:"credential_offer_dict"`
+	CredentialProposalMap     CredentialProposal        `json:"credential_proposal_dict"`
+	CredentialRequest         CredentialRequest         `json:"credential_request"`
+	CredentialRequestMetadata CredentialRequestMetadata `json:"credential_request_metadata"`
+	Credential                Credential                `json:"credential"`
+	RawCredential             RawCredential             `json:"raw_credential"`
+	Role                      string                    `json:"role"`
+	Initiator                 string                    `json:"initiator"`
+	CreatedAt                 string                    `json:"created_at"`
+	UpdatedAt                 string                    `json:"updated_at"`
+	ErrorMessage              string                    `json:"error_msg"`
+	Trace                     bool                      `json:"trace"`
+	AutoOffer                 bool                      `json:"auto_offer"`
+	AutoIssue                 bool                      `json:"auto_issue"`
+	AutoRemove                bool                      `json:"auto_remove"`
 }
 
 type CredentialOffer struct {
@@ -37,11 +45,11 @@ type CredentialOffer struct {
 }
 
 type CredentialOfferMap struct {
-	Type              string     `json:"@type"`
-	ID                string     `json:"@id"`
-	Thread            Thread     `json:"~thread"`
-	CredentialPreview Credential `json:"credential_preview"`
-	Comment           string     `json:"comment"`
+	Type              string            `json:"@type"`
+	ID                string            `json:"@id"`
+	Thread            Thread            `json:"~thread"`
+	CredentialPreview CredentialPreview `json:"credential_preview"`
+	Comment           string            `json:"comment"`
 	OffersAttach      []struct {
 		ID       string `json:"@id"`
 		MimeType string `json:"mime-type"`
@@ -52,16 +60,16 @@ type CredentialOfferMap struct {
 }
 
 type CredentialProposal struct {
-	ID                     string     `json:"@id"`
-	Type                   string     `json:"@type"`
-	CredentialDefinitionID string     `json:"cred_def_id"`
-	SchemaID               string     `json:"schema_id"`
-	IssuerDID              string     `json:"issuer_did"`
-	SchemaName             string     `json:"schema_name"`
-	SchemaIssuerDID        string     `json:"schema_issuer_did"`
-	SchemaVersion          string     `json:"schema_version"`
-	Comment                string     `json:"comment"`
-	Credential             Credential `json:"credential_proposal"`
+	ID                     string            `json:"@id"`
+	Type                   string            `json:"@type"`
+	CredentialDefinitionID string            `json:"cred_def_id"`
+	SchemaID               string            `json:"schema_id"`
+	IssuerDID              string            `json:"issuer_did"`
+	SchemaName             string            `json:"schema_name"`
+	SchemaIssuerDID        string            `json:"schema_issuer_did"`
+	SchemaVersion          string            `json:"schema_version"`
+	Comment                string            `json:"comment"`
+	Credential             CredentialPreview `json:"credential_proposal"`
 }
 
 type CredentialRequest struct {
@@ -86,19 +94,27 @@ type CredentialRequest struct {
 	Nonce string `json:"nonce"`
 }
 
-type Credential struct {
-	Type       string      `json:"@type"`
+type CredentialRequestMetadata struct {
+	Description string `json:"description"`
+}
+
+type RawCredential struct {
+	Description string `json:"raw_credential"`
+}
+
+type CredentialPreview struct {
+	Type       string      `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview
 	Attributes []Attribute `json:"attributes"`
 }
 
 type CredentialOfferRequest struct {
-	CredentialDefinitionID string     `json:"cred_def_id"`
-	ConnectionID           string     `json:"connection_id"`
-	CredentialPreview      Credential `json:"credential_preview"`
-	Comment                string     `json:"comment"`
-	Trace                  bool       `json:"trace"`
-	AutoRemove             bool       `json:"auto_remove"`
-	AutoIssue              bool       `json:"auto_issue"`
+	CredentialDefinitionID string            `json:"cred_def_id"`
+	ConnectionID           string            `json:"connection_id"`
+	CredentialPreview      CredentialPreview `json:"credential_preview"`
+	Comment                string            `json:"comment"`
+	Trace                  bool              `json:"trace"`
+	AutoRemove             bool              `json:"auto_remove"`
+	AutoIssue              bool              `json:"auto_issue"`
 }
 
 type Attribute struct {
@@ -117,17 +133,17 @@ func (c *Client) SendCredentialExchangeOffer(offer CredentialOfferRequest) (Cred
 }
 
 type CredentialProposalRequest struct {
-	CredentialDefinitionID string     `json:"cred_def_id"`
-	ConnectionID           string     `json:"connection_id"`
-	IssuerDID              string     `json:"issuer_did"`
-	Comment                string     `json:"comment"`
-	CredentialProposal     Credential `json:"credential_proposal"`
-	SchemaName             string     `json:"schema_name"`
-	SchemaVersion          string     `json:"schema_version"`
-	SchemaID               string     `json:"schema_id"`
-	SchemaIssuerDID        string     `json:"schema_issuer_did"`
-	Trace                  bool       `json:"trace"`
-	AutoRemove             bool       `json:"auto_remove"`
+	CredentialDefinitionID string            `json:"cred_def_id"`
+	ConnectionID           string            `json:"connection_id"`
+	IssuerDID              string            `json:"issuer_did"`
+	Comment                string            `json:"comment"`
+	CredentialProposal     CredentialPreview `json:"credential_proposal"`
+	SchemaName             string            `json:"schema_name"`
+	SchemaVersion          string            `json:"schema_version"`
+	SchemaID               string            `json:"schema_id"`
+	SchemaIssuerDID        string            `json:"schema_issuer_did"`
+	Trace                  bool              `json:"trace"`
+	AutoRemove             bool              `json:"auto_remove"`
 }
 
 type CredentialProposalResponse struct {
@@ -190,15 +206,15 @@ func (c *Client) GetCredentialExchange(credentialExchangeID string) (CredentialE
 type CredentialCreateRequest struct {
 	CredentialDefinitionID string `json:"cred_def_id"`
 	// ConnectionID           string     `json:"connection_id"`
-	IssuerDID          string     `json:"issuer_did"`
-	Comment            string     `json:"comment"`
-	CredentialProposal Credential `json:"credential_proposal"`
-	SchemaName         string     `json:"schema_name"`
-	SchemaVersion      string     `json:"schema_version"`
-	SchemaID           string     `json:"schema_id"`
-	SchemaIssuerDID    string     `json:"schema_issuer_did"`
-	Trace              bool       `json:"trace"`
-	AutoRemove         bool       `json:"auto_remove"`
+	IssuerDID          string            `json:"issuer_did"`
+	Comment            string            `json:"comment"`
+	CredentialProposal CredentialPreview `json:"credential_proposal"`
+	SchemaName         string            `json:"schema_name"`
+	SchemaVersion      string            `json:"schema_version"`
+	SchemaID           string            `json:"schema_id"`
+	SchemaIssuerDID    string            `json:"schema_issuer_did"`
+	Trace              bool              `json:"trace"`
+	AutoRemove         bool              `json:"auto_remove"`
 }
 
 func (c *Client) CreateCredentialExchange(request CredentialCreateRequest) (CredentialExchange, error) {
@@ -223,7 +239,7 @@ func (c *Client) SendCredentialExchange(request CredentialSendRequest) (Credenti
 
 func (c *Client) SendCredentialExchangeOfferByID(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/%s/send-offer", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
+	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/send-offer", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -232,25 +248,35 @@ func (c *Client) SendCredentialExchangeOfferByID(credentialExchangeID string) (C
 
 func (c *Client) SendCredentialExchangeRequestByID(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/%s/send-request", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
+	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/send-request", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
 	return credentialExchange, nil
 }
 
-func (c *Client) SendCredentialToHolder(credentialExchangeID string) (CredentialExchange, error) {
+func (c *Client) SendCredentialToHolder(credentialExchangeID string, comment string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/%s/issue", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
+	var body = struct {
+		Comment string `json:"comment"`
+	}{
+		Comment: comment,
+	}
+	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/issue", c.ACApyURL, credentialExchangeID), nil, body, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
 	return credentialExchange, nil
 }
 
-func (c *Client) StoreReceivedCredential(credentialExchangeID string) (CredentialExchange, error) {
+func (c *Client) StoreReceivedCredential(credentialExchangeID string, credentialID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/%s/store", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
+	var body = struct {
+		CredentialID string `json:"credential_id"`
+	}{
+		CredentialID: credentialID,
+	}
+	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/store", c.ACApyURL, credentialExchangeID), nil, body, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -258,7 +284,7 @@ func (c *Client) StoreReceivedCredential(credentialExchangeID string) (Credentia
 }
 
 func (c *Client) RemoveCredentialExchange(credentialExchangeID string) error {
-	return c.post(fmt.Sprintf("%s/issue-credential/%s/remove", c.ACApyURL, credentialExchangeID), nil, nil, nil)
+	return c.post(fmt.Sprintf("%s/issue-credential/records/%s/remove", c.ACApyURL, credentialExchangeID), nil, nil, nil)
 }
 
 func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, message string) error {
@@ -267,7 +293,7 @@ func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, me
 	}{
 		Message: message,
 	}
-	return c.post(fmt.Sprintf("%s/issue-credential/%s/problem-report", c.ACApyURL, credentialExchangeID), nil, body, nil)
+	return c.post(fmt.Sprintf("%s/issue-credential/records/%s/problem-report", c.ACApyURL, credentialExchangeID), nil, body, nil)
 }
 
 func (c *Client) RevokeIssuedCredential(credentialRevocationID string, revocationRegistryID string, publish bool) error {

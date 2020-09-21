@@ -83,7 +83,7 @@ type CredentialDefinitionValue struct {
 	Revocation Revocation `json:"revocation"`
 }
 type CredentialDefinition struct {
-	Ver      string                    `json:"ver"`
+	Version  string                    `json:"ver"`
 	ID       string                    `json:"id"`
 	SchemaID string                    `json:"schemaId"`
 	Type     string                    `json:"type"`

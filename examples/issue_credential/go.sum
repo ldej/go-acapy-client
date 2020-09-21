@@ -1,0 +1,4 @@
+github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
+github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
+github.com/ldej/go-acapy-client v0.0.0-20200918112249-8f7ce3dadbc2 h1:S+Gj47S5qlWHZ8rPqbZPrxD/xz6v0FRX9Z38y5ytDNU=
+github.com/ldej/go-acapy-client v0.0.0-20200918112249-8f7ce3dadbc2/go.mod h1:qh1l9MqgMCnrxWrC57rBhoumhL5n59FWeZ4KINDODhs=

@@ -36,16 +36,26 @@ func (app *App) ReadCommands() {
 	scanner.Scan()
 	app.label = scanner.Text()
 
+	fmt.Printf("Seed: ")
+	scanner.Scan()
+	app.seed = scanner.Text()
+
+	didResponse, _ := app.RegisterDID(app.label, app.seed)
+	fmt.Printf("Registered DID: %s\n", didResponse.DID)
+
+	var schema acapy.Schema
+
 	for {
 		fmt.Println(`Choose:
-	(1) Register DID and start ACA-py
-	(2) Register Schema
-	(3) Create invitation
-	(4) Receive invitation
-	(5) Accept invitation
-	(6) Accept request
-	(7) Send basic message
-	(8) Query connections
+	(1) Create invitation
+	(2) Receive invitation
+	(3) Register schema
+	(4) Create credential definition
+	(5) Send credential offer
+	(6) Send credential request
+	(7) Issue credential
+	(8) Store credential
+	(9) List credentials
 	(exit) Exit
 `)
 		fmt.Print("Enter Command: ")
@@ -57,48 +67,110 @@ func (app *App) ReadCommands() {
 			app.Exit()
 			return
 		case "1":
-			fmt.Print("Seed: ")
-			scanner.Scan()
-			seed := scanner.Text() + app.rand
-			didResponse, _ := app.RegisterDID(app.label, seed)
-			fmt.Printf("Registered DID: %s\n", didResponse.DID)
-		case "2":
-			app.RegisterSchema()
-		case "3":
 			fmt.Print("Alias: ")
 			scanner.Scan()
 			alias := scanner.Text()
-			invitationResponse, _ := app.CreateInvitation(alias, false, false, true)
+			invitationResponse, _ := app.CreateInvitation(alias, true, false, true)
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
-		case "4":
+		case "2":
 			fmt.Print("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
 			receiveInvitation, _ := app.ReceiveInvitation(invitation)
-			fmt.Printf("Connection id: %s\n", receiveInvitation.ConnectionID)
+			fmt.Printf("Connection ID: %s\n", receiveInvitation.ConnectionID)
+		case "3":
+			fmt.Print("Schema name: ")
+			scanner.Scan()
+			schemaName := scanner.Text()
+			fmt.Printf("Version: ")
+			scanner.Scan()
+			version := scanner.Text()
+			fmt.Printf("Attributes: ")
+			scanner.Scan()
+			attributesString := scanner.Text()
+			attributes := strings.Split(attributesString, ",")
+			schema, _ = app.RegisterSchema(schemaName, version, attributes)
+			fmt.Printf("Schema: %+v\n", schema)
+		case "4":
+			fmt.Printf("Tag: ")
+			scanner.Scan()
+			tag := scanner.Text()
+			fmt.Printf("Schema ID: ")
+			scanner.Scan()
+			schemaID := scanner.Text()
+			definition, _ := app.client.CreateCredentialDefinition(tag, false, 0, schemaID)
+			fmt.Printf("Credential Definition ID: %s\n", definition)
 		case "5":
-			fmt.Print("Connection id: ")
+			fmt.Printf("Credential Definition ID: ")
+			scanner.Scan()
+			credentialDefinitionID := scanner.Text()
+
+			fmt.Printf("Connection ID: ")
 			scanner.Scan()
 			connectionID := scanner.Text()
-			_, _ = app.AcceptInvitation(connectionID)
+
+			var attributes []acapy.Attribute
+
+			for _, attr := range schema.AttributeNames {
+				fmt.Printf("Attribute %q value: ", attr)
+				scanner.Scan()
+				val := scanner.Text()
+
+				attributes = append(attributes, acapy.Attribute{
+					Name:     attr,
+					MimeType: "text/plain",
+					Value:    val,
+				})
+			}
+
+			fmt.Printf("Comment: ")
+			scanner.Scan()
+			comment := scanner.Text()
+
+			var offer = acapy.CredentialOfferRequest{
+				CredentialDefinitionID: credentialDefinitionID,
+				ConnectionID:           connectionID,
+				CredentialPreview: acapy.CredentialPreview{
+					Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+					Attributes: attributes,
+				},
+				Comment:    comment,
+				Trace:      false,
+				AutoRemove: false,
+				AutoIssue:  false,
+			}
+			exchangeOffer, _ := app.client.SendCredentialExchangeOffer(offer)
+			fmt.Printf("Credential Exchange ID: %s\n", exchangeOffer.CredentialExchangeID)
 		case "6":
-			fmt.Print("Connection id: ")
+			fmt.Printf("Credential Exchange ID: ")
 			scanner.Scan()
-			connectionID := scanner.Text()
-			_, _ = app.AcceptRequest(connectionID)
+			credentialExchangeID := scanner.Text()
+			_, _ = app.client.SendCredentialExchangeRequestByID(credentialExchangeID)
 		case "7":
-			fmt.Print("Connection id: ")
+			fmt.Printf("Credential Exchange ID: ")
 			scanner.Scan()
-			connectionID := scanner.Text()
-			fmt.Print("Message: ")
+			credentialExchangeID := scanner.Text()
+
+			fmt.Printf("Comment: ")
 			scanner.Scan()
-			message := scanner.Text()
-			_ = app.SendBasicMessage(connectionID, message)
+			comment := scanner.Text()
+
+			_, _ = app.client.SendCredentialToHolder(credentialExchangeID, comment)
 		case "8":
-			connections, _ := app.QueryConnections(acapy.QueryConnectionsParams{})
-			for _, connection := range connections {
-				fmt.Printf("%s - %s - %s - %s\n", connection.Alias, connection.ConnectionID, connection.State, connection.TheirDID)
+			fmt.Printf("Credential Exchange ID: ")
+			scanner.Scan()
+			credentialExchangeID := scanner.Text()
+
+			fmt.Printf("Credential ID: ")
+			scanner.Scan()
+			credentialID := scanner.Text()
+
+			_, _ = app.client.StoreReceivedCredential(credentialExchangeID, credentialID)
+		case "9":
+			credentials, _ := app.client.GetCredentials(10, 0, "")
+			for _, cred := range credentials {
+				fmt.Printf("%s - %s", cred.CredentialID, cred.Attributes)
 			}
 		}
 	}
@@ -119,6 +191,9 @@ func (app *App) StartACApy() {
 		"--public-invites",
 		"--wallet-type", "indy",
 		"--wallet-name", strings.Replace(app.label+app.rand, " ", "_", -1),
+		"--auto-accept-invites",
+		"--auto-accept-requests",
+		"--auto-ping-connection",
 	)
 	cmd.Stderr = os.Stderr
 	// cmd.Stdout = os.Stdout
@@ -135,7 +210,7 @@ func (app *App) StartWebserver() {
 		app.ConnectionsEventHandler,
 		app.BasicMessagesEventHandler,
 		app.ProblemReportEventHandler,
-		nil,
+		app.IssueCredentialEventHandler,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -175,6 +250,11 @@ func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
 	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.Alias, event.ConnectionID, event.Content)
 }
 
+func (app *App) IssueCredentialEventHandler(event acapy.CredentialExchange) {
+	connection, _ := app.client.GetConnection(event.ConnectionID)
+	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.Alias, event.State)
+}
+
 func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 	fmt.Printf("\n -> Received problem report: %+v\n", event)
 }
@@ -212,20 +292,6 @@ func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDRespons
 	return didResponse, nil
 }
 
-func (app *App) RegisterSchema() (acapy.Schema, error) {
-	schemaResponse, err := app.client.RegisterSchema(
-		"Laurence",
-		"1.0",
-		[]string{"name"},
-	)
-	if err != nil {
-		log.Printf("Failed to register schema: %+v", err)
-		return acapy.Schema{}, err
-	}
-	fmt.Printf("Registered schema: %+v\n", schemaResponse)
-	return schemaResponse, nil
-}
-
 func (app *App) CreateInvitation(alias string, autoAccept bool, multiUse bool, public bool) (acapy.CreateInvitationResponse, error) {
 	invitationResponse, err := app.client.CreateInvitation(alias, autoAccept, multiUse, public)
 	if err != nil {
@@ -241,30 +307,19 @@ func (app *App) ReceiveInvitation(inv []byte) (acapy.ReceiveInvitationResponse, 
 	if err != nil {
 		return acapy.ReceiveInvitationResponse{}, err
 	}
-	return app.client.ReceiveInvitation(invitation, false)
+	return app.client.ReceiveInvitation(invitation, true)
 }
 
-func (app *App) AcceptInvitation(connectionID string) (acapy.Connection, error) {
-	return app.client.AcceptInvitation(connectionID)
-}
-
-func (app *App) AcceptRequest(connectionID string) (acapy.Connection, error) {
-	return app.client.AcceptRequest(connectionID)
-}
-
-func (app *App) SendPing(connectionID string) (acapy.Thread, error) {
-	return app.client.SendPing(connectionID)
-}
-
-func (app *App) SendBasicMessage(connectionID string, message string) error {
-	return app.client.SendBasicMessage(connectionID, message)
-}
-
-func (app *App) QueryConnections(params acapy.QueryConnectionsParams) ([]acapy.Connection, error) {
-	connections, err := app.client.QueryConnections(params)
+func (app *App) RegisterSchema(name string, version string, attributes []string) (acapy.Schema, error) {
+	schema, err := app.client.RegisterSchema(
+		name,
+		version,
+		attributes,
+	)
 	if err != nil {
-		log.Printf("Failed to list connections: %+v", err)
-		return nil, err
+		log.Printf("Failed to register schema: %+v", err)
+		return acapy.Schema{}, err
 	}
-	return connections, nil
+	fmt.Printf("Registered schema: %+v\n", schema)
+	return schema, nil
 }
