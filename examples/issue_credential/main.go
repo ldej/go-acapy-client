@@ -140,13 +140,13 @@ func (app *App) ReadCommands() {
 				AutoRemove: false,
 				AutoIssue:  false,
 			}
-			exchangeOffer, _ := app.client.SendCredentialExchangeOffer(offer)
+			exchangeOffer, _ := app.client.SendCredentialOffer(offer)
 			fmt.Printf("Credential Exchange ID: %s\n", exchangeOffer.CredentialExchangeID)
 		case "6":
 			fmt.Printf("Credential Exchange ID: ")
 			scanner.Scan()
 			credentialExchangeID := scanner.Text()
-			_, _ = app.client.SendCredentialExchangeRequestByID(credentialExchangeID)
+			_, _ = app.client.SendCredentialRequestByID(credentialExchangeID)
 		case "7":
 			fmt.Printf("Credential Exchange ID: ")
 			scanner.Scan()
@@ -156,7 +156,7 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			comment := scanner.Text()
 
-			_, _ = app.client.SendCredentialToHolder(credentialExchangeID, comment)
+			_, _ = app.client.IssueCredentialByID(credentialExchangeID, comment)
 		case "8":
 			fmt.Printf("Credential Exchange ID: ")
 			scanner.Scan()
@@ -166,7 +166,7 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			credentialID := scanner.Text()
 
-			_, _ = app.client.StoreReceivedCredential(credentialExchangeID, credentialID)
+			_, _ = app.client.StoreCredentialByID(credentialExchangeID, credentialID)
 		case "9":
 			credentials, _ := app.client.GetCredentials(10, 0, "")
 			for _, cred := range credentials {

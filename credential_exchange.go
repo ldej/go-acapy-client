@@ -69,7 +69,7 @@ type CredentialProposal struct {
 	SchemaIssuerDID        string            `json:"schema_issuer_did"`
 	SchemaVersion          string            `json:"schema_version"`
 	Comment                string            `json:"comment"`
-	Credential             CredentialPreview `json:"credential_proposal"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"`
 }
 
 type CredentialRequest struct {
@@ -123,21 +123,12 @@ type Attribute struct {
 	Value    string `json:"value"`
 }
 
-func (c *Client) SendCredentialExchangeOffer(offer CredentialOfferRequest) (CredentialExchange, error) {
-	var credentialExchangeRecord CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/send-offer", c.ACApyURL), nil, offer, &credentialExchangeRecord)
-	if err != nil {
-		return CredentialExchange{}, err
-	}
-	return credentialExchangeRecord, nil
-}
-
 type CredentialProposalRequest struct {
 	CredentialDefinitionID string            `json:"cred_def_id"`
 	ConnectionID           string            `json:"connection_id"`
 	IssuerDID              string            `json:"issuer_did"`
 	Comment                string            `json:"comment"`
-	CredentialProposal     CredentialPreview `json:"credential_proposal"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"`
 	SchemaName             string            `json:"schema_name"`
 	SchemaVersion          string            `json:"schema_version"`
 	SchemaID               string            `json:"schema_id"`
@@ -146,28 +137,22 @@ type CredentialProposalRequest struct {
 	AutoRemove             bool              `json:"auto_remove"`
 }
 
-type CredentialProposalResponse struct {
-	CredentialExchangeID  string             `json:"credential_exchange_id"`
-	ConnectionID          string             `json:"connection_id"`
-	ThreadID              string             `json:"thread_id"`
-	State                 string             `json:"state"`
-	Initiator             string             `json:"initiator"`
-	Role                  string             `json:"role"`
-	CredentialProposalMap CredentialProposal `json:"credential_proposal_dict"`
-	CreatedAt             string             `json:"created_at"`
-	UpdatedAt             string             `json:"updated_at"`
-	Trace                 bool               `json:"trace"`
-	AutoIssue             bool               `json:"auto_issue"`
-	AutoRemove            bool               `json:"auto_remove"`
+func (c *Client) SendCredentialProposal(proposal CredentialProposalRequest) (CredentialExchange, error) {
+	var credentialExchange CredentialExchange
+	err := c.post(fmt.Sprintf("%s/issue-credential/send-proposal", c.ACApyURL), nil, proposal, &credentialExchange)
+	if err != nil {
+		return CredentialExchange{}, err
+	}
+	return credentialExchange, nil
 }
 
-func (c *Client) SendCredentialExchangeProposal(proposal CredentialProposalRequest) (CredentialProposalResponse, error) {
-	var credentialProposalResponse CredentialProposalResponse
-	err := c.post(fmt.Sprintf("%s/issue-credential/send-proposal", c.ACApyURL), nil, proposal, &credentialProposalResponse)
+func (c *Client) SendCredentialOffer(offer CredentialOfferRequest) (CredentialExchange, error) {
+	var credentialExchangeRecord CredentialExchange
+	err := c.post(fmt.Sprintf("%s/issue-credential/send-offer", c.ACApyURL), nil, offer, &credentialExchangeRecord)
 	if err != nil {
-		return CredentialProposalResponse{}, err
+		return CredentialExchange{}, err
 	}
-	return credentialProposalResponse, nil
+	return credentialExchangeRecord, nil
 }
 
 type QueryCredentialExchangeParams struct {
@@ -204,17 +189,16 @@ func (c *Client) GetCredentialExchange(credentialExchangeID string) (CredentialE
 }
 
 type CredentialCreateRequest struct {
-	CredentialDefinitionID string `json:"cred_def_id"`
-	// ConnectionID           string     `json:"connection_id"`
-	IssuerDID          string            `json:"issuer_did"`
-	Comment            string            `json:"comment"`
-	CredentialProposal CredentialPreview `json:"credential_proposal"`
-	SchemaName         string            `json:"schema_name"`
-	SchemaVersion      string            `json:"schema_version"`
-	SchemaID           string            `json:"schema_id"`
-	SchemaIssuerDID    string            `json:"schema_issuer_did"`
-	Trace              bool              `json:"trace"`
-	AutoRemove         bool              `json:"auto_remove"`
+	CredentialDefinitionID string            `json:"cred_def_id"`
+	IssuerDID              string            `json:"issuer_did"`
+	Comment                string            `json:"comment"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"`
+	SchemaName             string            `json:"schema_name"`
+	SchemaVersion          string            `json:"schema_version"`
+	SchemaID               string            `json:"schema_id"`
+	SchemaIssuerDID        string            `json:"schema_issuer_did"`
+	Trace                  bool              `json:"trace"`
+	AutoRemove             bool              `json:"auto_remove"`
 }
 
 func (c *Client) CreateCredentialExchange(request CredentialCreateRequest) (CredentialExchange, error) {
@@ -228,7 +212,7 @@ func (c *Client) CreateCredentialExchange(request CredentialCreateRequest) (Cred
 
 type CredentialSendRequest CredentialProposalRequest
 
-func (c *Client) SendCredentialExchange(request CredentialSendRequest) (CredentialExchange, error) {
+func (c *Client) SendCredential(request CredentialSendRequest) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
 	err := c.post(fmt.Sprintf("%s/issue-credential/send", c.ACApyURL), nil, request, &credentialExchange)
 	if err != nil {
@@ -237,7 +221,7 @@ func (c *Client) SendCredentialExchange(request CredentialSendRequest) (Credenti
 	return credentialExchange, nil
 }
 
-func (c *Client) SendCredentialExchangeOfferByID(credentialExchangeID string) (CredentialExchange, error) {
+func (c *Client) SendCredentialOfferByID(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
 	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/send-offer", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
 	if err != nil {
@@ -246,7 +230,7 @@ func (c *Client) SendCredentialExchangeOfferByID(credentialExchangeID string) (C
 	return credentialExchange, nil
 }
 
-func (c *Client) SendCredentialExchangeRequestByID(credentialExchangeID string) (CredentialExchange, error) {
+func (c *Client) SendCredentialRequestByID(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
 	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/send-request", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
 	if err != nil {
@@ -255,7 +239,7 @@ func (c *Client) SendCredentialExchangeRequestByID(credentialExchangeID string) 
 	return credentialExchange, nil
 }
 
-func (c *Client) SendCredentialToHolder(credentialExchangeID string, comment string) (CredentialExchange, error) {
+func (c *Client) IssueCredentialByID(credentialExchangeID string, comment string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
 	var body = struct {
 		Comment string `json:"comment"`
@@ -269,7 +253,8 @@ func (c *Client) SendCredentialToHolder(credentialExchangeID string, comment str
 	return credentialExchange, nil
 }
 
-func (c *Client) StoreReceivedCredential(credentialExchangeID string, credentialID string) (CredentialExchange, error) {
+// credentialID is optional: https://github.com/hyperledger/aries-cloudagent-python/issues/594#issuecomment-656113125
+func (c *Client) StoreCredentialByID(credentialExchangeID string, credentialID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
 	var body = struct {
 		CredentialID string `json:"credential_id"`

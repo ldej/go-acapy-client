@@ -7,7 +7,6 @@ import (
 
 // TODO Credential differs between Swagger documentation and retrieved credential
 type Credential struct {
-	CredentialID           string `json:"referent"` // ??
 	CredentialDefinitionID string `json:"cred_def_id"`
 	CredentialRevokeID     string `json:"cred_rev_id"`
 	SchemaID               string `json:"schema_id"`
@@ -20,8 +19,10 @@ type Credential struct {
 	Witness                   struct {
 		Omega string `json:"omega"`
 	} `json:"witness"`
-	Values     map[string]CredentialAttribute `json:"values"`
-	Attributes map[string]interface{}
+	Values map[string]CredentialAttribute `json:"values"`
+
+	CredentialID string                 `json:"referent"` // ??
+	Attributes   map[string]interface{} `json:"attrs"`
 }
 
 type CredentialAttribute struct {

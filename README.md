@@ -129,23 +129,23 @@ Examples can be found in the [examples](./examples) folder.
 
 `{id}` = credential exchange identifier
 
-| Function Name                     | Method | Endpoint                                    | Implemented        |
-| --------------------------------- | ------ | ------------------------------------------- | ------------------ |
-| QueryCredentialExchange           | GET    | /issue-credential/records                   | :heavy_check_mark: |
-| GetCredentialExchange             | GET    | /issue-credential/records/{id}              | :heavy_check_mark: |
-| CreateCredentialExchange          | POST   | /issue-credential/create                    | :heavy_check_mark: |
-| SendCredentialExchange            | POST   | /issue-credential/send                      | :heavy_check_mark: |
-| SendCredentialExchangeProposal    | POST   | /issue-credential/send-proposal             | :heavy_check_mark: |
-| SendCredentialExchangeOffer       | POST   | /issue-credential/send-offer                | :heavy_check_mark: |
-| SendCredentialExchangeOfferByID   | POST   | /issue-credential/{id}/send-offer           | :heavy_check_mark: |
-| SendCredentialExchangeRequestByID | POST   | /issue-credential/{id}/send-request         | :heavy_check_mark: |
-| SendCredentialByID                | POST   | /issue-credential/{id}/issue                | :heavy_check_mark: |
-| StoreReceivedCredential           | POST   | /issue-credential/{id}/store                | :heavy_check_mark: |
-| RemoveCredentialExchange          | POST   | /issue-credential/{id}/remove               | :heavy_check_mark: |
-| ReportCredentialExchangeProblem   | POST   | /issue-credential/{id}/problem-report       | :heavy_check_mark: |
-| RevokeIssuedCredential            | POST   | /issue-credential/revoke                    | :heavy_check_mark: |
-| -                                 | POST   | /issue-credential/publish-revocations       | :exclamation:      |
-| -                                 | POST   | /issue-credential/clear-pending-revocations | :exclamation:      |
+| Function Name                   | Method | Endpoint                                    | Implemented        |
+| ------------------------------- | ------ | ------------------------------------------- | ------------------ |
+| QueryCredentialExchange         | GET    | /issue-credential/records                   | :heavy_check_mark: |
+| GetCredentialExchange           | GET    | /issue-credential/records/{id}              | :heavy_check_mark: |
+| CreateCredentialExchange        | POST   | /issue-credential/create                    | :heavy_check_mark: |
+| SendCredential                  | POST   | /issue-credential/send                      | :heavy_check_mark: |
+| SendCredentialProposal          | POST   | /issue-credential/send-proposal             | :heavy_check_mark: |
+| SendCredentialOffer             | POST   | /issue-credential/send-offer                | :heavy_check_mark: |
+| SendCredentialOfferByID         | POST   | /issue-credential/{id}/send-offer           | :heavy_check_mark: |
+| SendCredentialRequestByID       | POST   | /issue-credential/{id}/send-request         | :heavy_check_mark: |
+| IssueCredentialByID             | POST   | /issue-credential/{id}/issue                | :heavy_check_mark: |
+| StoreReceivedCredential         | POST   | /issue-credential/{id}/store                | :heavy_check_mark: |
+| RemoveCredentialExchange        | POST   | /issue-credential/{id}/remove               | :heavy_check_mark: |
+| ReportCredentialExchangeProblem | POST   | /issue-credential/{id}/problem-report       | :heavy_check_mark: |
+| RevokeIssuedCredential          | POST   | /issue-credential/revoke                    | :heavy_check_mark: |
+| -                               | POST   | /issue-credential/publish-revocations       | :exclamation:      |
+| -                               | POST   | /issue-credential/clear-pending-revocations | :exclamation:      |
 
 ### Credentials
 
