@@ -84,26 +84,30 @@ func (c *Client) QueryRevocationRegistries(credentialDefinitionID string, state 
 }
 
 func (c *Client) GetRevocationRegistry(revocationRegistryID string) (RevocationRegistry, error) {
-	var revocationRegistry RevocationRegistry
-	err := c.get(fmt.Sprintf("%s/revocation/registry/%s", c.ACApyURL, revocationRegistryID), nil, &revocationRegistry)
+	var result = struct {
+		RevocationRegistry RevocationRegistry `json:"result"`
+	}{}
+	err := c.get(fmt.Sprintf("%s/revocation/registry/%s", c.ACApyURL, revocationRegistryID), nil, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
-	return revocationRegistry, nil
+	return result.RevocationRegistry, nil
 }
 
 func (c *Client) UpdateRevocationRegistryTailsURI(revocationRegistryID string, tailsPublicURI string) (RevocationRegistry, error) {
-	var revocationRegistry RevocationRegistry
+	var result = struct {
+		RevocationRegistry RevocationRegistry `json:"result"`
+	}{}
 	var body = struct {
 		TailsPublicURI string `json:"tails_public_uri"`
 	}{
 		TailsPublicURI: tailsPublicURI,
 	}
-	err := c.patch(fmt.Sprintf("%s/revocation/registry/%s", c.ACApyURL, revocationRegistryID), nil, body, &revocationRegistry)
+	err := c.patch(fmt.Sprintf("%s/revocation/registry/%s", c.ACApyURL, revocationRegistryID), nil, body, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
-	return revocationRegistry, nil
+	return result.RevocationRegistry, nil
 }
 
 func (c *Client) GetActiveRevocationRegistry(credentialDefinitionID string) (RevocationRegistry, error) {
@@ -123,27 +127,42 @@ func (c *Client) DownloadRegistryTailsFile(revocationRegistryID string) ([]byte,
 	return tailsFile, nil
 }
 
-func (c *Client) UploadRegistryTailsFile(revocationRegistryID string, tailsFile []byte) error {
-	// TODO
-	// return c.put_file(fmt.Sprintf("%s/revocation/registry/%s/tails_file", c.ACApyURL, revocationRegistryID), nil, tailsFile)
-	return nil
+func (c *Client) UploadRegistryTailsFile(revocationRegistryID string) error {
+	return c.put(fmt.Sprintf("%s/revocation/registry/%s/tails_file", c.ACApyURL, revocationRegistryID))
 }
 
 func (c *Client) PublishRevocationRegistryDefinition(revocationRegistryID string) (RevocationRegistry, error) {
-	var revocationRegistry RevocationRegistry
-	err := c.post(fmt.Sprintf("%s/revocation/registry/%s/definition", c.ACApyURL, revocationRegistryID), nil, nil, &revocationRegistry)
+	var result = struct {
+		RevocationRegistry RevocationRegistry `json:"result"`
+	}{}
+	err := c.post(fmt.Sprintf("%s/revocation/registry/%s/definition", c.ACApyURL, revocationRegistryID), nil, nil, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
-	return revocationRegistry, nil
+	return result.RevocationRegistry, nil
 }
 
-func (c *Client) PublishRevocationRegistryEntry(revocationRegistryID string) error {
-	// TODO
-	return nil
+func (c *Client) PublishRevocationRegistryEntry(revocationRegistryID string) (RevocationRegistry, error) {
+	var result = struct {
+		RevocationRegistry RevocationRegistry `json:"result"`
+	}{}
+	err := c.post(fmt.Sprintf("%s/revocation/registry/%s/entry", c.ACApyURL, revocationRegistryID), nil, nil, &result)
+	if err != nil {
+		return RevocationRegistry{}, err
+	}
+	return result.RevocationRegistry, nil
 }
 
-func (c *Client) SetRevocationRegistryState(revocationRegistryID string, state string) error {
-	// TODO
-	return nil
+func (c *Client) SetRevocationRegistryState(revocationRegistryID string, state string) (RevocationRegistry, error) {
+	var result = struct {
+		RevocationRegistry RevocationRegistry `json:"result"`
+	}{}
+	var queryParams = map[string]string{
+		"state": state,
+	}
+	err := c.patch(fmt.Sprintf("%s/revocation/registry/%s/set-state", c.ACApyURL, revocationRegistryID), queryParams, nil, &result)
+	if err != nil {
+		return RevocationRegistry{}, err
+	}
+	return result.RevocationRegistry, nil
 }

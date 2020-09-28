@@ -22,7 +22,7 @@ $ go get -u github.com/ldej/go-acapy-client
 
 ## Compatibility
 
-Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports version v0.5.4 but might support older and newer versions as well, but no guarantees.
+Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports only the latest master of ACA-py because of the [recent changes](https://github.com/hyperledger/aries-cloudagent-python/pull/717/files) in the revocation registry endpoint. It might support older and newer versions as well, but no guarantees.
 
 ## Development
 
@@ -159,11 +159,24 @@ Examples can be found in the [examples](./examples) folder.
 | RemoveCredential    | POST   | /credential/{id}/remove     | :heavy_check_mark: |
 | CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
 
-### Present Proof
-
-TODO
-
 ### Revocation
+
+`{id}` = revocation registry identifier, `{cred_def_id}` = credential definition identifier
+
+| Function Name                       | Method | Endpoint                                  | Implemented        |
+| ----------------------------------- | ------ | ----------------------------------------- | ------------------ |
+| CreateRevocationRegistry            | POST   | /revocation/create-registry               | :heavy_check_mark: |
+| QueryRevocationRegistries           | GET    | /revocation/registries/created            | :heavy_check_mark: |
+| GetRevocationRegistry               | GET    | /revocation/registry/{id}                 | :heavy_check_mark: |
+| UpdateRevocationRegistryTailsURI    | PATCH  | /revocation/registry/{id}                 | :heavy_check_mark: |
+| GetActiveRevocationRegistry         | GET    | /revocation/active-registry/{cred_def_id} | :heavy_check_mark: |
+| DownloadRegistryTailsFile           | GET    | /revocation/registry/{id}/tails-file      | :heavy_check_mark: |
+| UploadRegistryTailsFile             | PUT    | /revocation/registry/{id}/tails-file      | :heavy_check_mark: |
+| PublishRevocationRegistryDefinition | POST   | /revocation/registry/{id}/definition      | :heavy_check_mark: |
+| PublishRevocationRegistryEntry      | POST   | /revocation/registry/{id}/entry           | :heavy_check_mark: |
+| SetRevocationRegistryState          | PATCH  | /revocation/registry/{id}/set-state       | :heavy_check_mark: |
+
+### Present Proof
 
 TODO
 
