@@ -110,14 +110,14 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			connectionID := scanner.Text()
 
-			var attributes []acapy.Attribute
+			var attributes []acapy.CredentialPreviewAttribute
 
 			for _, attr := range schema.AttributeNames {
 				fmt.Printf("Attribute %q value: ", attr)
 				scanner.Scan()
 				val := scanner.Text()
 
-				attributes = append(attributes, acapy.Attribute{
+				attributes = append(attributes, acapy.CredentialPreviewAttribute{
 					Name:     attr,
 					MimeType: "text/plain",
 					Value:    val,
@@ -211,6 +211,7 @@ func (app *App) StartWebserver() {
 		app.BasicMessagesEventHandler,
 		app.ProblemReportEventHandler,
 		app.CredentialExchangeEventHandler,
+		nil,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -269,7 +270,7 @@ func main() {
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
 
 	app := App{
-		client: acapy.NewClient(ledgerURL, acapyURL),
+		client: acapy.NewClient(ledgerURL, "", acapyURL),
 		port:   port,
 		rand:   strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}

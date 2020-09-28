@@ -4,21 +4,24 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 )
 
 type Client struct {
-	LedgerURL string
-	ACApyURL  string
+	LedgerURL      string
+	TailsServerURL string
+	ACApyURL       string
 
 	HTTPClient http.Client
 }
 
-func NewClient(ledgerURL string, acapyURL string) *Client {
+func NewClient(ledgerURL string, tailsServerURL string, acapyURL string) *Client {
 	return &Client{
-		LedgerURL:  ledgerURL,
-		ACApyURL:   acapyURL,
-		HTTPClient: http.Client{},
+		LedgerURL:      ledgerURL,
+		TailsServerURL: tailsServerURL,
+		ACApyURL:       acapyURL,
+		HTTPClient:     http.Client{},
 	}
 }
 
@@ -34,7 +37,7 @@ func (c *Client) patch(url string, queryParams map[string]string, body interface
 	return c.request(http.MethodPatch, url, queryParams, body, response)
 }
 
-func (c *Client) request(method string, url string, queryParams map[string]string, body interface{}, response interface{}) error {
+func (c *Client) request(method string, url string, queryParams map[string]string, body interface{}, responseObject interface{}) error {
 	var input io.Reader
 	var err error
 
@@ -60,14 +63,28 @@ func (c *Client) request(method string, url string, queryParams map[string]strin
 	}
 	r.URL.RawQuery = q.Encode()
 
-	result, err := c.HTTPClient.Do(r)
+	response, err := c.HTTPClient.Do(r)
 	if err != nil {
 		return err
 	}
 
-	err = json.NewDecoder(result.Body).Decode(response)
+	err = json.NewDecoder(response.Body).Decode(responseObject)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (c *Client) getFile(url string) ([]byte, error) {
+	r, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.HTTPClient.Do(r)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	return ioutil.ReadAll(response.Body)
 }

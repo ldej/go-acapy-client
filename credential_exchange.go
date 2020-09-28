@@ -103,8 +103,14 @@ type RawCredential struct {
 }
 
 type CredentialPreview struct {
-	Type       string      `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview
-	Attributes []Attribute `json:"attributes"`
+	Type       string                       `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview
+	Attributes []CredentialPreviewAttribute `json:"attributes"`
+}
+
+type CredentialPreviewAttribute struct {
+	Name     string `json:"name"`
+	MimeType string `json:"mime-type"`
+	Value    string `json:"value"`
 }
 
 type CredentialOfferRequest struct {
@@ -115,12 +121,6 @@ type CredentialOfferRequest struct {
 	Trace                  bool              `json:"trace"`
 	AutoRemove             bool              `json:"auto_remove"`
 	AutoIssue              bool              `json:"auto_issue"`
-}
-
-type Attribute struct {
-	Name     string `json:"name"`
-	MimeType string `json:"mime-type"`
-	Value    string `json:"value"`
 }
 
 type CredentialProposalRequest struct {

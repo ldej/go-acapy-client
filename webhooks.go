@@ -13,6 +13,7 @@ func WebhookHandler(
 	basicMessagesEventHandler func(event BasicMessagesEvent),
 	problemReportEventHandler func(event ProblemReportEvent),
 	credentialExchangeEventHandler func(event CredentialExchange),
+	revocationRegistryEventHandler func(event RevocationRegistry),
 ) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		path := strings.Split(strings.TrimSuffix(r.URL.Path, "/"), "/")
@@ -35,6 +36,10 @@ func WebhookHandler(
 			var credentialExchangeEvent CredentialExchange
 			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
 			credentialExchangeEventHandler(credentialExchangeEvent)
+		case "revocation_registry":
+			var revocationRegistryEvent RevocationRegistry
+			json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
+			revocationRegistryEventHandler(revocationRegistryEvent)
 		case "oob-invitation":
 			// TODO
 		case "present_proof":

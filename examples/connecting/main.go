@@ -136,6 +136,7 @@ func (app *App) StartWebserver() {
 		app.BasicMessagesEventHandler,
 		app.ProblemReportEventHandler,
 		nil,
+		nil,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -189,7 +190,7 @@ func main() {
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
 
 	app := App{
-		client: acapy.NewClient(ledgerURL, acapyURL),
+		client: acapy.NewClient(ledgerURL, "", acapyURL),
 		port:   port,
 		rand:   strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}

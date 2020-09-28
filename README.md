@@ -41,6 +41,7 @@ Start an Aries-Cloud-Agent-Python (ACA-py) instance and configure the right comm
 - [Becoming an Aries Developer - Part 2: Development Environment](https://ldej.nl/post/becoming-aries-developer-part-2-development-environment/)
 - [Becoming an Aries Developer - Part 3: Connecting using Swagger](https://ldej.nl/post/becoming-aries-developer-part-3-connecting-using-swagger/)
 - [Becoming an Aries Developer - Part 4: Connecting using go-acapy-client](https://ldej.nl/post/becoming-aries-developer-part-4-connecting-using-go-acapy-client/)
+- [Becoming an Aries Developer - Part 5: Issue Credentials](https://ldej.nl/post/becoming-aries-developer-part-5-issue-credentials/)
 
 ## Examples
 
@@ -154,7 +155,7 @@ Examples can be found in the [examples](./examples) folder.
 | Function Name       | Method | Endpoint                    | Implemented        |
 | ------------------- | ------ | --------------------------- | ------------------ |
 | GetCredential       | GET    | /credential/{id}            | :heavy_check_mark: |
-| GetCredentials      | GET    | /credential__s__            | :heavy_check_mark: |
+| GetCredentials      | GET    | /credentials                | :heavy_check_mark: |
 | RemoveCredential    | POST   | /credential/{id}/remove     | :heavy_check_mark: |
 | CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
 
@@ -181,6 +182,13 @@ TODO
 ### Action Menu
 
 TODO
+
+### JSON-LD
+
+| Function Name | Method | Endpoint       | Implemented   |
+| ------------- | ------ | -------------- | ------------- |
+| SignJSONLD    | GET    | /jsonld/sign   | :exclamation: |
+| VerifyJSONLD  | GET    | /jsonld/verify | :exclamation: |
 
 ## Webhooks
 
@@ -220,3 +228,14 @@ You are free to choose the URL for your webhooks. Don't forget to set the comman
 - then the webhooks handler should listen on `http://myhost:{port}/webhooks/topic/{topic}`
 
 The `acapy.WebhookHandler` is web framework agnostic and reads the topic from the URL by itself. The handler returned by `acapy.WebhookHandler` has the standard handler signature `func (w http.ResponseWriter, r *http.Request) {}`.
+
+## TODO
+
+- [ ] godoc
+- [ ] Proper error handling
+- [ ] Admin API Key
+- [ ] Tracing via global config
+- [ ] Automation of steps via global config
+- [ ] Payment decorators https://github.com/hyperledger/aries-rfcs/tree/master/features/0075-payment-decorators
+- [ ] Constructors for JSON-LD types
+- [ ] Add types for roles, predicates, etc
