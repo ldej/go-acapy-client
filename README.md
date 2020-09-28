@@ -224,12 +224,18 @@ func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
 	fmt.Printf("\n -> Credential Exchange update: %s - %s\n", event.CredentialExchangeID, event.State)
 }
 
+func (app *App) RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
+	fmt.Printf("\n -> Revocation Registry update: %s - %s\n", event.RevocationRegistryID, event.State)
+}
+
+
 r := mux.NewRouter()
 webhooksHandler := acapy.WebhookHandler(
     ConnectionsEventHandler,
     BasicMessagesEventHandler,
     ProblemReportEventHandler,
     CredentialExchangeEventHandler,
+    RevocationRegistryEventHandler,
 )
 
 r.HandleFunc("/webhooks/topic/{topic}/", webhooksHandler).Methods(http.MethodPost)
