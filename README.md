@@ -145,8 +145,8 @@ Examples can be found in the [examples](./examples) folder.
 | RemoveCredentialExchange        | POST   | /issue-credential/{id}/remove               | :heavy_check_mark: |
 | ReportCredentialExchangeProblem | POST   | /issue-credential/{id}/problem-report       | :heavy_check_mark: |
 | RevokeIssuedCredential          | POST   | /issue-credential/revoke                    | :heavy_check_mark: |
-| -                               | POST   | /issue-credential/publish-revocations       | :exclamation:      |
-| -                               | POST   | /issue-credential/clear-pending-revocations | :exclamation:      |
+| PublishRevocations              | POST   | /issue-credential/publish-revocations       | :heavy_check_mark: |
+| ClearPendingRevocations         | POST   | /issue-credential/clear-pending-revocations | :heavy_check_mark: |
 
 ### Credentials
 
@@ -257,4 +257,4 @@ The `acapy.WebhookHandler` is web framework agnostic and reads the topic from th
 - [ ] Automation of steps via global config
 - [ ] Payment decorators https://github.com/hyperledger/aries-rfcs/tree/master/features/0075-payment-decorators
 - [ ] Constructors for JSON-LD types
-- [ ] Add types for roles, predicates, etc
+- [ ] Add types for roles, states, predicates, etc

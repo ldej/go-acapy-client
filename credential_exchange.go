@@ -290,5 +290,38 @@ func (c *Client) RevokeIssuedCredential(credentialRevocationID string, revocatio
 	return c.post(fmt.Sprintf("%s/issue-credential/revoke", c.ACApyURL), queryParams, nil, nil)
 }
 
-// func (c *Client) PublishRevocations()
-// func (c *Client) ClearPendingRevocations()
+// A map from revocation registry identifier to credential revocation identifiers
+// For example:
+// map[string][]string{
+// 	"6i7GFi2cDx524ZNfxmGWcp:4:6i7GFi2cDx524ZNfxmGWcp:3:CL:165:default:CL_ACCUM:159875bc-a5c7-4d51-b5c0-b4782a01fb94": ["1"].
+// }
+type PendingRevocations map[string][]string
+
+// PublishRevocations
+// Pass nil in case you want to publish all pending revocations
+func (c *Client) PublishRevocations(revocations PendingRevocations) error {
+	var body = struct{
+		Body PendingRevocations `json:"rrid2crid"`
+	}{
+		Body: revocations,
+	}
+	return c.post(fmt.Sprintf("%s/issue-credential/publish-revocations", c.ACApyURL), nil, body, nil)
+}
+
+// ClearPendingRevocations
+// pass nil in case you want to clear all pending revocations
+func (c *Client) ClearPendingRevocations(revocations PendingRevocations) (PendingRevocations, error) {
+	var result = struct{
+		Result PendingRevocations `json:"rrid2crid"`
+	}{}
+	var body = struct{
+		Body map[string][]string `json:"purge"`
+	}{
+		Body: revocations,
+	}
+	err := c.post(fmt.Sprintf("%s/issue-credential/clear-pending-revocations", c.ACApyURL), nil, body, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result.Result, nil
+}
