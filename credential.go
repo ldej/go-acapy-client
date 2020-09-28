@@ -5,24 +5,13 @@ import (
 	"strconv"
 )
 
-// TODO Credential differs between Swagger documentation and retrieved credential
 type Credential struct {
-	CredentialDefinitionID string `json:"cred_def_id"`
-	CredentialRevokeID     string `json:"cred_rev_id"`
-	SchemaID               string `json:"schema_id"`
-	RevokeRegistryID       string `json:"rev_reg_id"`
-	RevokeRegistry         struct {
-		Accum string `json:"accum"`
-	} `json:"rev_reg"`
-	SignatureCorrectnessProof struct{} `json:"signature_correctness_proof"` // TODO
-	Signature                 struct{} `json:"signature"`                   // TODO
-	Witness                   struct {
-		Omega string `json:"omega"`
-	} `json:"witness"`
-	Values map[string]CredentialAttribute `json:"values"`
-
-	CredentialID string                 `json:"referent"` // ??
-	Attributes   map[string]interface{} `json:"attrs"`
+	Referent               string                         `json:"referent"` // ??
+	CredentialDefinitionID string                         `json:"cred_def_id"`
+	CredentialRevokeID     string                         `json:"cred_rev_id"`
+	SchemaID               string                         `json:"schema_id"`
+	RevokeRegistryID       string                         `json:"rev_reg_id"`
+	Attributes             map[string]CredentialAttribute `json:"attrs"`
 }
 
 type CredentialAttribute struct {

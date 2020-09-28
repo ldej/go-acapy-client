@@ -170,7 +170,7 @@ func (app *App) ReadCommands() {
 		case "9":
 			credentials, _ := app.client.GetCredentials(10, 0, "")
 			for _, cred := range credentials {
-				fmt.Printf("%s - %s", cred.CredentialID, cred.Attributes)
+				fmt.Printf("%s - %s", cred.Referent, cred.Attributes)
 			}
 		}
 	}
