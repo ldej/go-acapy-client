@@ -5,6 +5,26 @@ import (
 	"strconv"
 )
 
+type Connection struct {
+	Accept              string `json:"accept"`
+	Alias               string `json:"alias"`
+	ConnectionID        string `json:"connection_id"`
+	CreatedAt           string `json:"created_at"`
+	ErrorMsg            string `json:"error_msg"`
+	InboundConnectionID string `json:"inbound_connection_id"`
+	Initiator           string `json:"initiator"`
+	InvitationKey       string `json:"invitation_key"`
+	InvitationMode      string `json:"invitation_mode"`
+	MyDID               string `json:"my_did"`
+	RequestID           string `json:"request_id"`
+	RoutingState        string `json:"routing_state"`
+	State               string `json:"state"`
+	TheirDID            string `json:"their_did"`
+	TheirLabel          string `json:"their_label"`
+	TheirRole           string `json:"their_role"`
+	UpdatedAt           string `json:"updated_at"`
+}
+
 type CreateInvitationResponse struct {
 	ConnectionID  string `json:"connection_id,omitempty"`
 	InvitationURL string `json:"invitation_url,omitempty"`
@@ -35,36 +55,16 @@ func (c *Client) CreateInvitation(alias string, autoAccept bool, multiUse bool, 
 	return createInvitationResponse, nil
 }
 
-type ReceiveInvitationResponse struct {
-	Accept              string `json:"accept,omitempty"`
-	Alias               string `json:"alias,omitempty"`
-	ConnectionID        string `json:"connection_id,omitempty"`
-	CreatedAt           string `json:"created_at,omitempty"`
-	ErrorMsg            string `json:"error_msg,omitempty"`
-	InboundConnectionID string `json:"inbound_connection_id,omitempty"`
-	Initiator           string `json:"initiator,omitempty"`
-	InvitationKey       string `json:"invitation_key,omitempty"`
-	InvitationMode      string `json:"invitation_mode,omitempty"`
-	MyDID               string `json:"my_did,omitempty"`
-	RequestID           string `json:"request_id,omitempty"`
-	RoutingState        string `json:"routing_state,omitempty"`
-	State               string `json:"state,omitempty"`
-	TheirDID            string `json:"their_did,omitempty"`
-	TheirLabel          string `json:"their_label,omitempty"`
-	TheirRole           string `json:"their_role,omitempty"`
-	UpdatedAt           string `json:"updated_at,omitempty"`
-}
-
-func (c *Client) ReceiveInvitation(invitation Invitation, autoAccept bool) (ReceiveInvitationResponse, error) {
-	var receiveInvitationResponse ReceiveInvitationResponse
+func (c *Client) ReceiveInvitation(invitation Invitation, autoAccept bool) (Connection, error) {
+	var connection Connection
 	err := c.post(c.ACApyURL+"/connections/receive-invitation", map[string]string{
 		"alias":       invitation.Label,
 		"auto_accept": strconv.FormatBool(autoAccept),
-	}, invitation, &receiveInvitationResponse)
+	}, invitation, &connection)
 	if err != nil {
-		return ReceiveInvitationResponse{}, err
+		return Connection{}, err
 	}
-	return receiveInvitationResponse, nil
+	return connection, nil
 }
 
 type Invitation struct {
@@ -93,26 +93,6 @@ func (c *Client) AcceptRequest(connectionID string) (Connection, error) {
 		return Connection{}, err
 	}
 	return connection, nil
-}
-
-type Connection struct {
-	Accept              string `json:"accept"`
-	Alias               string `json:"alias"`
-	ConnectionID        string `json:"connection_id"`
-	CreatedAt           string `json:"created_at"`
-	ErrorMsg            string `json:"error_msg"`
-	InboundConnectionID string `json:"inbound_connection_id"`
-	Initiator           string `json:"initiator"`
-	InvitationKey       string `json:"invitation_key"`
-	InvitationMode      string `json:"invitation_mode"`
-	MyDID               string `json:"my_did"`
-	RequestID           string `json:"request_id"`
-	RoutingState        string `json:"routing_state"`
-	State               string `json:"state"`
-	TheirDID            string `json:"their_did"`
-	TheirLabel          string `json:"their_label"`
-	TheirRole           string `json:"their_role"`
-	UpdatedAt           string `json:"updated_at"`
 }
 
 // QueryConnectionsParams model

@@ -36,12 +36,12 @@ This starts 4 Indy nodes and a von-webserver. The von-webserver has a web interf
 
 Start an Aries-Cloud-Agent-Python (ACA-py) instance and configure the right command line parameters. Read about ACA-py and the command line parameters on my blog:
 
-- [Becoming an Aries Developer - Part 1: Terminology](https://ldej.nl/post/becoming-aries-developer-part-1-terminology/)
-
-- [Becoming an Aries Developer - Part 2: Development Environment](https://ldej.nl/post/becoming-aries-developer-part-2-development-environment/)
-- [Becoming an Aries Developer - Part 3: Connecting using Swagger](https://ldej.nl/post/becoming-aries-developer-part-3-connecting-using-swagger/)
-- [Becoming an Aries Developer - Part 4: Connecting using go-acapy-client](https://ldej.nl/post/becoming-aries-developer-part-4-connecting-using-go-acapy-client/)
-- [Becoming an Aries Developer - Part 5: Issue Credentials](https://ldej.nl/post/becoming-aries-developer-part-5-issue-credentials/)
+- [Becoming a Hyperledger Aries Developer - Part 1: Terminology](https://ldej.nl/post/becoming-aries-developer-part-1-terminology/)
+- [Becoming a Hyperledger Aries Developer - Part 2: Development Environment](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-2-development-environment/)
+- [Becoming a Hyperledger Aries Developer - Part 3: Connecting using Swagger](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-3-connecting-using-swagger/)
+- [Becoming a Hyperledger Aries Developer - Part 4: Connecting using go-acapy-client](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-4-connecting-using-go-acapy-client/)
+- [Becoming a Hyperledger Aries Developer - Part 5: Issue Credentials](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-5-issue-credentials/)
+- [Becoming a Hyperledger Aries Developer - Part 6: Revocation](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-6-revocation/)
 
 ## Examples
 
@@ -54,8 +54,9 @@ import "github.com/ldej/go-acapy-client"
 
 func main() {
     var ledgerURL = "http://localhost:9000"
+    var tailsServerURL = "http://localhost:6543"
     var acapyURL = "http://localhost:8000"
-    client := acapy.NewClient(ledgerURL, acapyURL)
+    client := acapy.NewClient(ledgerURL, tailsServerURL, acapyURL)
     
     didResponse, err := client.RegisterDID("Alice", "Alice", "ENDORSER")
     if err != nil {
@@ -178,7 +179,19 @@ Examples can be found in the [examples](./examples) folder.
 
 ### Present Proof
 
-TODO
+`{id}` = presentation exchange identifier
+
+| Function Name                  | Method | Endpoint                                        | Implemented        |
+| ------------------------------ | ------ | ----------------------------------------------- | ------------------ |
+| QueryPresentationExchange      | GET    | /present-proof/records                          | :heavy_check_mark: |
+| GetPresentationExchangeByID    | GET    | /present-proof/records/{id}                     | :heavy_check_mark: |
+| SendPresentationByID           | POST   | /present-proof/records/{id}/sent-presentation   | :heavy_check_mark: |
+| VerifyPresentationByID         | POST   | /present-proof/records/{id}/verify-presentation | :heavy_check_mark: |
+| GetPresentationCredentialsByID | GET    | /present-proof/records/{id}/credentials         | :heavy_check_mark: |
+| RemovePresentationExchangeByID | POST   | /present-proof/records/{id}/remove              | :heavy_check_mark: |
+| SendPresentationRequest        | POST   | /present-proof/send-request                     | :heavy_check_mark: |
+| CreatePresentationRequest      | POST   | /present-proof/create-request                   | :heavy_check_mark: |
+| SendPresentationProposal       | POST   | /present-proof/send-proposal                    | :heavy_check_mark: |
 
 ### Out-of-Band
 

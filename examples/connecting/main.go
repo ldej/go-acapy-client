@@ -75,8 +75,8 @@ func (app *App) ReadCommands() {
 			fmt.Print("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
-			receiveInvitation, _ := app.ReceiveInvitation(invitation)
-			fmt.Printf("Connection id: %s\n", receiveInvitation.ConnectionID)
+			connection, _ := app.ReceiveInvitation(invitation)
+			fmt.Printf("Connection id: %s\n", connection.ConnectionID)
 		case "5":
 			fmt.Print("Connection id: ")
 			scanner.Scan()
@@ -135,6 +135,7 @@ func (app *App) StartWebserver() {
 		app.ConnectionsEventHandler,
 		app.BasicMessagesEventHandler,
 		app.ProblemReportEventHandler,
+		nil,
 		nil,
 		nil,
 	)
@@ -236,11 +237,11 @@ func (app *App) CreateInvitation(alias string, autoAccept bool, multiUse bool, p
 	return invitationResponse, nil
 }
 
-func (app *App) ReceiveInvitation(inv []byte) (acapy.ReceiveInvitationResponse, error) {
+func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {
 	var invitation acapy.Invitation
 	err := json.Unmarshal(inv, &invitation)
 	if err != nil {
-		return acapy.ReceiveInvitationResponse{}, err
+		return acapy.Connection{}, err
 	}
 	return app.client.ReceiveInvitation(invitation, false)
 }

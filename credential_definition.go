@@ -7,8 +7,8 @@ import (
 func (c *Client) CreateCredentialDefinition(tag string, supportRevocation bool, revocationRegistrySize int, schemaID string) (string, error) {
 	var request = struct {
 		Tag                    string `json:"tag"`
-		SupportRevocation      bool   `json:"support_revocation"`
-		RevocationRegistrySize int    `json:"revocation_registry_size"`
+		SupportRevocation      bool   `json:"support_revocation,omitempty"`
+		RevocationRegistrySize int    `json:"revocation_registry_size,omitempty"`
 		SchemaID               string `json:"schema_id"`
 	}{
 		Tag:                    tag,

@@ -6,17 +6,12 @@ import (
 )
 
 type Credential struct {
-	Referent               string                         `json:"referent"` // ??
-	CredentialDefinitionID string                         `json:"cred_def_id"`
-	CredentialRevokeID     string                         `json:"cred_rev_id"`
-	SchemaID               string                         `json:"schema_id"`
-	RevokeRegistryID       string                         `json:"rev_reg_id"`
-	Attributes             map[string]CredentialAttribute `json:"attrs"`
-}
-
-type CredentialAttribute struct {
-	Raw     string `json:"raw"`
-	Encoded string `json:"encoded"`
+	Referent               string            `json:"referent"` // ??
+	CredentialDefinitionID string            `json:"cred_def_id"`
+	CredentialRevokeID     string            `json:"cred_rev_id"`
+	SchemaID               string            `json:"schema_id"`
+	RevokeRegistryID       string            `json:"rev_reg_id"`
+	Attributes             map[string]string `json:"attrs"`
 }
 
 func (c *Client) GetCredentials(max int, index int, wql string) ([]Credential, error) {

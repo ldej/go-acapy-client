@@ -9,11 +9,12 @@ import (
 )
 
 func WebhookHandler(
-	connectionsEventHandler func(event ConnectionsEvent),
+	connectionsEventHandler func(event Connection),
 	basicMessagesEventHandler func(event BasicMessagesEvent),
 	problemReportEventHandler func(event ProblemReportEvent),
 	credentialExchangeEventHandler func(event CredentialExchange),
 	revocationRegistryEventHandler func(event RevocationRegistry),
+	presentationExchangeEventHandler func(event PresentationExchange),
 ) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		path := strings.Split(strings.TrimSuffix(r.URL.Path, "/"), "/")
@@ -21,7 +22,7 @@ func WebhookHandler(
 
 		switch topic {
 		case "connections":
-			var connectionsEvent ConnectionsEvent
+			var connectionsEvent Connection
 			json.NewDecoder(r.Body).Decode(&connectionsEvent)
 			connectionsEventHandler(connectionsEvent)
 		case "basicmessages":
@@ -43,7 +44,9 @@ func WebhookHandler(
 		case "oob-invitation":
 			// TODO
 		case "present_proof":
-			// TODO
+			var presentationExchangeEvent PresentationExchange
+			json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
+			presentationExchangeEventHandler(presentationExchangeEvent)
 		default:
 			fmt.Printf("Topic not supported: %q\n", topic)
 			w.WriteHeader(404)
@@ -53,19 +56,6 @@ func WebhookHandler(
 		}
 		w.WriteHeader(200)
 	}
-}
-
-type ConnectionsEvent struct {
-	Initiator      string `json:"initiator"`
-	CreatedAt      string `json:"created_at"`
-	State          string `json:"state"`
-	ConnectionID   string `json:"connection_id"`
-	Accept         string `json:"accept"`
-	Alias          string `json:"alias"`
-	InvitationMode string `json:"invitation_mode"`
-	UpdatedAt      string `json:"updated_at"`
-	RoutingState   string `json:"routing_state"`
-	InvitationKey  string `json:"invitation_key"`
 }
 
 type BasicMessagesEvent struct {

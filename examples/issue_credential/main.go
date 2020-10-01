@@ -77,8 +77,8 @@ func (app *App) ReadCommands() {
 			fmt.Print("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
-			receiveInvitation, _ := app.ReceiveInvitation(invitation)
-			fmt.Printf("Connection ID: %s\n", receiveInvitation.ConnectionID)
+			connection, _ := app.ReceiveInvitation(invitation)
+			fmt.Printf("Connection ID: %s\n", connection.ConnectionID)
 		case "3":
 			fmt.Print("Schema name: ")
 			scanner.Scan()
@@ -212,6 +212,7 @@ func (app *App) StartWebserver() {
 		app.ProblemReportEventHandler,
 		app.CredentialExchangeEventHandler,
 		nil,
+		nil,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -237,7 +238,7 @@ func (app *App) Exit() {
 	}
 }
 
-func (app *App) ConnectionsEventHandler(event acapy.ConnectionsEvent) {
+func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	alias := event.Alias
 	if alias == "" {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
@@ -302,11 +303,11 @@ func (app *App) CreateInvitation(alias string, autoAccept bool, multiUse bool, p
 	return invitationResponse, nil
 }
 
-func (app *App) ReceiveInvitation(inv []byte) (acapy.ReceiveInvitationResponse, error) {
+func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {
 	var invitation acapy.Invitation
 	err := json.Unmarshal(inv, &invitation)
 	if err != nil {
-		return acapy.ReceiveInvitationResponse{}, err
+		return acapy.Connection{}, err
 	}
 	return app.client.ReceiveInvitation(invitation, true)
 }
