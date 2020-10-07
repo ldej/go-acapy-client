@@ -140,11 +140,24 @@ type Predicate struct {
 	Threshold              int    `json:"threshold"`
 }
 
-// TODO Create a constructor
 type PresentationPreview struct {
-	Type       string                  `json:"@type"`      // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/present-proof/1.0/presentation-preview
-	Attributes []PresentationAttribute `json:"attributes"` // TODO Cannot be nil
-	Predicates []Predicate             `json:"predicates"` // TODO Cannot be nil
+	Type       string                  `json:"@type"`
+	Attributes []PresentationAttribute `json:"attributes"`
+	Predicates []Predicate             `json:"predicates"`
+}
+
+func NewPresentationPreview(attributes []PresentationAttribute, predicates []Predicate) PresentationPreview {
+	if attributes == nil {
+		attributes = []PresentationAttribute{}
+	}
+	if predicates == nil {
+		predicates = []Predicate{}
+	}
+	return PresentationPreview{
+		Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/present-proof/1.0/presentation-preview",
+		Attributes: attributes,
+		Predicates: predicates,
+	}
 }
 
 type PresentationRequest struct {
@@ -217,9 +230,9 @@ type PresentationProofPredicate struct {
 
 // TODO Create constructor to prevent nils
 type PresentationProof struct {
-	RequestedAttributes    map[string]PresentationProofAttribute `json:"requested_attributes"`     // Cannot be empty
-	RequestedPredicates    map[string]PresentationProofPredicate `json:"requested_predicates"`     // Cannot be empty
-	SelfAttestedAttributes map[string]string                     `json:"self_attested_attributes"` // Cannot be empty
+	RequestedAttributes    map[string]PresentationProofAttribute `json:"requested_attributes"`     // TODO Cannot be nil
+	RequestedPredicates    map[string]PresentationProofPredicate `json:"requested_predicates"`     // TODO Cannot be nil
+	SelfAttestedAttributes map[string]string                     `json:"self_attested_attributes"` // TODO Cannot be nil
 	Trace                  bool                                  `json:"trace"`
 }
 

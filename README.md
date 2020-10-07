@@ -233,25 +233,33 @@ func ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 	fmt.Printf("\n -> Received problem report: %+v\n", event)
 }
 
-func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
+func CredentialExchangeEventHandler(event acapy.CredentialExchange) {
 	fmt.Printf("\n -> Credential Exchange update: %s - %s\n", event.CredentialExchangeID, event.State)
 }
 
-func (app *App) RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
+func RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
 	fmt.Printf("\n -> Revocation Registry update: %s - %s\n", event.RevocationRegistryID, event.State)
 }
 
+func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
+    fmt.Printf("\n -> Presentation Exchange update: %s - %s\n", event.PresentationExchangeID, event.State)
+}
 
+func main() {
 r := mux.NewRouter()
-webhooksHandler := acapy.WebhookHandler(
-    ConnectionsEventHandler,
-    BasicMessagesEventHandler,
-    ProblemReportEventHandler,
-    CredentialExchangeEventHandler,
-    RevocationRegistryEventHandler,
-)
-
-r.HandleFunc("/webhooks/topic/{topic}/", webhooksHandler).Methods(http.MethodPost)
+    webhooksHandler := acapy.WebhookHandler(
+        ConnectionsEventHandler,
+        BasicMessagesEventHandler,
+        ProblemReportEventHandler,
+        CredentialExchangeEventHandler,
+        RevocationRegistryEventHandler,
+        PresentationExchangeEventHandler,
+    )
+    
+    r.HandleFunc("/webhooks/topic/{topic}/", webhooksHandler).Methods(http.MethodPost)
+    
+    // and so on
+}
 ```
 
 You are free to choose the URL for your webhooks. Don't forget to set the command-line parameter for ACA-py: `--webhook-url http://localhost:{port}/webhooks`. The URL you provide to ACA-py is the base URL which will be extended with `/topic/{topic}` by default. So whatever URL you choose, make sure that:

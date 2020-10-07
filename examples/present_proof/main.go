@@ -150,17 +150,11 @@ func (app *App) ReadCommands() {
 					Referent:               app.credentialExchange.Credential.Referent,
 				})
 			}
-
-			preview := acapy.PresentationPreview{
-				Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/present-proof/1.0/presentation-preview",
-				Attributes: attributes,
-				Predicates: []acapy.Predicate{},
-			}
 			
 			proposal := acapy.PresentationProposalRequest{
 				Comment:             comment,
 				AutoPresent:         false,
-				PresentationPreview: preview,
+				PresentationPreview: acapy.NewPresentationPreview(attributes, nil),
 				ConnectionID:        app.connection.ConnectionID,
 				Trace:               false,
 			}

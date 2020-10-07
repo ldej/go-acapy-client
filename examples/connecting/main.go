@@ -163,7 +163,7 @@ func (app *App) Exit() {
 	}
 }
 
-func (app *App) ConnectionsEventHandler(event acapy.ConnectionsEvent) {
+func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	alias := event.Alias
 	if alias == "" {
 		connection, _ := app.client.GetConnection(event.ConnectionID)

@@ -12,14 +12,23 @@ type RegisterDIDResponse struct {
 	Verkey string `json:"verkey"`
 }
 
-func (c *Client) RegisterDID(alias string, seed string, role string) (RegisterDIDResponse, error) {
+type DIDRole string
+
+const (
+	Endorser       DIDRole = "ENDORSER"
+	Steward        DIDRole = "STEWARD"
+	Trustee        DIDRole = "TRUSTEE"
+	NetworkMonitor DIDRole = "NETWORK_MONITOR"
+)
+
+func (c *Client) RegisterDID(alias string, seed string, role DIDRole) (RegisterDIDResponse, error) {
 	var registerDID registerDIDRequest
 	var registerDIDResponse RegisterDIDResponse
 
 	registerDID = registerDIDRequest{
 		Alias: alias,
-		Seed:  seed, // Should be random in Develop mode
-		Role:  role,
+		Seed:  seed, // Should be random in develop mode
+		Role:  string(role),
 	}
 	err := c.post(c.LedgerURL+"/register", nil, registerDID, &registerDIDResponse)
 	if err != nil {
