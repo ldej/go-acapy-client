@@ -105,6 +105,7 @@ func (app *App) ReadCommands() {
 }
 
 func (app *App) StartACApy() {
+	id := strings.Replace(app.label+app.rand, " ", "_", -1)
 	cmd := exec.Command("aca-py",
 		"start",
 		"-it", "http", "0.0.0.0", strconv.Itoa(app.port+1),
@@ -118,7 +119,8 @@ func (app *App) StartACApy() {
 		"--label", app.label,
 		"--public-invites",
 		"--wallet-type", "indy",
-		"--wallet-name", strings.Replace(app.label+app.rand, " ", "_", -1),
+		"--wallet-name", id,
+		"--wallet-key", id,
 	)
 	cmd.Stderr = os.Stderr
 	// cmd.Stdout = os.Stdout

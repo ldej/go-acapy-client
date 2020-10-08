@@ -153,12 +153,13 @@ Examples can be found in the [examples](./examples) folder.
 
 `{id}` = credential identifier, also known as referent
 
-| Function Name       | Method | Endpoint                    | Implemented        |
-| ------------------- | ------ | --------------------------- | ------------------ |
-| GetCredential       | GET    | /credential/{id}            | :heavy_check_mark: |
-| GetCredentials      | GET    | /credentials                | :heavy_check_mark: |
-| RemoveCredential    | POST   | /credential/{id}/remove     | :heavy_check_mark: |
-| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
+| Function Name       | Method | Endpoint                    | Implemented              |
+| ------------------- | ------ | --------------------------- | ------------------------ |
+| GetCredential       | GET    | /credential/{id}            | :heavy_check_mark:       |
+| GetCredentials      | GET    | /credentials                | :heavy_check_mark:       |
+| IsCredentialRevoked | GET    | /credentials/revoked/{id}   | :heavy_check_mark: :new: |
+| RemoveCredential    | POST   | /credential/{id}/remove     | :heavy_check_mark:       |
+| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark:       |
 
 ### Revocation
 
@@ -203,7 +204,15 @@ TODO
 
 ### Server
 
-TODO
+| Function Name   | Method | Endpoint      | Implemented        |
+| --------------- | ------ | ------------- | ------------------ |
+| Plugins         | GET    | /plugins      | :heavy_check_mark: |
+| Status          | GET    | /status       | :heavy_check_mark: |
+| ResetStatistics | POST   | /status/reset | :heavy_check_mark: |
+| IsAlive         | GET    | /status/alive | :heavy_check_mark: |
+| IsReady         | GET    | /status/ready | :heavy_check_mark: |
+| Shutdown        | GET    | /shutdown     | :heavy_check_mark: |
+| Features        | GET    | /features     | :heavy_check_mark: |
 
 ### Action Menu
 

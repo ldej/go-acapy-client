@@ -39,6 +39,17 @@ func (c *Client) GetCredential(credentialID string) (Credential, error) {
 	return credential, nil
 }
 
+func (c *Client) IsCredentialRevoked(credentialID string) (bool, error) {
+	var result = struct{
+		Revoked bool `json:"revoked"`
+	}{}
+	err := c.get(fmt.Sprintf("%s/credential/revoked/%s", c.ACApyURL, credentialID), nil, &result)
+	if err != nil {
+		return false, err
+	}
+	return result.Revoked, nil
+}
+
 func (c *Client) CredentialMimeTypes(credentialID string) (map[string]string, error) {
 	var result map[string]string
 	err := c.get(fmt.Sprintf("%s/credential/mime-types/%s", c.ACApyURL, credentialID), nil, &result)
