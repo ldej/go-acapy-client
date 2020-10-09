@@ -287,4 +287,28 @@ The `acapy.WebhookHandler` is web framework agnostic and reads the topic from th
 - [ ] Automation of steps via global config
 - [ ] Payment decorators https://github.com/hyperledger/aries-rfcs/tree/master/features/0075-payment-decorators
 - [ ] Constructors for JSON-LD types
-- [ ] Add types for roles, states, predicates, etc
+- [ ] Add types for roles, states, predicates
+- [ ] Allow for a connection-less proof by making a QR code of a payload below. The base64 payload is the result of your call to  /present-proof/create-request.
+```json
+{
+    "@id": "3b67c4bf-3953-4ace-94ef-28e0969288c5",
+    "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/present-proof/1.0/request-presentation",
+    "request_presentations~attach": [
+        {
+            "@id": "libindy-request-presentation-0",
+            "mime-type": "application/json",
+            "data": {
+                "base64": "eyJuYW1lIjoiQ29udGFjdCBBZGRyZXNzIiwidmVyc2lvbiI6IjEuMC4wIiwibm9uY2UiOiIzOTIyNTEwMjk1NjY5MzcxNDIxNTIzMDgiLCJyZXF1ZXN0ZWRfYXR0cmlidXRlcyI6eyJHaXZlbiBOYW1lcyI6eyJuYW1lIjoiZ2l2ZW5fbmFtZXMiLCJyZXN0cmljdGlvbnMiOlt7InNjaGVtYV9pc3N1ZXJfZGlkIjoiODU0NTlHeGpOeVNKOEh3VFRRNHZxNyIsInNjaGVtYV9uYW1lIjoidmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIxLjQuMCJ9LHsic2NoZW1hX25hbWUiOiJ1bnZlcmlmaWVkX3BlcnNvbiIsInNjaGVtYV92ZXJzaW9uIjoiMC4xLjAiLCJpc3N1ZXJfZGlkIjoiOFlxN0VoS0JNdWpoMjVOa0xHR2IydCJ9XX0sIkZhbWlseSBOYW1lIjp7Im5hbWUiOiJmYW1pbHlfbmFtZSIsInJlc3RyaWN0aW9ucyI6W3sic2NoZW1hX2lzc3Vlcl9kaWQiOiI4NTQ1OUd4ak55U0o4SHdUVFE0dnE3Iiwic2NoZW1hX25hbWUiOiJ2ZXJpZmllZF9wZXJzb24iLCJzY2hlbWFfdmVyc2lvbiI6IjEuNC4wIn0seyJzY2hlbWFfbmFtZSI6InVudmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIwLjEuMCIsImlzc3Vlcl9kaWQiOiI4WXE3RWhLQk11amgyNU5rTEdHYjJ0In1dfSwiRGF0ZSBvZiBCaXJ0aCI6eyJuYW1lIjoiYmlydGhkYXRlIiwicmVzdHJpY3Rpb25zIjpbeyJzY2hlbWFfaXNzdWVyX2RpZCI6Ijg1NDU5R3hqTnlTSjhId1RUUTR2cTciLCJzY2hlbWFfbmFtZSI6InZlcmlmaWVkX3BlcnNvbiIsInNjaGVtYV92ZXJzaW9uIjoiMS40LjAifSx7InNjaGVtYV9uYW1lIjoidW52ZXJpZmllZF9wZXJzb24iLCJzY2hlbWFfdmVyc2lvbiI6IjAuMS4wIiwiaXNzdWVyX2RpZCI6IjhZcTdFaEtCTXVqaDI1TmtMR0diMnQifV19LCJTdHJlZXQgQWRkcmVzcyI6eyJuYW1lIjoic3RyZWV0X2FkZHJlc3MiLCJyZXN0cmljdGlvbnMiOlt7InNjaGVtYV9pc3N1ZXJfZGlkIjoiODU0NTlHeGpOeVNKOEh3VFRRNHZxNyIsInNjaGVtYV9uYW1lIjoidmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIxLjQuMCJ9LHsic2NoZW1hX25hbWUiOiJ1bnZlcmlmaWVkX3BlcnNvbiIsInNjaGVtYV92ZXJzaW9uIjoiMC4xLjAiLCJpc3N1ZXJfZGlkIjoiOFlxN0VoS0JNdWpoMjVOa0xHR2IydCJ9XX0sIlBvc3RhbCBDb2RlIjp7Im5hbWUiOiJwb3N0YWxfY29kZSIsInJlc3RyaWN0aW9ucyI6W3sic2NoZW1hX2lzc3Vlcl9kaWQiOiI4NTQ1OUd4ak55U0o4SHdUVFE0dnE3Iiwic2NoZW1hX25hbWUiOiJ2ZXJpZmllZF9wZXJzb24iLCJzY2hlbWFfdmVyc2lvbiI6IjEuNC4wIn0seyJzY2hlbWFfbmFtZSI6InVudmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIwLjEuMCIsImlzc3Vlcl9kaWQiOiI4WXE3RWhLQk11amgyNU5rTEdHYjJ0In1dfSwiQ2l0eSI6eyJuYW1lIjoibG9jYWxpdHkiLCJyZXN0cmljdGlvbnMiOlt7InNjaGVtYV9pc3N1ZXJfZGlkIjoiODU0NTlHeGpOeVNKOEh3VFRRNHZxNyIsInNjaGVtYV9uYW1lIjoidmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIxLjQuMCJ9LHsic2NoZW1hX25hbWUiOiJ1bnZlcmlmaWVkX3BlcnNvbiIsInNjaGVtYV92ZXJzaW9uIjoiMC4xLjAiLCJpc3N1ZXJfZGlkIjoiOFlxN0VoS0JNdWpoMjVOa0xHR2IydCJ9XX0sIlByb3ZpbmNlIjp7Im5hbWUiOiJyZWdpb24iLCJyZXN0cmljdGlvbnMiOlt7InNjaGVtYV9pc3N1ZXJfZGlkIjoiODU0NTlHeGpOeVNKOEh3VFRRNHZxNyIsInNjaGVtYV9uYW1lIjoidmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIxLjQuMCJ9LHsic2NoZW1hX25hbWUiOiJ1bnZlcmlmaWVkX3BlcnNvbiIsInNjaGVtYV92ZXJzaW9uIjoiMC4xLjAiLCJpc3N1ZXJfZGlkIjoiOFlxN0VoS0JNdWpoMjVOa0xHR2IydCJ9XX0sIkNvdW50cnkiOnsibmFtZSI6ImNvdW50cnkiLCJyZXN0cmljdGlvbnMiOlt7InNjaGVtYV9pc3N1ZXJfZGlkIjoiODU0NTlHeGpOeVNKOEh3VFRRNHZxNyIsInNjaGVtYV9uYW1lIjoidmVyaWZpZWRfcGVyc29uIiwic2NoZW1hX3ZlcnNpb24iOiIxLjQuMCJ9LHsic2NoZW1hX25hbWUiOiJ1bnZlcmlmaWVkX3BlcnNvbiIsInNjaGVtYV92ZXJzaW9uIjoiMC4xLjAiLCJpc3N1ZXJfZGlkIjoiOFlxN0VoS0JNdWpoMjVOa0xHR2IydCJ9XX19LCJyZXF1ZXN0ZWRfcHJlZGljYXRlcyI6e319"
+            }
+        }
+    ],
+    "comment": null,
+    "~service": {
+        "recipientKeys": [
+            "F2fFPEXABoPKt8mYjNAavBwbsmQKYqNTcv3HKqBgqpLw"
+        ],
+        "routingKeys": null,
+        "serviceEndpoint": "https://my-url.test.org"
+    }
+}
+```
