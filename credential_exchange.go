@@ -2,7 +2,6 @@ package acapy
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type CredentialExchange struct {
@@ -103,7 +102,7 @@ type RawCredential struct {
 }
 
 type CredentialPreview struct {
-	Type       string                       `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview
+	Type       string                       `json:"@type"` // TODO did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview
 	Attributes []CredentialPreviewAttribute `json:"attributes"`
 }
 
@@ -269,7 +268,7 @@ func (c *Client) StoreCredentialByID(credentialExchangeID string, credentialID s
 }
 
 func (c *Client) RemoveCredentialExchange(credentialExchangeID string) error {
-	return c.post(fmt.Sprintf("%s/issue-credential/records/%s/remove", c.ACApyURL, credentialExchangeID), nil, nil, nil)
+	return c.delete(fmt.Sprintf("%s/issue-credential/records/%s", c.ACApyURL, credentialExchangeID))
 }
 
 func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, message string) error {
@@ -279,49 +278,4 @@ func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, me
 		Message: message,
 	}
 	return c.post(fmt.Sprintf("%s/issue-credential/records/%s/problem-report", c.ACApyURL, credentialExchangeID), nil, body, nil)
-}
-
-func (c *Client) RevokeIssuedCredential(credentialRevocationID string, revocationRegistryID string, publish bool) error {
-	queryParams := map[string]string{
-		"cred_rev_id": credentialRevocationID,
-		"rev_reg_id":  revocationRegistryID,
-		"publish":     strconv.FormatBool(publish),
-	}
-	return c.post(fmt.Sprintf("%s/issue-credential/revoke", c.ACApyURL), queryParams, nil, nil)
-}
-
-// A map from revocation registry identifier to credential revocation identifiers
-// For example:
-// map[string][]string{
-// 	"6i7GFi2cDx524ZNfxmGWcp:4:6i7GFi2cDx524ZNfxmGWcp:3:CL:165:default:CL_ACCUM:159875bc-a5c7-4d51-b5c0-b4782a01fb94": ["1"].
-// }
-type PendingRevocations map[string][]string
-
-// PublishRevocations
-// Pass nil in case you want to publish all pending revocations
-func (c *Client) PublishRevocations(revocations PendingRevocations) error {
-	var body = struct{
-		Body PendingRevocations `json:"rrid2crid"`
-	}{
-		Body: revocations,
-	}
-	return c.post(fmt.Sprintf("%s/issue-credential/publish-revocations", c.ACApyURL), nil, body, nil)
-}
-
-// ClearPendingRevocations
-// pass nil in case you want to clear all pending revocations
-func (c *Client) ClearPendingRevocations(revocations PendingRevocations) (PendingRevocations, error) {
-	var result = struct{
-		Result PendingRevocations `json:"rrid2crid"`
-	}{}
-	var body = struct{
-		Body map[string][]string `json:"purge"`
-	}{
-		Body: revocations,
-	}
-	err := c.post(fmt.Sprintf("%s/issue-credential/clear-pending-revocations", c.ACApyURL), nil, body, &result)
-	if err != nil {
-		return nil, err
-	}
-	return result.Result, nil
 }

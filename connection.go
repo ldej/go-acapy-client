@@ -154,13 +154,14 @@ func (c *Client) GetConnection(connectionID string) (Connection, error) {
 }
 
 func (c *Client) RemoveConnection(connectionID string) error {
-	return c.post(fmt.Sprintf("%s/connections/%s", c.ACApyURL, connectionID), nil, nil, nil)
+	return c.delete(fmt.Sprintf("%s/connections/%s", c.ACApyURL, connectionID))
 }
 
 type Thread struct {
 	ThreadID string `json:"thread_id"`
 }
 
+// Trust Ping
 func (c *Client) SendPing(connectionID string) (Thread, error) {
 	ping := struct {
 		Comment string `json:"comment"`
@@ -174,3 +175,5 @@ func (c *Client) SendPing(connectionID string) (Thread, error) {
 	}
 	return thread, nil
 }
+
+// TODO CreateStaticConnection EstablishInboundConnection

@@ -355,5 +355,5 @@ func (c *Client) GetPresentationCredentialsByID(presentationExchangeID string, c
 }
 
 func (c *Client) RemovePresentationExchangeByID(presentationExchangeID string) error {
-	return c.post(fmt.Sprintf("%s/present-proof/records/%s/remove", c.ACApyURL, presentationExchangeID), nil, nil, nil)
+	return c.delete(fmt.Sprintf("%s/present-proof/records/%s", c.ACApyURL, presentationExchangeID))
 }

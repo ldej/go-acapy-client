@@ -60,5 +60,5 @@ func (c *Client) CredentialMimeTypes(credentialID string) (map[string]string, er
 }
 
 func (c *Client) RemoveCredential(credentialID string) error {
-	return c.post(fmt.Sprintf("%s/credential/%s/remove", c.ACApyURL, credentialID), nil, nil, nil)
+	return c.delete(fmt.Sprintf("%s/credential/%s", c.ACApyURL, credentialID))
 }

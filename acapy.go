@@ -41,6 +41,10 @@ func (c *Client) put(url string) error {
 	return c.request(http.MethodPut, url, nil, nil, nil)
 }
 
+func (c *Client) delete(url string) error {
+	return c.request(http.MethodDelete, url, nil, nil, nil)
+}
+
 func (c *Client) request(method string, url string, queryParams map[string]string, body interface{}, responseObject interface{}) error {
 	var input io.Reader
 	var err error

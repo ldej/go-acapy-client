@@ -22,7 +22,7 @@ $ go get -u github.com/ldej/go-acapy-client
 
 ## Compatibility
 
-Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports only the latest master of ACA-py because of the [recent changes](https://github.com/hyperledger/aries-cloudagent-python/pull/717/files) in the revocation registry endpoint. It might support older and newer versions as well, but no guarantees.
+Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports v0.5.6 of ACA-py.
 
 ## Development
 
@@ -76,46 +76,33 @@ Examples can be found in the [examples](./examples) folder.
 
 ## Implemented Endpoints
 
-### Connections
+### Action Menu
+
+TODO
+
+### Basic Message
 
 `{id}` = connection identifier
 
-| Function Name                  | Method                               | Endpoint                                     | Implemented |
-|----------------------------------------------|------------------------------|------------------------------|------------------------------|
-| QueryConnections            | GET                              | /connections                                 | :heavy_check_mark: |
-| GetConnection | GET | /connections/{id} | :heavy_check_mark: |
-| CreateInvitation | POST           | /connections/create-invitation               | :heavy_check_mark: |
-| ReceiveInvitation | POST          | /connections/receive-invitation              | :heavy_check_mark: |
-| AcceptInvitation | POST      | /connections/{id}/accept-invitation          | :heavy_check_mark: |
-| AcceptRequest | POST         | /connections/{id}/accept-request             | :heavy_check_mark: |
-| RemoveConnection    | POST \<why though :man_facepalming:> | /connections/{id}/remove                     | :heavy_check_mark: |
-| SendBasicMessage    | POST                | /connections/send-message                    | :heavy_check_mark: |
-| SendPing               | POST               | /connections/send-ping                       | :heavy_check_mark: |
-| - | POST | /connections/{id}/start-introduction | :exclamation: |
-| - | POST | /connections/{id}/create-static | :exclamation: |
-| - | POST | /connections/{id}/establish-inbound/{ref_id} | :exclamation: |
+| Function Name    | Method | Endpoint                       | Implemented        |
+| ---------------- | ------ | ------------------------------ | ------------------ |
+| SendBasicMessage | POST   | /connections/{id}/send-message | :heavy_check_mark: |
 
-### Schemas
+### Connection
 
-`{id}` = schema identifier
+`{id}` = connection identifier
 
-| Function Name  | Method | Endpoint         | Implemented        |
-| -------------- | ------ | ---------------- | ------------------ |
-| RegisterSchema | POST   | /schemas         | :heavy_check_mark: |
-| QuerySchemas   | GET    | /schemas/created | :heavy_check_mark: |
-| GetSchema      | GET    | /schemas/{id}    | :heavy_check_mark: |
-
-### Wallet
-
-| Function Name  | Method | Endpoint                         | Implemented        |
-| -------------- | ------ | -------------------------------- | ------------------ |
-| QueryDIDs      | GET    | /wallet/did                      | :heavy_check_mark: |
-| CreateLocalDID | POST   | /wallet/did/create               | :heavy_check_mark: |
-| GetPublicDID   | GET    | /wallet/did/public               | :heavy_check_mark: |
-| SetPublicDID   | POST   | /wallet/did/public               | :heavy_check_mark: |
-| SetDIDEndpoint | POST   | /wallet/set-public-did           | :heavy_check_mark: |
-| GetDIDEndpoint | GET    | /wallet/get-public-did           | :heavy_check_mark: |
-| RotateKeypair  | PATCH  | /wallet/did/local/rotate-keypair | :heavy_check_mark: |
+| Function Name          | Method | Endpoint                                     | Implemented        |
+| ---------------------- | ------ | -------------------------------------------- | ------------------ |
+| QueryConnections       | GET    | /connections                                 | :heavy_check_mark: |
+| GetConnection          | GET    | /connections/{id}                            | :heavy_check_mark: |
+| RemoveConnection       | DELETE | /connections/{id}                            | :heavy_check_mark: |
+| CreateStaticConnection | POST   | /connections/create-static                   | :exclamation:      |
+| CreateInvitation       | POST   | /connections/create-invitation               | :heavy_check_mark: |
+| ReceiveInvitation      | POST   | /connections/receive-invitation              | :heavy_check_mark: |
+| AcceptInvitation       | POST   | /connections/{id}/accept-invitation          | :heavy_check_mark: |
+| AcceptRequest          | POST   | /connections/{id}/accept-request             | :heavy_check_mark: |
+| -                      | POST   | /connections/{id}/establish-inbound/{ref_id} | :exclamation:      |
 
 ### Credential Definitions
 
@@ -127,56 +114,52 @@ Examples can be found in the [examples](./examples) folder.
 | QueryCredentialDefintions   | GET    | /credential-definitions/created | :heavy_check_mark: |
 | GetCredentialDefinition     | GET    | /credential-definitions/{id}    | :heavy_check_mark: |
 
-### Issue Credentials (Credential Exchange v1.0)
-
-`{id}` = credential exchange identifier
-
-| Function Name                   | Method | Endpoint                                    | Implemented        |
-| ------------------------------- | ------ | ------------------------------------------- | ------------------ |
-| QueryCredentialExchange         | GET    | /issue-credential/records                   | :heavy_check_mark: |
-| GetCredentialExchange           | GET    | /issue-credential/records/{id}              | :heavy_check_mark: |
-| CreateCredentialExchange        | POST   | /issue-credential/create                    | :heavy_check_mark: |
-| SendCredential                  | POST   | /issue-credential/send                      | :heavy_check_mark: |
-| SendCredentialProposal          | POST   | /issue-credential/send-proposal             | :heavy_check_mark: |
-| SendCredentialOffer             | POST   | /issue-credential/send-offer                | :heavy_check_mark: |
-| SendCredentialOfferByID         | POST   | /issue-credential/{id}/send-offer           | :heavy_check_mark: |
-| SendCredentialRequestByID       | POST   | /issue-credential/{id}/send-request         | :heavy_check_mark: |
-| IssueCredentialByID             | POST   | /issue-credential/{id}/issue                | :heavy_check_mark: |
-| StoreReceivedCredential         | POST   | /issue-credential/{id}/store                | :heavy_check_mark: |
-| RemoveCredentialExchange        | POST   | /issue-credential/{id}/remove               | :heavy_check_mark: |
-| ReportCredentialExchangeProblem | POST   | /issue-credential/{id}/problem-report       | :heavy_check_mark: |
-| RevokeIssuedCredential          | POST   | /issue-credential/revoke                    | :heavy_check_mark: |
-| PublishRevocations              | POST   | /issue-credential/publish-revocations       | :heavy_check_mark: |
-| ClearPendingRevocations         | POST   | /issue-credential/clear-pending-revocations | :heavy_check_mark: |
-
 ### Credentials
 
 `{id}` = credential identifier, also known as referent
 
-| Function Name       | Method | Endpoint                    | Implemented              |
-| ------------------- | ------ | --------------------------- | ------------------------ |
-| GetCredential       | GET    | /credential/{id}            | :heavy_check_mark:       |
-| GetCredentials      | GET    | /credentials                | :heavy_check_mark:       |
-| IsCredentialRevoked | GET    | /credentials/revoked/{id}   | :heavy_check_mark: :new: |
-| RemoveCredential    | POST   | /credential/{id}/remove     | :heavy_check_mark:       |
-| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark:       |
+| Function Name       | Method | Endpoint                    | Implemented        |
+| ------------------- | ------ | --------------------------- | ------------------ |
+| GetCredential       | GET    | /credential/{id}            | :heavy_check_mark: |
+| RemoveCredential    | DELETE | /credential/{id}            | :heavy_check_mark: |
+| IsCredentialRevoked | GET    | /credential/revoked/{id}    | :heavy_check_mark: |
+| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
+| GetCredentials      | GET    | /credentials                | :heavy_check_mark: |
 
-### Revocation
+### Introduction
 
-`{id}` = revocation registry identifier, `{cred_def_id}` = credential definition identifier
+`{id}` = connection identifier
 
-| Function Name                       | Method | Endpoint                                  | Implemented        |
-| ----------------------------------- | ------ | ----------------------------------------- | ------------------ |
-| CreateRevocationRegistry            | POST   | /revocation/create-registry               | :heavy_check_mark: |
-| QueryRevocationRegistries           | GET    | /revocation/registries/created            | :heavy_check_mark: |
-| GetRevocationRegistry               | GET    | /revocation/registry/{id}                 | :heavy_check_mark: |
-| UpdateRevocationRegistryTailsURI    | PATCH  | /revocation/registry/{id}                 | :heavy_check_mark: |
-| GetActiveRevocationRegistry         | GET    | /revocation/active-registry/{cred_def_id} | :heavy_check_mark: |
-| DownloadRegistryTailsFile           | GET    | /revocation/registry/{id}/tails-file      | :heavy_check_mark: |
-| UploadRegistryTailsFile             | PUT    | /revocation/registry/{id}/tails-file      | :heavy_check_mark: |
-| PublishRevocationRegistryDefinition | POST   | /revocation/registry/{id}/definition      | :heavy_check_mark: |
-| PublishRevocationRegistryEntry      | POST   | /revocation/registry/{id}/entry           | :heavy_check_mark: |
-| SetRevocationRegistryState          | PATCH  | /revocation/registry/{id}/set-state       | :heavy_check_mark: |
+| Function Name | Method | Endpoint                             | Implemented   |
+| ------------- | ------ | ------------------------------------ | ------------- |
+| -             | POST   | /connections/{id}/start-introduction | :exclamation: |
+
+### Issue Credentials (Credential Exchange v1.0)
+
+`{id}` = credential exchange identifier
+
+| Function Name                   | Method | Endpoint                                      | Implemented        |
+| ------------------------------- | ------ | --------------------------------------------- | ------------------ |
+| QueryCredentialExchange         | GET    | /issue-credential/records                     | :heavy_check_mark: |
+| GetCredentialExchange           | GET    | /issue-credential/records/{id}                | :heavy_check_mark: 
+| RemoveCredentialExchange        | DELETE | /issue-credential/records/{id}                | :heavy_check_mark: |
+| CreateCredentialExchange        | POST   | /issue-credential/create                      | :heavy_check_mark: |
+| SendCredential                  | POST   | /issue-credential/send                        | :heavy_check_mark: |
+| SendCredentialProposal          | POST   | /issue-credential/send-proposal               | :heavy_check_mark: |
+| SendCredentialOffer             | POST   | /issue-credential/send-offer                  | :heavy_check_mark: |
+| SendCredentialOfferByID         | POST   | /issue-credential/records/{id}/send-offer     | :heavy_check_mark: |
+| SendCredentialRequestByID       | POST   | /issue-credential/records/{id}/send-request   | :heavy_check_mark: |
+| IssueCredentialByID             | POST   | /issue-credential/records/{id}/issue          | :heavy_check_mark: |
+| StoreReceivedCredential         | POST   | /issue-credential/records/{id}/store          | :heavy_check_mark: |
+| ReportCredentialExchangeProblem | POST   | /issue-credential/records/{id}/problem-report | :heavy_check_mark: |
+
+### Ledger
+
+TODO
+
+### Out-of-Band
+
+TODO
 
 ### Present Proof
 
@@ -186,21 +169,46 @@ Examples can be found in the [examples](./examples) folder.
 | ------------------------------ | ------ | ----------------------------------------------- | ------------------ |
 | QueryPresentationExchange      | GET    | /present-proof/records                          | :heavy_check_mark: |
 | GetPresentationExchangeByID    | GET    | /present-proof/records/{id}                     | :heavy_check_mark: |
-| SendPresentationByID           | POST   | /present-proof/records/{id}/sent-presentation   | :heavy_check_mark: |
-| VerifyPresentationByID         | POST   | /present-proof/records/{id}/verify-presentation | :heavy_check_mark: |
+| RemovePresentationExchangeByID | DELETE | /present-proof/records/{id}                     | :heavy_check_mark: |
 | GetPresentationCredentialsByID | GET    | /present-proof/records/{id}/credentials         | :heavy_check_mark: |
-| RemovePresentationExchangeByID | POST   | /present-proof/records/{id}/remove              | :heavy_check_mark: |
-| SendPresentationRequest        | POST   | /present-proof/send-request                     | :heavy_check_mark: |
-| CreatePresentationRequest      | POST   | /present-proof/create-request                   | :heavy_check_mark: |
 | SendPresentationProposal       | POST   | /present-proof/send-proposal                    | :heavy_check_mark: |
+| CreatePresentationRequest      | POST   | /present-proof/create-request                   | :heavy_check_mark: |
+| SendPresentationRequest        | POST   | /present-proof/send-request                     | :heavy_check_mark: |
+| SendPresentationRequestByID    | POST   | /present-proof/records/{id}/send-request        | :exclamation:      |
+| SendPresentationByID           | POST   | /present-proof/records/{id}/send-presentation   | :heavy_check_mark: |
+| VerifyPresentationByID         | POST   | /present-proof/records/{id}/verify-presentation | :heavy_check_mark: |
 
-### Out-of-Band
+### Revocation
 
-TODO
+`{id}` = revocation registry identifier, `{cred_def_id}` = credential definition identifier
 
-### Ledger
+| Function Name                       | Method | Endpoint                                    | Implemented        |
+| ----------------------------------- | ------ | ------------------------------------------- | ------------------ |
+| RevokeIssuedCredential              | POST   | /revocation/revoke                          | :heavy_check_mark: |
+| PublishRevocations                  | POST   | /revocation/publish-revocations             | :heavy_check_mark: |
+| ClearPendingRevocations             | POST   | /revocation/clear-pending-revocations       | :heavy_check_mark: |
+| GetCredentialRevocationStatus       | GET    | /revocation/credential-record               | :exclamation:      |
+| QueryRevocationRegistries           | GET    | /revocation/registries/created              | :heavy_check_mark: |
+| GetRevocationRegistry               | GET    | /revocation/registry/{id}                   | :heavy_check_mark: |
+| UpdateRevocationRegistryTailsURI    | PATCH  | /revocation/registry/{id}                   | :heavy_check_mark: |
+| GetActiveRevocationRegistry         | GET    | /revocation/active-registry/{cred_def_id}   | :heavy_check_mark: |
+| GetNumberOfIssuedCredentials        | GET    | /revocation/registry/{id}/issued            | :exclamation:      |
+| CreateRevocationRegistry            | POST   | /revocation/create-registry                 | :heavy_check_mark: |
+| PublishRevocationRegistryDefinition | POST   | /revocation/registry/{id}/definition        | :heavy_check_mark: |
+| PublishRevocationRegistryEntry      | POST   | /revocation/registry/{id}/entry             | :heavy_check_mark: |
+| UploadRegistryTailsFile             | PUT    | /revocation/registry/{id}/tails-file        | :heavy_check_mark: |
+| DownloadRegistryTailsFile           | GET    | /revocation/registry/{id}/tails-file        | :heavy_check_mark: |
+| SetRevocationRegistryState          | PATCH  | /revocation/registry/{id}/set-state         | :heavy_check_mark: |
 
-TODO
+### Schema
+
+`{id}` = schema identifier
+
+| Function Name  | Method | Endpoint         | Implemented        |
+| -------------- | ------ | ---------------- | ------------------ |
+| RegisterSchema | POST   | /schemas         | :heavy_check_mark: |
+| QuerySchemas   | GET    | /schemas/created | :heavy_check_mark: |
+| GetSchema      | GET    | /schemas/{id}    | :heavy_check_mark: |
 
 ### Server
 
@@ -214,11 +222,26 @@ TODO
 | Shutdown        | GET    | /shutdown     | :heavy_check_mark: |
 | Features        | GET    | /features     | :heavy_check_mark: |
 
-### Action Menu
+### Trust ping
 
-TODO
+| Function Name | Method | Endpoint                    | Implemented        |
+| ------------- | ------ | --------------------------- | ------------------ |
+| SendPing      | POST   | /connections/{id}/send-ping | :heavy_check_mark: |
 
-### JSON-LD
+
+### Wallet
+
+| Function Name  | Method | Endpoint                         | Implemented        |
+| -------------- | ------ | -------------------------------- | ------------------ |
+| QueryDIDs      | GET    | /wallet/did                      | :heavy_check_mark: |
+| CreateLocalDID | POST   | /wallet/did/create               | :heavy_check_mark: |
+| GetPublicDID   | GET    | /wallet/did/public               | :heavy_check_mark: |
+| SetPublicDID   | POST   | /wallet/did/public               | :heavy_check_mark: |
+| SetDIDEndpoint | POST   | /wallet/set-public-did           | :heavy_check_mark: |
+| GetDIDEndpoint | GET    | /wallet/get-public-did           | :heavy_check_mark: |
+| RotateKeypair  | PATCH  | /wallet/did/local/rotate-keypair | :heavy_check_mark: |
+
+### JSON-LD (unlisted)
 
 | Function Name | Method | Endpoint       | Implemented   |
 | ------------- | ------ | -------------- | ------------- |
