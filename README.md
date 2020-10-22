@@ -141,7 +141,7 @@ TODO
 | Function Name                   | Method | Endpoint                                      | Implemented        |
 | ------------------------------- | ------ | --------------------------------------------- | ------------------ |
 | QueryCredentialExchange         | GET    | /issue-credential/records                     | :heavy_check_mark: |
-| GetCredentialExchange           | GET    | /issue-credential/records/{id}                | :heavy_check_mark: 
+| GetCredentialExchange           | GET    | /issue-credential/records/{id}                | :heavy_check_mark: |
 | RemoveCredentialExchange        | DELETE | /issue-credential/records/{id}                | :heavy_check_mark: |
 | CreateCredentialExchange        | POST   | /issue-credential/create                      | :heavy_check_mark: |
 | SendCredential                  | POST   | /issue-credential/send                        | :heavy_check_mark: |
@@ -174,7 +174,7 @@ TODO
 | SendPresentationProposal       | POST   | /present-proof/send-proposal                    | :heavy_check_mark: |
 | CreatePresentationRequest      | POST   | /present-proof/create-request                   | :heavy_check_mark: |
 | SendPresentationRequest        | POST   | /present-proof/send-request                     | :heavy_check_mark: |
-| SendPresentationRequestByID    | POST   | /present-proof/records/{id}/send-request        | :exclamation:      |
+| SendPresentationRequestByID    | POST   | /present-proof/records/{id}/send-request        | :heavy_check_mark: |
 | SendPresentationByID           | POST   | /present-proof/records/{id}/send-presentation   | :heavy_check_mark: |
 | VerifyPresentationByID         | POST   | /present-proof/records/{id}/verify-presentation | :heavy_check_mark: |
 
