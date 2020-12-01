@@ -8,7 +8,7 @@ func (c *Client) Plugins() ([]string, error) {
 	var result = struct {
 		Result []string `json:"result"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/plugins", c.ACApyURL), nil, &result)
+	err := c.get("/plugins", nil, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ type Status struct {
 
 func (c *Client) Status() (Status, error) {
 	var status Status
-	err := c.get(fmt.Sprintf("%s/status", c.ACApyURL), nil, &status)
+	err := c.get("/status", nil, &status)
 	if err != nil {
 		return Status{}, err
 	}
@@ -39,14 +39,14 @@ func (c *Client) Status() (Status, error) {
 }
 
 func (c *Client) ResetStatistics() error {
-	return c.post(fmt.Sprintf("%s/status/reset", c.ACApyURL), nil, nil, nil)
+	return c.post("/status/reset", nil, nil, nil)
 }
 
 func (c *Client) IsAlive() (bool, error) {
 	var result = struct {
 		Alive bool `json:"alive"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/status/alive", c.ACApyURL), nil, &result)
+	err := c.get("/status/alive", nil, &result)
 	if err != nil {
 		return false, err
 	}
@@ -57,7 +57,7 @@ func (c *Client) IsReady() (bool, error) {
 	var result = struct {
 		Ready bool `json:"ready"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/status/ready", c.ACApyURL), nil, &result)
+	err := c.get("/status/ready", nil, &result)
 	if err != nil {
 		return false, err
 	}
@@ -65,14 +65,14 @@ func (c *Client) IsReady() (bool, error) {
 }
 
 func (c *Client) Shutdown() error {
-	return c.get(fmt.Sprintf("%s/shutdown", c.ACApyURL), nil, nil)
+	return c.get("/shutdown", nil, nil)
 }
 
 func (c *Client) Features() ([]string, error) {
 	var result = struct {
 		Results map[string]interface{} `json:"results"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/features", c.ACApyURL), nil, &result)
+	err := c.get("/features", nil, &result)
 	if err != nil {
 		return nil, err
 	}

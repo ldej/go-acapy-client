@@ -62,7 +62,7 @@ func (c *Client) CreateRevocationRegistry(credentialDefinitionID string, maxCred
 		CredentialDefinitionID: credentialDefinitionID,
 		MaxCredNum:             maxCredNum,
 	}
-	err := c.post(fmt.Sprintf("%s/revocation/create-registry", c.ACApyURL), nil, body, &result)
+	err := c.post("/revocation/create-registry", nil, body, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -77,7 +77,7 @@ func (c *Client) QueryRevocationRegistries(credentialDefinitionID string, state 
 	var result = struct {
 		RevocationRegistryIDs []string `json:"rev_reg_ids"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/revocation/registries/created", c.ACApyURL), queryParams, &result)
+	err := c.get("/revocation/registries/created", queryParams, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (c *Client) GetRevocationRegistry(revocationRegistryID string) (RevocationR
 	var result = struct {
 		RevocationRegistry RevocationRegistry `json:"result"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/revocation/registry/%s", c.ACApyURL, revocationRegistryID), nil, &result)
+	err := c.get(fmt.Sprintf("/revocation/registry/%s", revocationRegistryID), nil, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -104,7 +104,7 @@ func (c *Client) UpdateRevocationRegistryTailsURI(revocationRegistryID string, t
 	}{
 		TailsPublicURI: tailsPublicURI,
 	}
-	err := c.patch(fmt.Sprintf("%s/revocation/registry/%s", c.ACApyURL, revocationRegistryID), nil, body, &result)
+	err := c.patch(fmt.Sprintf("/revocation/registry/%s", revocationRegistryID), nil, body, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -113,7 +113,7 @@ func (c *Client) UpdateRevocationRegistryTailsURI(revocationRegistryID string, t
 
 func (c *Client) GetActiveRevocationRegistry(credentialDefinitionID string) (RevocationRegistry, error) {
 	var revocationRegistry RevocationRegistry
-	err := c.get(fmt.Sprintf("%s/revocation/active-registry/%s", c.ACApyURL, credentialDefinitionID), nil, &revocationRegistry)
+	err := c.get(fmt.Sprintf("/revocation/active-registry/%s", credentialDefinitionID), nil, &revocationRegistry)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -121,7 +121,7 @@ func (c *Client) GetActiveRevocationRegistry(credentialDefinitionID string) (Rev
 }
 
 func (c *Client) DownloadRegistryTailsFile(revocationRegistryID string) ([]byte, error) {
-	tailsFile, err := c.getFile(fmt.Sprintf("%s/revocation/registry/%s/tails-file", c.ACApyURL, revocationRegistryID))
+	tailsFile, err := c.getFile(fmt.Sprintf("/revocation/registry/%s/tails-file", revocationRegistryID))
 	if err != nil {
 		return nil, err
 	}
@@ -129,14 +129,14 @@ func (c *Client) DownloadRegistryTailsFile(revocationRegistryID string) ([]byte,
 }
 
 func (c *Client) UploadRegistryTailsFile(revocationRegistryID string) error {
-	return c.put(fmt.Sprintf("%s/revocation/registry/%s/tails-file", c.ACApyURL, revocationRegistryID))
+	return c.put(fmt.Sprintf("/revocation/registry/%s/tails-file", revocationRegistryID))
 }
 
 func (c *Client) PublishRevocationRegistryDefinition(revocationRegistryID string) (RevocationRegistry, error) {
 	var result = struct {
 		RevocationRegistry RevocationRegistry `json:"result"`
 	}{}
-	err := c.post(fmt.Sprintf("%s/revocation/registry/%s/definition", c.ACApyURL, revocationRegistryID), nil, nil, &result)
+	err := c.post(fmt.Sprintf("/revocation/registry/%s/definition", revocationRegistryID), nil, nil, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -147,7 +147,7 @@ func (c *Client) PublishRevocationRegistryEntry(revocationRegistryID string) (Re
 	var result = struct {
 		RevocationRegistry RevocationRegistry `json:"result"`
 	}{}
-	err := c.post(fmt.Sprintf("%s/revocation/registry/%s/entry", c.ACApyURL, revocationRegistryID), nil, nil, &result)
+	err := c.post(fmt.Sprintf("/revocation/registry/%s/entry", revocationRegistryID), nil, nil, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -161,7 +161,7 @@ func (c *Client) SetRevocationRegistryState(revocationRegistryID string, state s
 	var queryParams = map[string]string{
 		"state": state,
 	}
-	err := c.patch(fmt.Sprintf("%s/revocation/registry/%s/set-state", c.ACApyURL, revocationRegistryID), queryParams, nil, &result)
+	err := c.patch(fmt.Sprintf("/revocation/registry/%s/set-state", revocationRegistryID), queryParams, nil, &result)
 	if err != nil {
 		return RevocationRegistry{}, err
 	}
@@ -174,7 +174,7 @@ func (c *Client) RevokeIssuedCredential(credentialRevocationID string, revocatio
 		"rev_reg_id":  revocationRegistryID,
 		"publish":     strconv.FormatBool(publish),
 	}
-	return c.post(fmt.Sprintf("%s/revocation/revoke", c.ACApyURL), queryParams, nil, nil)
+	return c.post("/revocation/revoke", queryParams, nil, nil)
 }
 
 // A map from revocation registry identifier to credential revocation identifiers
@@ -192,7 +192,7 @@ func (c *Client) PublishRevocations(revocations PendingRevocations) error {
 	}{
 		Body: revocations,
 	}
-	return c.post(fmt.Sprintf("%s/revocation/publish-revocations", c.ACApyURL), nil, body, nil)
+	return c.post("/revocation/publish-revocations", nil, body, nil)
 }
 
 // ClearPendingRevocations
@@ -206,7 +206,7 @@ func (c *Client) ClearPendingRevocations(revocations PendingRevocations) (Pendin
 	}{
 		Body: revocations,
 	}
-	err := c.post(fmt.Sprintf("%s/revocation/clear-pending-revocations", c.ACApyURL), nil, body, &result)
+	err := c.post("/revocation/clear-pending-revocations", nil, body, &result)
 	if err != nil {
 		return nil, err
 	}

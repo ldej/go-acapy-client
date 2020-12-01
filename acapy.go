@@ -25,20 +25,24 @@ func NewClient(ledgerURL string, tailsServerURL string, acapyURL string) *Client
 	}
 }
 
-func (c *Client) post(url string, queryParam map[string]string, body interface{}, response interface{}) error {
-	return c.request(http.MethodPost, url, queryParam, body, response)
+func (c *Client) post(path string, queryParam map[string]string, body interface{}, response interface{}) error {
+	return c.request(http.MethodPost, c.ACApyURL+path, queryParam, body, response)
 }
 
-func (c *Client) get(url string, queryParams map[string]string, response interface{}) error {
-	return c.request(http.MethodGet, url, queryParams, nil, response)
+func (c *Client) post_ledger(path string, queryParam map[string]string, body interface{}, response interface{}) error {
+	return c.request(http.MethodPost, path, queryParam, body, response)
 }
 
-func (c *Client) patch(url string, queryParams map[string]string, body interface{}, response interface{}) error {
-	return c.request(http.MethodPatch, url, queryParams, body, response)
+func (c *Client) get(path string, queryParams map[string]string, response interface{}) error {
+	return c.request(http.MethodGet, c.ACApyURL+path, queryParams, nil, response)
 }
 
-func (c *Client) put(url string) error {
-	return c.request(http.MethodPut, url, nil, nil, nil)
+func (c *Client) patch(path string, queryParams map[string]string, body interface{}, response interface{}) error {
+	return c.request(http.MethodPatch, c.ACApyURL+path, queryParams, body, response)
+}
+
+func (c *Client) put(path string) error {
+	return c.request(http.MethodPut, c.ACApyURL+path, nil, nil, nil)
 }
 
 func (c *Client) delete(url string) error {

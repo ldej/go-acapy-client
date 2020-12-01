@@ -30,7 +30,7 @@ func (c *Client) RegisterDID(alias string, seed string, role DIDRole) (RegisterD
 		Seed:  seed, // Should be random in develop mode
 		Role:  string(role),
 	}
-	err := c.post(c.LedgerURL+"/register", nil, registerDID, &registerDIDResponse)
+	err := c.post_ledger("/register", nil, registerDID, &registerDIDResponse)
 	if err != nil {
 		return RegisterDIDResponse{}, err
 	}

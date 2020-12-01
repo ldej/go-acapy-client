@@ -23,7 +23,7 @@ func (c *Client) GetCredentials(max int, index int, wql string) ([]Credential, e
 		"index": strconv.Itoa(index),
 		"wql":   wql,
 	}
-	err := c.get(fmt.Sprintf("%s/credentials", c.ACApyURL), queryParams, &results)
+	err := c.get("/credentials", queryParams, &results)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (c *Client) GetCredentials(max int, index int, wql string) ([]Credential, e
 
 func (c *Client) GetCredential(credentialID string) (Credential, error) {
 	var credential Credential
-	err := c.get(fmt.Sprintf("%s/credential/%s", c.ACApyURL, credentialID), nil, &credential)
+	err := c.get(fmt.Sprintf("/credential/%s", credentialID), nil, &credential)
 	if err != nil {
 		return Credential{}, err
 	}
@@ -43,7 +43,7 @@ func (c *Client) IsCredentialRevoked(credentialID string) (bool, error) {
 	var result = struct{
 		Revoked bool `json:"revoked"`
 	}{}
-	err := c.get(fmt.Sprintf("%s/credential/revoked/%s", c.ACApyURL, credentialID), nil, &result)
+	err := c.get(fmt.Sprintf("/credential/revoked/%s", credentialID), nil, &result)
 	if err != nil {
 		return false, err
 	}
@@ -52,7 +52,7 @@ func (c *Client) IsCredentialRevoked(credentialID string) (bool, error) {
 
 func (c *Client) CredentialMimeTypes(credentialID string) (map[string]string, error) {
 	var result map[string]string
-	err := c.get(fmt.Sprintf("%s/credential/mime-types/%s", c.ACApyURL, credentialID), nil, &result)
+	err := c.get(fmt.Sprintf("/credential/mime-types/%s", credentialID), nil, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -60,5 +60,5 @@ func (c *Client) CredentialMimeTypes(credentialID string) (map[string]string, er
 }
 
 func (c *Client) RemoveCredential(credentialID string) error {
-	return c.delete(fmt.Sprintf("%s/credential/%s", c.ACApyURL, credentialID))
+	return c.delete(fmt.Sprintf("/credential/%s", credentialID))
 }

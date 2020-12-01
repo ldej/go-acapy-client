@@ -138,7 +138,7 @@ type CredentialProposalRequest struct {
 
 func (c *Client) SendCredentialProposal(proposal CredentialProposalRequest) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/send-proposal", c.ACApyURL), nil, proposal, &credentialExchange)
+	err := c.post("/issue-credential/send-proposal", nil, proposal, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -147,7 +147,7 @@ func (c *Client) SendCredentialProposal(proposal CredentialProposalRequest) (Cre
 
 func (c *Client) SendCredentialOffer(offer CredentialOfferRequest) (CredentialExchange, error) {
 	var credentialExchangeRecord CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/send-offer", c.ACApyURL), nil, offer, &credentialExchangeRecord)
+	err := c.post("/issue-credential/send-offer", nil, offer, &credentialExchangeRecord)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -171,7 +171,7 @@ func (c *Client) QueryCredentialExchange(params QueryCredentialExchangeParams) (
 		"state":         params.State,
 		"thread_id":     params.ThreadID,
 	}
-	err := c.get(fmt.Sprintf("%s/issue-credential/records", c.ACApyURL), queryParams, &result)
+	err := c.get("/issue-credential/records", queryParams, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (c *Client) QueryCredentialExchange(params QueryCredentialExchangeParams) (
 
 func (c *Client) GetCredentialExchange(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.get(fmt.Sprintf("%s/issue-credential/records/%s", c.ACApyURL, credentialExchangeID), nil, &credentialExchange)
+	err := c.get(fmt.Sprintf("/issue-credential/records/%s", credentialExchangeID), nil, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -202,7 +202,7 @@ type CredentialCreateRequest struct {
 
 func (c *Client) CreateCredentialExchange(request CredentialCreateRequest) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/create", c.ACApyURL), nil, request, &credentialExchange)
+	err := c.post("/issue-credential/create", nil, request, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -213,7 +213,7 @@ type CredentialSendRequest CredentialProposalRequest
 
 func (c *Client) SendCredential(request CredentialSendRequest) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/send", c.ACApyURL), nil, request, &credentialExchange)
+	err := c.post("/issue-credential/send", nil, request, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -222,7 +222,7 @@ func (c *Client) SendCredential(request CredentialSendRequest) (CredentialExchan
 
 func (c *Client) SendCredentialOfferByID(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/send-offer", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
+	err := c.post(fmt.Sprintf("/issue-credential/records/%s/send-offer", credentialExchangeID), nil, nil, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -231,7 +231,7 @@ func (c *Client) SendCredentialOfferByID(credentialExchangeID string) (Credentia
 
 func (c *Client) SendCredentialRequestByID(credentialExchangeID string) (CredentialExchange, error) {
 	var credentialExchange CredentialExchange
-	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/send-request", c.ACApyURL, credentialExchangeID), nil, nil, &credentialExchange)
+	err := c.post(fmt.Sprintf("/issue-credential/records/%s/send-request", credentialExchangeID), nil, nil, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -245,7 +245,7 @@ func (c *Client) IssueCredentialByID(credentialExchangeID string, comment string
 	}{
 		Comment: comment,
 	}
-	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/issue", c.ACApyURL, credentialExchangeID), nil, body, &credentialExchange)
+	err := c.post(fmt.Sprintf("/issue-credential/records/%s/issue", credentialExchangeID), nil, body, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -260,7 +260,7 @@ func (c *Client) StoreCredentialByID(credentialExchangeID string, credentialID s
 	}{
 		CredentialID: credentialID,
 	}
-	err := c.post(fmt.Sprintf("%s/issue-credential/records/%s/store", c.ACApyURL, credentialExchangeID), nil, body, &credentialExchange)
+	err := c.post(fmt.Sprintf("/issue-credential/records/%s/store", credentialExchangeID), nil, body, &credentialExchange)
 	if err != nil {
 		return CredentialExchange{}, err
 	}
@@ -268,7 +268,7 @@ func (c *Client) StoreCredentialByID(credentialExchangeID string, credentialID s
 }
 
 func (c *Client) RemoveCredentialExchange(credentialExchangeID string) error {
-	return c.delete(fmt.Sprintf("%s/issue-credential/records/%s", c.ACApyURL, credentialExchangeID))
+	return c.delete(fmt.Sprintf("/issue-credential/records/%s", credentialExchangeID))
 }
 
 func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, message string) error {
@@ -277,5 +277,5 @@ func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, me
 	}{
 		Message: message,
 	}
-	return c.post(fmt.Sprintf("%s/issue-credential/records/%s/problem-report", c.ACApyURL, credentialExchangeID), nil, body, nil)
+	return c.post(fmt.Sprintf("/issue-credential/records/%s/problem-report", credentialExchangeID), nil, body, nil)
 }

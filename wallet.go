@@ -1,7 +1,6 @@
 package acapy
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -23,7 +22,7 @@ func (c *Client) QueryDIDs(params QueryDIDsParams) ([]DID, error) {
 		"public": strconv.FormatBool(params.Public),
 		"verkey": params.VerKey,
 	}
-	err := c.get(fmt.Sprintf("%s/wallet/did", c.ACApyURL), queryParams, &r)
+	err := c.get("/wallet/did", queryParams, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +35,7 @@ type didResult struct {
 
 func (c *Client) CreateLocalDID() (DID, error) {
 	var r didResult
-	err := c.post(fmt.Sprintf("%s/wallet/didResult/create", c.ACApyURL), nil, nil, &r)
+	err := c.post("/wallet/didResult/create", nil, nil, &r)
 	if err != nil {
 		return DID{}, err
 	}
@@ -45,7 +44,7 @@ func (c *Client) CreateLocalDID() (DID, error) {
 
 func (c *Client) GetPublicDID() (DID, error) {
 	var r didResult
-	err := c.get(fmt.Sprintf("%s/wallet/did/public", c.ACApyURL), nil, &r)
+	err := c.get("/wallet/did/public", nil, &r)
 	if err != nil {
 		return DID{}, err
 	}
@@ -57,7 +56,7 @@ func (c *Client) SetPublicDID(did string) (DID, error) {
 	queryParams := map[string]string{
 		"did": did,
 	}
-	err := c.post(fmt.Sprintf("%s/wallet/did/public", c.ACApyURL), queryParams, nil, &r)
+	err := c.post("/wallet/did/public", queryParams, nil, &r)
 	if err != nil {
 		return DID{}, err
 	}
@@ -74,7 +73,7 @@ func (c *Client) SetDIDEndpointInWallet(did string, endpoint string, endpointTyp
 		Endpoint:     endpoint,
 		EndpointType: endpointType,
 	}
-	return c.post(fmt.Sprintf("%s/wallet/set-did-endpoint", c.ACApyURL), nil, setDIDEndpointRequest, nil)
+	return c.post("/wallet/set-did-endpoint", nil, setDIDEndpointRequest, nil)
 }
 
 func (c *Client) GetDIDEndpointFromWallet(did string) (string, error) {
@@ -85,7 +84,7 @@ func (c *Client) GetDIDEndpointFromWallet(did string) (string, error) {
 	queryParams := map[string]string{
 		"did": did,
 	}
-	err := c.get(fmt.Sprintf("%s/wallet/get-did-endpoint", c.ACApyURL), queryParams, &r)
+	err := c.get("/wallet/get-did-endpoint", queryParams, &r)
 	if err != nil {
 		return "", err
 	}
@@ -96,5 +95,5 @@ func (c *Client) RotateKeypair(did string) error {
 	queryParams := map[string]string{
 		"did": did,
 	}
-	return c.patch(fmt.Sprintf("%s/wallet/did/local/rotate-keypair", c.ACApyURL), queryParams, nil, nil)
+	return c.patch("/wallet/did/local/rotate-keypair", queryParams, nil, nil)
 }

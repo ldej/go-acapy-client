@@ -48,7 +48,7 @@ func (c *Client) CreateInvitation(alias string, autoAccept bool, multiUse bool, 
 		"multi_use":   strconv.FormatBool(multiUse),
 		"public":      strconv.FormatBool(public),
 	}
-	err := c.post(c.ACApyURL+"/connections/create-invitation", queryParams, nil, &createInvitationResponse)
+	err := c.post("/connections/create-invitation", queryParams, nil, &createInvitationResponse)
 	if err != nil {
 		return CreateInvitationResponse{}, err
 	}
@@ -57,7 +57,7 @@ func (c *Client) CreateInvitation(alias string, autoAccept bool, multiUse bool, 
 
 func (c *Client) ReceiveInvitation(invitation Invitation, autoAccept bool) (Connection, error) {
 	var connection Connection
-	err := c.post(c.ACApyURL+"/connections/receive-invitation", map[string]string{
+	err := c.post("/connections/receive-invitation", map[string]string{
 		"alias":       invitation.Label,
 		"auto_accept": strconv.FormatBool(autoAccept),
 	}, invitation, &connection)
@@ -79,7 +79,7 @@ type Invitation struct {
 
 func (c *Client) AcceptInvitation(connectionID string) (Connection, error) {
 	var connection Connection
-	err := c.post(fmt.Sprintf("%s/connections/%s/accept-invitation", c.ACApyURL, connectionID), nil, nil, &connection)
+	err := c.post(fmt.Sprintf("/connections/%s/accept-invitation", connectionID), nil, nil, &connection)
 	if err != nil {
 		return Connection{}, err
 	}
@@ -88,7 +88,7 @@ func (c *Client) AcceptInvitation(connectionID string) (Connection, error) {
 
 func (c *Client) AcceptRequest(connectionID string) (Connection, error) {
 	var connection Connection
-	err := c.post(fmt.Sprintf("%s/connections/%s/accept-request", c.ACApyURL, connectionID), nil, nil, &connection)
+	err := c.post(fmt.Sprintf("/connections/%s/accept-request", connectionID), nil, nil, &connection)
 	if err != nil {
 		return Connection{}, err
 	}
@@ -137,7 +137,7 @@ func (c *Client) QueryConnections(params QueryConnectionsParams) ([]Connection, 
 		"their_did":        params.TheirDID,
 		"their_role":       params.TheirRole,
 	}
-	err := c.get(c.ACApyURL+"/results", queryParams, &results)
+	err := c.get("/connections", queryParams, &results)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (c *Client) QueryConnections(params QueryConnectionsParams) ([]Connection, 
 
 func (c *Client) GetConnection(connectionID string) (Connection, error) {
 	var connection Connection
-	err := c.get(fmt.Sprintf("%s/connections/%s", c.ACApyURL, connectionID), nil, &connection)
+	err := c.get(fmt.Sprintf("/connections/%s", connectionID), nil, &connection)
 	if err != nil {
 		return Connection{}, err
 	}
@@ -154,7 +154,7 @@ func (c *Client) GetConnection(connectionID string) (Connection, error) {
 }
 
 func (c *Client) RemoveConnection(connectionID string) error {
-	return c.delete(fmt.Sprintf("%s/connections/%s", c.ACApyURL, connectionID))
+	return c.delete(fmt.Sprintf("/connections/%s", connectionID))
 }
 
 type Thread struct {
@@ -169,7 +169,7 @@ func (c *Client) SendPing(connectionID string) (Thread, error) {
 		Comment: "ping",
 	}
 	var thread Thread
-	err := c.post(fmt.Sprintf("%s/connections/%s/send-ping", c.ACApyURL, connectionID), nil, ping, &thread)
+	err := c.post(fmt.Sprintf("/connections/%s/send-ping", connectionID), nil, ping, &thread)
 	if err != nil {
 		return Thread{}, err
 	}

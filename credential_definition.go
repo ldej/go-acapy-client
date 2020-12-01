@@ -19,7 +19,7 @@ func (c *Client) CreateCredentialDefinition(tag string, supportRevocation bool, 
 	var response = struct {
 		CredentialDefinitionID string `json:"credential_definition_id"`
 	}{}
-	err := c.post(fmt.Sprintf("%s/credential-definitions", c.ACApyURL), nil, request, &response)
+	err := c.post("/credential-definitions", nil, request, &response)
 	if err != nil {
 		return "", err
 	}
@@ -47,7 +47,7 @@ func (c *Client) QueryCredentialDefinitions(params QueryCredentialDefinitionsPar
 		"schema_name":       params.SchemaName,
 		"schema_version":    params.SchemaVersion,
 	}
-	err := c.get(fmt.Sprintf("%s/credential-definitions/created", c.ACApyURL), queryParams, &result)
+	err := c.get("/credential-definitions/created", queryParams, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ type CredentialDefinition struct {
 
 func (c *Client) GetCredentialDefinition(credentialDefinitionID string) (CredentialDefinition, error) {
 	var credentialDefinition CredentialDefinition
-	err := c.get(fmt.Sprintf("%s/credential-definitions/%s", c.ACApyURL, credentialDefinitionID), nil, &credentialDefinition)
+	err := c.get(fmt.Sprintf("/credential-definitions/%s", credentialDefinitionID), nil, &credentialDefinition)
 	if err != nil {
 		return CredentialDefinition{}, err
 	}

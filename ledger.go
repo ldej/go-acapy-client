@@ -1,9 +1,5 @@
 package acapy
 
-import (
-	"fmt"
-)
-
 // available endpoint types: Endpoint, Profile, LinkedDomains
 func (c *Client) GetDIDEndpointFromLedger(did string, endpointType string) (string, error) {
 	var result = struct {
@@ -13,7 +9,7 @@ func (c *Client) GetDIDEndpointFromLedger(did string, endpointType string) (stri
 		"did":           did,
 		"endpoint_type": endpointType,
 	}
-	err := c.get(fmt.Sprintf("%s/ledger/did-endpoint", c.ACApyURL), queryParams, &result)
+	err := c.get("/ledger/did-endpoint", queryParams, &result)
 	if err != nil {
 		return "", err
 	}
@@ -25,9 +21,9 @@ func (c *Client) GetDIDVerkeyFromLedger(did string) (string, error) {
 		Verkey string `json:"verkey"`
 	}{}
 	var queryParams = map[string]string{
-		"did":           did,
+		"did": did,
 	}
-	err := c.get(fmt.Sprintf("%s/ledger/did-verkey", c.ACApyURL), queryParams, &result)
+	err := c.get("/ledger/did-verkey", queryParams, &result)
 	if err != nil {
 		return "", err
 	}
@@ -40,12 +36,11 @@ func (c *Client) GetDIDRoleFromLedger(did string) (string, error) {
 		Role string `json:"role"`
 	}{}
 	var queryParams = map[string]string{
-		"did":           did,
+		"did": did,
 	}
-	err := c.get(fmt.Sprintf("%s/ledger/get-nym-role", c.ACApyURL), queryParams, &result)
+	err := c.get("/ledger/get-nym-role", queryParams, &result)
 	if err != nil {
 		return "", err
 	}
 	return result.Role, nil
 }
-

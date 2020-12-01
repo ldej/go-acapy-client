@@ -235,7 +235,7 @@ type PresentationProof struct {
 
 func (c *Client) SendPresentationProposal(request PresentationProposalRequest) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.post(fmt.Sprintf("%s/present-proof/send-proposal", c.ACApyURL), nil, request, &presentationExchange)
+	err := c.post("/present-proof/send-proposal", nil, request, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, err
 	}
@@ -244,7 +244,7 @@ func (c *Client) SendPresentationProposal(request PresentationProposalRequest) (
 
 func (c *Client) CreatePresentationRequest(request PresentationRequestRequest) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.post(fmt.Sprintf("%s/present-proof/create-request", c.ACApyURL), nil, request, &presentationExchange)
+	err := c.post("/present-proof/create-request", nil, request, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, err
 	}
@@ -253,7 +253,7 @@ func (c *Client) CreatePresentationRequest(request PresentationRequestRequest) (
 
 func (c *Client) SendPresentationRequest(request PresentationRequestRequest) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.post(fmt.Sprintf("%s/present-proof/send-request", c.ACApyURL), nil, request, &presentationExchange)
+	err := c.post("/present-proof/send-request", nil, request, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, err
 	}
@@ -277,7 +277,7 @@ func (c *Client) QueryPresentationExchange(params QueryPresentationExchangeParam
 		"state":         params.State,
 		"thread_id":     params.ThreadID,
 	}
-	err := c.get(fmt.Sprintf("%s/present-proof/records", c.ACApyURL), queryParams, &result)
+	err := c.get("/present-proof/records", queryParams, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +286,7 @@ func (c *Client) QueryPresentationExchange(params QueryPresentationExchangeParam
 
 func (c *Client) GetPresentationExchangeByID(presentationExchangeID string) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.get(fmt.Sprintf("%s/present-proof/records/%s", c.ACApyURL, presentationExchangeID), nil, &presentationExchange)
+	err := c.get(fmt.Sprintf("/present-proof/records/%s", presentationExchangeID), nil, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, nil
 	}
@@ -295,7 +295,7 @@ func (c *Client) GetPresentationExchangeByID(presentationExchangeID string) (Pre
 
 func (c *Client) SendPresentationRequestByID(presentationExchangeID string, request PresentationRequestRequest) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.post(fmt.Sprintf("%s/present-proof/records/%s/send-request", c.ACApyURL, presentationExchangeID), nil, request, &presentationExchange)
+	err := c.post(fmt.Sprintf("/present-proof/records/%s/send-request", presentationExchangeID), nil, request, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, nil
 	}
@@ -304,7 +304,7 @@ func (c *Client) SendPresentationRequestByID(presentationExchangeID string, requ
 
 func (c *Client) SendPresentationByID(presentationExchangeID string, proof PresentationProof) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.post(fmt.Sprintf("%s/present-proof/records/%s/send-presentation", c.ACApyURL, presentationExchangeID), nil, proof, &presentationExchange)
+	err := c.post(fmt.Sprintf("/present-proof/records/%s/send-presentation", presentationExchangeID), nil, proof, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, nil
 	}
@@ -313,7 +313,7 @@ func (c *Client) SendPresentationByID(presentationExchangeID string, proof Prese
 
 func (c *Client) VerifyPresentationByID(presentationExchangeID string) (PresentationExchange, error) {
 	var presentationExchange PresentationExchange
-	err := c.post(fmt.Sprintf("%s/present-proof/records/%s/verify-presentation", c.ACApyURL, presentationExchangeID), nil, nil, &presentationExchange)
+	err := c.post(fmt.Sprintf("/present-proof/records/%s/verify-presentation", presentationExchangeID), nil, nil, &presentationExchange)
 	if err != nil {
 		return PresentationExchange{}, nil
 	}
@@ -344,7 +344,7 @@ func (c *Client) GetPresentationCredentialsByID(presentationExchangeID string, c
 		"start":       strconv.Itoa(start),
 		"referent":    strings.Join(proofRequestReferents, ","),
 	}
-	err := c.get(fmt.Sprintf("%s/present-proof/records/%s/credentials", c.ACApyURL, presentationExchangeID), queryParams, &result)
+	err := c.get(fmt.Sprintf("/present-proof/records/%s/credentials", presentationExchangeID), queryParams, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -352,5 +352,5 @@ func (c *Client) GetPresentationCredentialsByID(presentationExchangeID string, c
 }
 
 func (c *Client) RemovePresentationExchangeByID(presentationExchangeID string) error {
-	return c.delete(fmt.Sprintf("%s/present-proof/records/%s", c.ACApyURL, presentationExchangeID))
+	return c.delete(fmt.Sprintf("/present-proof/records/%s", presentationExchangeID))
 }

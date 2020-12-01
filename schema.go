@@ -31,7 +31,7 @@ func (c *Client) RegisterSchema(name string, version string, attributes []string
 		Attributes: attributes,
 	}
 	var response schemaResponse
-	err := c.post(c.ACApyURL+"/schemas", nil, request, &response)
+	err := c.post("/schemas", nil, request, &response)
 	if err != nil {
 		return Schema{}, err
 	}
@@ -56,7 +56,7 @@ func (c *Client) QuerySchemas(params QuerySchemasParams) ([]string, error) {
 		"schema_name":       params.SchemaName,
 		"schema_version":    params.SchemaVersion,
 	}
-	err := c.get(c.ACApyURL+"/schemas/created", queryParams, &r)
+	err := c.get("/schemas/created", queryParams, &r)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *Client) QuerySchemas(params QuerySchemasParams) ([]string, error) {
 
 func (c *Client) GetSchema(schemaID string) (Schema, error) {
 	var schemaResponse schemaResponse
-	err := c.get(fmt.Sprintf("%s/schemas/%s", c.ACApyURL, schemaID), nil, &schemaResponse)
+	err := c.get(fmt.Sprintf("/schemas/%s", schemaID), nil, &schemaResponse)
 	if err != nil {
 		return Schema{}, err
 	}
