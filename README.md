@@ -34,6 +34,12 @@ Start a local Indy ledger network VON-network. Make a checkout of [github.com/bc
 
 This starts 4 Indy nodes and a von-webserver. The von-webserver has a web interface at [localhost:9000](http://localhost:9000) which allows you to browse the transactions in the blockchain.
 
+Start a Tails server for the revocation registry tails files: Make a checkout of [github.com/bcgov/indy-tails-server](https://github.com/bcgov/indy-tails-server). Then run:
+
+```shell script
+./docker/manage start
+```
+
 Start an Aries-Cloud-Agent-Python (ACA-py) instance and configure the right command line parameters. Read about ACA-py and the command line parameters on my blog:
 
 - [Becoming a Hyperledger Aries Developer - Part 1: Terminology](https://ldej.nl/post/becoming-aries-developer-part-1-terminology/)
@@ -278,7 +284,7 @@ func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
 }
 
 func main() {
-r := mux.NewRouter()
+    r := mux.NewRouter()
     webhooksHandler := acapy.WebhookHandler(
         ConnectionsEventHandler,
         BasicMessagesEventHandler,

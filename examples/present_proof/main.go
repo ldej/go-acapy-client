@@ -243,7 +243,10 @@ func (app *App) ReadCommands() {
 				app.presentationExchange = presentationExchange
 			}
 		case "10":
-			credentials, _ := app.client.GetPresentationCredentialsByID(app.presentationExchange.PresentationExchangeID, 10, "", nil, 0)
+			credentials, err := app.client.GetPresentationCredentialsByID(app.presentationExchange.PresentationExchangeID, 10, "", nil, 0)
+			if err != nil {
+				log.Println("Err: %v", err)
+			}
 			for _, credential := range credentials {
 				fmt.Printf("Credential %s: %+v", credential.CredentialInfo.Referent, credential.CredentialInfo.Attrs)
 			}
@@ -253,7 +256,7 @@ func (app *App) ReadCommands() {
 
 func (app *App) StartACApy() {
 	id := strings.Replace(app.label+app.rand, " ", "_", -1)
-	cmd := exec.Command("/home/laurencedejong/.venv/aries-cloudagent-python/bin/aca-py",
+	cmd := exec.Command("aca-py",
 		"start",
 		"-it", "http", "0.0.0.0", strconv.Itoa(app.port+1),
 		"-ot", "http",

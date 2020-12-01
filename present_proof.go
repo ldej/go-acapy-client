@@ -15,7 +15,7 @@ type PresentationExchange struct {
 	Role                     string                  `json:"role"`
 	PresentationProposalDict PresentationProposalMap `json:"presentation_proposal_dict"`
 	PresentationRequest      PresentationRequest     `json:"presentation_request"`
-	PresentationRequestDict  PresentationRequestMap  `json:"presentation_request_dict"` // TODO ?
+	PresentationRequestDict  struct{}                `json:"presentation_request_dict"` // TODO ?
 	Presentation             Presentation            `json:"presentation"`
 	Verified                 string                  `json:"verified"`
 	CreatedAt                string                  `json:"created_at"`
@@ -33,88 +33,85 @@ type PresentationProposalMap struct {
 }
 
 // TODO
-type Proof struct {
-	Proofs []struct {
-		PrimaryProof struct {
-			EqProof struct {
-				RevealedAttrs struct {
-					Name string `json:"name"`
-				} `json:"revealed_attrs"`
-				APrime string `json:"a_prime"`
-				E      string `json:"e"`
-				V      string `json:"v"`
-				M      struct {
-					MasterSecret string `json:"master_secret"`
-				} `json:"m"`
-				M2 string `json:"m2"`
-			} `json:"eq_proof"`
-			GeProofs []interface{} `json:"ge_proofs"`
-		} `json:"primary_proof"`
-		NonRevocProof struct {
-			XList struct {
-				Rho              string `json:"rho"`
-				R                string `json:"r"`
-				RPrime           string `json:"r_prime"`
-				RPrimePrime      string `json:"r_prime_prime"`
-				RPrimePrimePrime string `json:"r_prime_prime_prime"`
-				O                string `json:"o"`
-				OPrime           string `json:"o_prime"`
-				M                string `json:"m"`
-				MPrime           string `json:"m_prime"`
-				T                string `json:"t"`
-				TPrime           string `json:"t_prime"`
-				M2               string `json:"m2"`
-				S                string `json:"s"`
-				C                string `json:"c"`
-			} `json:"x_list"`
-			CList struct {
-				E string `json:"e"`
-				D string `json:"d"`
-				A string `json:"a"`
-				G string `json:"g"`
-				W string `json:"w"`
-				S string `json:"s"`
-				U string `json:"u"`
-			} `json:"c_list"`
-		} `json:"non_revoc_proof"`
-	} `json:"proofs"`
-	AggregatedProof struct {
-		CHash string  `json:"c_hash"`
-		CList [][]int `json:"c_list"`
-	} `json:"aggregated_proof"`
-}
+// type Proof struct {
+// 	Proofs []struct {
+// 		PrimaryProof struct {
+// 			EqProof struct {
+// 				RevealedAttrs struct {
+// 					Name string `json:"name"`
+// 				} `json:"revealed_attrs"`
+// 				APrime string `json:"a_prime"`
+// 				E      string `json:"e"`
+// 				V      string `json:"v"`
+// 				M      struct {
+// 					MasterSecret string `json:"master_secret"`
+// 				} `json:"m"`
+// 				M2 string `json:"m2"`
+// 			} `json:"eq_proof"`
+// 			GeProofs []interface{} `json:"ge_proofs"`
+// 		} `json:"primary_proof"`
+// 		NonRevocProof struct {
+// 			XList struct {
+// 				Rho              string `json:"rho"`
+// 				R                string `json:"r"`
+// 				RPrime           string `json:"r_prime"`
+// 				RPrimePrime      string `json:"r_prime_prime"`
+// 				RPrimePrimePrime string `json:"r_prime_prime_prime"`
+// 				O                string `json:"o"`
+// 				OPrime           string `json:"o_prime"`
+// 				M                string `json:"m"`
+// 				MPrime           string `json:"m_prime"`
+// 				T                string `json:"t"`
+// 				TPrime           string `json:"t_prime"`
+// 				M2               string `json:"m2"`
+// 				S                string `json:"s"`
+// 				C                string `json:"c"`
+// 			} `json:"x_list"`
+// 			CList struct {
+// 				E string `json:"e"`
+// 				D string `json:"d"`
+// 				A string `json:"a"`
+// 				G string `json:"g"`
+// 				W string `json:"w"`
+// 				S string `json:"s"`
+// 				U string `json:"u"`
+// 			} `json:"c_list"`
+// 		} `json:"non_revoc_proof"`
+// 	} `json:"proofs"`
+// 	AggregatedProof struct {
+// 		CHash string  `json:"c_hash"`
+// 		CList [][]int `json:"c_list"`
+// 	} `json:"aggregated_proof"`
+// }
 
 // TODO
 type RequestedProof struct {
-	RevealedAttrs      struct{} `json:"revealed_attrs"`
-	RevealedAttrGroups struct {
-		ZeroNameUUID struct {
-			SubProofIndex int `json:"sub_proof_index"`
-			Values        struct {
-				Name struct {
-					Raw     string `json:"raw"`
-					Encoded string `json:"encoded"`
-				} `json:"name"`
-			} `json:"values"`
-		} `json:"0_name_uuid"`
-	} `json:"revealed_attr_groups"`
-	SelfAttestedAttrs struct{} `json:"self_attested_attrs"`
-	UnrevealedAttrs   struct{} `json:"unrevealed_attrs"`
-	Predicates        struct{} `json:"predicates"`
+	RevealedAttrs      struct{}                `json:"revealed_attrs"`
+	RevealedAttrGroups map[string]RevealedAttr `json:"revealed_attr_groups"`
+	SelfAttestedAttrs  struct{}                `json:"self_attested_attrs"`
+	UnrevealedAttrs    struct{}                `json:"unrevealed_attrs"`
+	Predicates         struct{}                `json:"predicates"`
+}
+
+type RevealedAttr struct {
+	SubProofIndex int `json:"sub_proof_index"`
+	Values        struct {
+		Name struct {
+			Raw     string `json:"raw"`
+			Encoded string `json:"encoded"`
+		} `json:"name"`
+	} `json:"values"`
 }
 
 type Presentation struct {
-	Proof          Proof          `json:"proof"`
+	// Proof          Proof          `json:"proof"` // TODO
 	RequestedProof RequestedProof `json:"requested_proof"`
 	Identifiers    []struct {
-		SchemaID  string `json:"schema_id"`
-		CredDefID string `json:"cred_def_id"`
-		RevRegID  string `json:"rev_reg_id"`
-		Timestamp int    `json:"timestamp"`
+		SchemaID               string `json:"schema_id"`
+		CredentialDefinitionID string `json:"cred_def_id"`
+		RevocationRegistryID   string `json:"rev_reg_id"`
+		Timestamp              int    `json:"timestamp"`
 	} `json:"identifiers"`
-}
-
-type PresentationRequestMap struct {
 }
 
 type PresentationProposalRequest struct {
@@ -347,7 +344,7 @@ func (c *Client) GetPresentationCredentialsByID(presentationExchangeID string, c
 		"start":       strconv.Itoa(start),
 		"referent":    strings.Join(proofRequestReferents, ","),
 	}
-	err := c.get(fmt.Sprintf("%s/present-proof/records/%s", c.ACApyURL, presentationExchangeID), queryParams, &result)
+	err := c.get(fmt.Sprintf("%s/present-proof/records/%s/credentials", c.ACApyURL, presentationExchangeID), queryParams, &result)
 	if err != nil {
 		return nil, err
 	}
