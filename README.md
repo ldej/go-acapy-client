@@ -101,11 +101,11 @@ TODO
 | Function Name          | Method | Endpoint                                     | Implemented        |
 | ---------------------- | ------ | -------------------------------------------- | ------------------ |
 | QueryConnections       | GET    | /connections                                 | :heavy_check_mark: |
+| CreateInvitation       | POST   | /connections/create-invitation               | :heavy_check_mark: |
+| CreateStaticConnection | POST   | /connections/create-static                   | :exclamation:      |
+| ReceiveInvitation      | POST   | /connections/receive-invitation              | :heavy_check_mark: |
 | GetConnection          | GET    | /connections/{id}                            | :heavy_check_mark: |
 | RemoveConnection       | DELETE | /connections/{id}                            | :heavy_check_mark: |
-| CreateStaticConnection | POST   | /connections/create-static                   | :exclamation:      |
-| CreateInvitation       | POST   | /connections/create-invitation               | :heavy_check_mark: |
-| ReceiveInvitation      | POST   | /connections/receive-invitation              | :heavy_check_mark: |
 | AcceptInvitation       | POST   | /connections/{id}/accept-invitation          | :heavy_check_mark: |
 | AcceptRequest          | POST   | /connections/{id}/accept-request             | :heavy_check_mark: |
 | -                      | POST   | /connections/{id}/establish-inbound/{ref_id} | :exclamation:      |
@@ -126,10 +126,10 @@ TODO
 
 | Function Name       | Method | Endpoint                    | Implemented        |
 | ------------------- | ------ | --------------------------- | ------------------ |
+| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
+| IsCredentialRevoked | GET    | /credential/revoked/{id}    | :heavy_check_mark: |
 | GetCredential       | GET    | /credential/{id}            | :heavy_check_mark: |
 | RemoveCredential    | DELETE | /credential/{id}            | :heavy_check_mark: |
-| IsCredentialRevoked | GET    | /credential/revoked/{id}    | :heavy_check_mark: |
-| CredentialMimeTypes | GET    | /credential/mime-types/{id} | :heavy_check_mark: |
 | GetCredentials      | GET    | /credentials                | :heavy_check_mark: |
 
 ### Introduction
@@ -146,26 +146,37 @@ TODO
 
 | Function Name                   | Method | Endpoint                                      | Implemented        |
 | ------------------------------- | ------ | --------------------------------------------- | ------------------ |
+| CreateCredentialExchange        | POST   | /issue-credential/create                      | :heavy_check_mark: |
 | QueryCredentialExchange         | GET    | /issue-credential/records                     | :heavy_check_mark: |
 | GetCredentialExchange           | GET    | /issue-credential/records/{id}                | :heavy_check_mark: |
 | RemoveCredentialExchange        | DELETE | /issue-credential/records/{id}                | :heavy_check_mark: |
-| CreateCredentialExchange        | POST   | /issue-credential/create                      | :heavy_check_mark: |
-| SendCredential                  | POST   | /issue-credential/send                        | :heavy_check_mark: |
-| SendCredentialProposal          | POST   | /issue-credential/send-proposal               | :heavy_check_mark: |
-| SendCredentialOffer             | POST   | /issue-credential/send-offer                  | :heavy_check_mark: |
+| IssueCredentialByID             | POST   | /issue-credential/records/{id}/issue          | :heavy_check_mark: |
+| ReportCredentialExchangeProblem | POST   | /issue-credential/records/{id}/problem-report | :heavy_check_mark: |
 | SendCredentialOfferByID         | POST   | /issue-credential/records/{id}/send-offer     | :heavy_check_mark: |
 | SendCredentialRequestByID       | POST   | /issue-credential/records/{id}/send-request   | :heavy_check_mark: |
-| IssueCredentialByID             | POST   | /issue-credential/records/{id}/issue          | :heavy_check_mark: |
 | StoreReceivedCredential         | POST   | /issue-credential/records/{id}/store          | :heavy_check_mark: |
-| ReportCredentialExchangeProblem | POST   | /issue-credential/records/{id}/problem-report | :heavy_check_mark: |
+| SendCredential                  | POST   | /issue-credential/send                        | :heavy_check_mark: |
+| SendCredentialOffer             | POST   | /issue-credential/send-offer                  | :heavy_check_mark: |
+| SendCredentialProposal          | POST   | /issue-credential/send-proposal               | :heavy_check_mark: |
 
 ### Ledger
 
-TODO
+| Function Name            | Method | Endpoint                          | Implemented        |
+| ------------------------ | ------ | --------------------------------- | ------------------ |
+| GetDIDEndpointFromLedger | GET    | /ledger/did-endpoint              | :heavy_check_mark: |
+| GetDIDVerkeyFromLedger   | GET    | /ledger/did-verkey                | :heavy_check_mark: |
+| GetDIDRoleFromLedger     | GET    | /ledger/get-nym-role              | :heavy_check_mark: |
+| -                        | POST   | /ledger/register-nym              | :exclamation:      |
+| -                        | PATCH  | /ledger/rotate-public-did-keypair | :exclamation:      |
+| -                        | GET    | /ledger/taa                       | :exclamation:      |
+| -                        | POST   | /ledger/taa/accept                | :exclamation:      |
 
 ### Out-of-Band
 
-TODO
+| Function Name | Method | Endpoint                         | Implemented   |
+| ------------- | ------ | -------------------------------- | ------------- |
+| -             | POST   | /out-of-band/create-invitation   | :exclamation: |
+| -             | POST   | /out-of-band/received-invitation | :exclamation: |
 
 ### Present Proof
 
@@ -237,17 +248,17 @@ TODO
 
 ### Wallet
 
-| Function Name  | Method | Endpoint                         | Implemented        |
-| -------------- | ------ | -------------------------------- | ------------------ |
-| QueryDIDs      | GET    | /wallet/did                      | :heavy_check_mark: |
-| CreateLocalDID | POST   | /wallet/did/create               | :heavy_check_mark: |
-| GetPublicDID   | GET    | /wallet/did/public               | :heavy_check_mark: |
-| SetPublicDID   | POST   | /wallet/did/public               | :heavy_check_mark: |
-| SetDIDEndpoint | POST   | /wallet/set-public-did           | :heavy_check_mark: |
-| GetDIDEndpoint | GET    | /wallet/get-public-did           | :heavy_check_mark: |
-| RotateKeypair  | PATCH  | /wallet/did/local/rotate-keypair | :heavy_check_mark: |
+| Function Name            | Method | Endpoint                         | Implemented        |
+| ------------------------ | ------ | -------------------------------- | ------------------ |
+| QueryDIDs                | GET    | /wallet/did                      | :heavy_check_mark: |
+| CreateLocalDID           | POST   | /wallet/did/create               | :heavy_check_mark: |
+| GetPublicDID             | GET    | /wallet/did/public               | :heavy_check_mark: |
+| SetPublicDID             | POST   | /wallet/did/public               | :heavy_check_mark: |
+| SetDIDEndpointInWallet   | POST   | /wallet/set-public-did           | :heavy_check_mark: |
+| GetDIDEndpointFromWallet | GET    | /wallet/get-public-did           | :heavy_check_mark: |
+| RotateKeypair            | PATCH  | /wallet/did/local/rotate-keypair | :heavy_check_mark: |
 
-### JSON-LD (unlisted)
+### JSON-LD (unlisted in Swagger)
 
 | Function Name | Method | Endpoint       | Implemented   |
 | ------------- | ------ | -------------- | ------------- |

@@ -64,7 +64,7 @@ func (c *Client) SetPublicDID(did string) (DID, error) {
 	return r.DID, nil
 }
 
-func (c *Client) SetDIDEndpoint(did string, endpoint string, endpointType string) error {
+func (c *Client) SetDIDEndpointInWallet(did string, endpoint string, endpointType string) error {
 	var setDIDEndpointRequest = struct {
 		DID          string `json:"did"`
 		Endpoint     string `json:"endpoint"`
@@ -77,7 +77,7 @@ func (c *Client) SetDIDEndpoint(did string, endpoint string, endpointType string
 	return c.post(fmt.Sprintf("%s/wallet/set-did-endpoint", c.ACApyURL), nil, setDIDEndpointRequest, nil)
 }
 
-func (c *Client) GetDIDEndpoint(did string) (string, error) {
+func (c *Client) GetDIDEndpointFromWallet(did string) (string, error) {
 	var r = struct {
 		DID      string `json:"did"`
 		Endpoint string `json:"endpoint"`
