@@ -159,7 +159,7 @@ func (app *App) ReadCommands() {
 				Trace:               false,
 			}
 			presentationExchange, err := app.client.SendPresentationProposal(proposal)
-			if err != nil {
+			if err == nil {
 				app.presentationExchange = presentationExchange
 			}
 		case "7":
@@ -198,7 +198,7 @@ func (app *App) ReadCommands() {
 			}
 
 			presentationExchange, err := app.client.SendPresentationRequestByID(app.presentationExchange.PresentationExchangeID, request)
-			if err != nil {
+			if err == nil {
 				app.presentationExchange = presentationExchange
 			}
 		case "8":
@@ -230,16 +230,13 @@ func (app *App) ReadCommands() {
 				SelfAttestedAttributes: map[string]string{},
 			}
 
-			j, _ := json.MarshalIndent(proof, "", "  ")
-			fmt.Println(string(j))
-
 			presentationExchange, err := app.client.SendPresentationByID(app.presentationExchange.PresentationExchangeID, proof)
-			if err != nil {
+			if err == nil {
 				app.presentationExchange = presentationExchange
 			}
 		case "9":
 			presentationExchange, err := app.client.VerifyPresentationByID(app.presentationExchange.PresentationExchangeID)
-			if err != nil {
+			if err == nil {
 				app.presentationExchange = presentationExchange
 			}
 		case "10":
@@ -248,7 +245,7 @@ func (app *App) ReadCommands() {
 				log.Println("Err: %v", err)
 			}
 			for _, credential := range credentials {
-				fmt.Printf("Credential %s: %+v", credential.CredentialInfo.Referent, credential.CredentialInfo.Attrs)
+				fmt.Printf("Credential %s: %+v\n", credential.CredentialInfo.Referent, credential.CredentialInfo.Attrs)
 			}
 		}
 	}
@@ -330,7 +327,7 @@ func (app *App) Exit() {
 func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	if event.Alias == "" {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
-		event.Alias = connection.Alias
+		event.Alias = connection.TheirLabel
 	}
 	app.connection = event
 	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
@@ -338,13 +335,13 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 
 func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
-	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.Alias, event.ConnectionID, event.Content)
+	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.TheirLabel, event.ConnectionID, event.Content)
 }
 
 func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	app.credentialExchange = event
-	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.Alias, event.State)
+	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.TheirLabel, event.State)
 }
 
 func (app *App) RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
@@ -359,7 +356,7 @@ func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 func (app *App) PresentationExchangeEventHandler(event acapy.PresentationExchange) {
 	app.presentationExchange = event
 	connection, _ := app.client.GetConnection(event.ConnectionID)
-	fmt.Printf("\n -> Presentation Exchange update: %s - %s - %s\n", connection.Alias, event.PresentationExchangeID, event.State)
+	fmt.Printf("\n -> Presentation Exchange update: %s - %s - %s\n", connection.TheirLabel, event.PresentationExchangeID, event.State)
 }
 
 func main() {

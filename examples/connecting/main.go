@@ -98,7 +98,7 @@ func (app *App) ReadCommands() {
 		case "8":
 			connections, _ := app.QueryConnections(acapy.QueryConnectionsParams{})
 			for _, connection := range connections {
-				fmt.Printf("%s - %s - %s - %s\n", connection.Alias, connection.ConnectionID, connection.State, connection.TheirDID)
+				fmt.Printf("%s - %s - %s - %s\n", connection.TheirLabel, connection.ConnectionID, connection.State, connection.TheirDID)
 			}
 		}
 	}
@@ -166,17 +166,16 @@ func (app *App) Exit() {
 }
 
 func (app *App) ConnectionsEventHandler(event acapy.Connection) {
-	alias := event.Alias
-	if alias == "" {
+	if event.Alias == "" {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
-		alias = connection.Alias
+		event.Alias = connection.TheirLabel
 	}
-	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", alias, event.ConnectionID, event.State)
+	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
 }
 
 func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
-	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.Alias, event.ConnectionID, event.Content)
+	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.TheirLabel, event.ConnectionID, event.Content)
 }
 
 func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
