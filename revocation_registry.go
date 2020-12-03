@@ -187,7 +187,7 @@ type PendingRevocations map[string][]string
 // PublishRevocations
 // Pass nil in case you want to publish all pending revocations
 func (c *Client) PublishRevocations(revocations PendingRevocations) error {
-	var body = struct{
+	var body = struct {
 		Body PendingRevocations `json:"rrid2crid"`
 	}{
 		Body: revocations,
@@ -198,14 +198,15 @@ func (c *Client) PublishRevocations(revocations PendingRevocations) error {
 // ClearPendingRevocations
 // Pass nil in case you want to clear all pending revocations
 func (c *Client) ClearPendingRevocations(revocations PendingRevocations) (PendingRevocations, error) {
-	var result = struct{
+	var result = struct {
 		Result PendingRevocations `json:"rrid2crid"`
 	}{}
-	var body = struct{
+	var body = struct {
 		Body map[string][]string `json:"purge"`
 	}{
 		Body: revocations,
 	}
+
 	err := c.post("/revocation/clear-pending-revocations", nil, body, &result)
 	if err != nil {
 		return nil, err
@@ -219,5 +220,6 @@ func (c *Client) GetCredentialRevocationStatus(credentialExchangeID string, cred
 }
 
 func (c *Client) GetNumberOfIssuedCredentials(revocationRegistryID string) (int, error) {
+	// TODO
 	return 0, nil
 }

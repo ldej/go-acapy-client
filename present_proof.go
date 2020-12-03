@@ -27,7 +27,7 @@ type PresentationExchange struct {
 
 type PresentationProposalMap struct {
 	Type                 string              `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/present-proof/1.0/propose-presentation
-	ID                   string              `json:"@id"`   // thread id
+	ThreadID             string              `json:"@id"`
 	Comment              string              `json:"comment"`
 	PresentationProposal PresentationPreview `json:"presentation_proposal"`
 }
@@ -130,11 +130,20 @@ type PresentationAttribute struct {
 	Referent               string `json:"referent"`
 }
 
+type PredicateType string
+
+const (
+	PredicateLT  PredicateType = "<"
+	PredicateLET PredicateType = "<="
+	PredicateGT  PredicateType = ">"
+	PredicateGET PredicateType = ">="
+)
+
 type Predicate struct {
-	Name                   string `json:"name"`
-	CredentialDefinitionID string `json:"cred_def_id"`
-	Predicate              string `json:"predicate"`
-	Threshold              int    `json:"threshold"`
+	Name                   string        `json:"name"`
+	CredentialDefinitionID string        `json:"cred_def_id"`
+	Predicate              PredicateType `json:"predicate"`
+	Threshold              int           `json:"threshold"`
 }
 
 type PresentationPreview struct {
@@ -225,11 +234,31 @@ type PresentationProofPredicate struct {
 	CredentialID string `json:"cred_id"` // referent?
 }
 
-// TODO Create constructor to prevent nils
+func NewPresentationProof(
+	requestedAttributes map[string]PresentationProofAttribute,
+	requestedPredicates map[string]PresentationProofPredicate,
+	selfAttestedAttributes map[string]string,
+) PresentationProof {
+	if requestedAttributes == nil {
+		requestedAttributes = map[string]PresentationProofAttribute{}
+	}
+	if requestedPredicates == nil {
+		requestedPredicates = map[string]PresentationProofPredicate{}
+	}
+	if selfAttestedAttributes == nil {
+		selfAttestedAttributes = map[string]string{}
+	}
+	return PresentationProof{
+		RequestedAttributes:    requestedAttributes,
+		RequestedPredicates:    requestedPredicates,
+		SelfAttestedAttributes: selfAttestedAttributes,
+	}
+}
+
 type PresentationProof struct {
-	RequestedAttributes    map[string]PresentationProofAttribute `json:"requested_attributes"`     // TODO Cannot be nil
-	RequestedPredicates    map[string]PresentationProofPredicate `json:"requested_predicates"`     // TODO Cannot be nil
-	SelfAttestedAttributes map[string]string                     `json:"self_attested_attributes"` // TODO Cannot be nil
+	RequestedAttributes    map[string]PresentationProofAttribute `json:"requested_attributes"`
+	RequestedPredicates    map[string]PresentationProofPredicate `json:"requested_predicates"`
+	SelfAttestedAttributes map[string]string                     `json:"self_attested_attributes"`
 	Trace                  bool                                  `json:"trace"`
 }
 

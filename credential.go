@@ -6,7 +6,7 @@ import (
 )
 
 type Credential struct {
-	Referent               string            `json:"referent"` // ??
+	Referent               string            `json:"referent"` // Also know as CredentialID
 	CredentialDefinitionID string            `json:"cred_def_id"`
 	CredentialRevokeID     string            `json:"cred_rev_id"`
 	SchemaID               string            `json:"schema_id"`

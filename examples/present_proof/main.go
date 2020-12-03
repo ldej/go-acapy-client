@@ -27,20 +27,20 @@ type App struct {
 	label  string
 	seed   string
 	rand   string
-	myDID string
+	myDID  string
 
-	connection acapy.Connection
-	schema acapy.Schema
+	connection             acapy.Connection
+	schema                 acapy.Schema
 	credentialDefinitionID string
-	credentialExchange acapy.CredentialExchange
-	presentationExchange acapy.PresentationExchange
-	revocationRegistry acapy.RevocationRegistry
+	credentialExchange     acapy.CredentialExchange
+	presentationExchange   acapy.PresentationExchange
+	revocationRegistry     acapy.RevocationRegistry
 }
 
 func (app *App) ReadCommands() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	didResponse, _ := app.RegisterDID(app.label, app.label + app.rand)
+	didResponse, _ := app.RegisterDID(app.label, app.label+app.rand)
 	app.myDID = didResponse.DID
 	fmt.Printf("Hi %s, your registered DID is %s\n", app.label, didResponse.DID)
 
@@ -106,13 +106,13 @@ func (app *App) ReadCommands() {
 			attributes := []acapy.CredentialPreviewAttribute{}
 
 			for _, attr := range app.schema.AttributeNames {
-				fmt.Printf("Attribute %q value: ", attr)
+				fmt.Printf("Attribute %q value: \n", attr)
 				scanner.Scan()
 				value := scanner.Text()
 				attributes = append(attributes, acapy.CredentialPreviewAttribute{
-					Name: attr,
+					Name:     attr,
 					MimeType: "text/plain",
-					Value: value,
+					Value:    value,
 				})
 			}
 
@@ -121,16 +121,16 @@ func (app *App) ReadCommands() {
 				ConnectionID:           app.connection.ConnectionID,
 				IssuerDID:              app.myDID,
 				Comment:                comment,
-				CredentialPreview:      acapy.CredentialPreview{
-					Type: "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+				CredentialPreview: acapy.CredentialPreview{
+					Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
 					Attributes: attributes,
 				},
-				SchemaName:             app.schema.Name,
-				SchemaVersion:          app.schema.Version,
-				SchemaID:               app.schema.ID,
-				SchemaIssuerDID:        app.myDID,
-				Trace:                  false,
-				AutoRemove:             false,
+				SchemaName:      app.schema.Name,
+				SchemaVersion:   app.schema.Version,
+				SchemaID:        app.schema.ID,
+				SchemaIssuerDID: app.myDID,
+				Trace:           false,
+				AutoRemove:      false,
 			}
 			app.credentialExchange, _ = app.client.SendCredential(credentialSendRequest)
 		case "6":
@@ -138,7 +138,7 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			comment := scanner.Text()
 
-			attributes := []acapy.PresentationAttribute{}
+			var attributes []acapy.PresentationAttribute
 
 			mimeTypes, _ := app.client.CredentialMimeTypes(app.credentialExchange.Credential.Referent)
 			for attrName, attrValue := range app.credentialExchange.Credential.Attributes {
@@ -150,7 +150,7 @@ func (app *App) ReadCommands() {
 					Referent:               app.credentialExchange.Credential.Referent,
 				})
 			}
-			
+
 			proposal := acapy.PresentationProposalRequest{
 				Comment:             comment,
 				AutoPresent:         false,
@@ -173,9 +173,9 @@ func (app *App) ReadCommands() {
 				requestedAttributes[attr.Name] = acapy.RequestedAttribute{
 					Restrictions: []map[string]string{},
 					Name:         attr.Name,
-					NonRevoked:   acapy.NonRevoked{
-						From: time.Now().Add(-time.Hour*24*7).Unix(),
-						To: time.Now().Unix(),
+					NonRevoked: acapy.NonRevoked{
+						From: time.Now().Add(-time.Hour * 24 * 7).Unix(),
+						To:   time.Now().Unix(),
 					},
 				}
 			}
@@ -189,10 +189,10 @@ func (app *App) ReadCommands() {
 					RequestedAttributes: requestedAttributes,
 					RequestedPredicates: map[string]acapy.RequestedPredicate{},
 					Version:             "1.0",
-					Nonce: 				 "1234567890",
-					NonRevoked:          acapy.NonRevoked{
-						From: time.Now().Add(-time.Hour*24*7).Unix(),
-						To: time.Now().Unix(),
+					Nonce:               "1234567890",
+					NonRevoked: acapy.NonRevoked{
+						From: time.Now().Add(-time.Hour * 24 * 7).Unix(),
+						To:   time.Now().Unix(),
 					},
 				},
 			}
@@ -224,11 +224,7 @@ func (app *App) ReadCommands() {
 				}
 			}
 
-			proof := acapy.PresentationProof{
-				RequestedAttributes: requestedAttributes,
-				RequestedPredicates: map[string]acapy.PresentationProofPredicate{},
-				SelfAttestedAttributes: map[string]string{},
-			}
+			proof := acapy.NewPresentationProof(requestedAttributes, nil, nil)
 
 			presentationExchange, err := app.client.SendPresentationByID(app.presentationExchange.PresentationExchangeID, proof)
 			if err == nil {
@@ -374,7 +370,7 @@ func main() {
 	app := App{
 		client: acapy.NewClient(ledgerURL, tailsServerURL, acapyURL),
 		port:   port,
-		label: name,
+		label:  name,
 		rand:   strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}
 	app.StartWebserver()

@@ -1,9 +1,5 @@
 package acapy
 
-import (
-	"fmt"
-)
-
 func (c *Client) Plugins() ([]string, error) {
 	var result = struct {
 		Result []string `json:"result"`
