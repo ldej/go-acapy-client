@@ -365,13 +365,17 @@ type PresentationCredential struct {
 	PresentationReferents []string `json:"presentation_referents"`
 }
 
-func (c *Client) GetPresentationCredentialsByID(presentationExchangeID string, count int, extraQuery string, proofRequestReferents []string, start int) ([]PresentationCredential, error) {
+func (c *Client) GetPresentationCredentialsByID(presentationExchangeID string, count int, wql string, proofRequestReferents []string, start int) ([]PresentationCredential, error) {
 	var result []PresentationCredential
 	queryParams := map[string]string{
-		"count":       strconv.Itoa(count),
-		"extra_query": extraQuery,
-		"start":       strconv.Itoa(start),
+		"extra_query": wql,
 		"referent":    strings.Join(proofRequestReferents, ","),
+	}
+	if count > 0 {
+		queryParams["count"] = strconv.Itoa(count)
+	}
+	if start > 0 {
+		queryParams["start"] = strconv.Itoa(start)
 	}
 	err := c.get(fmt.Sprintf("/present-proof/records/%s/credentials", presentationExchangeID), queryParams, &result)
 	if err != nil {

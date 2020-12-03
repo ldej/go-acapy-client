@@ -14,6 +14,8 @@ type Credential struct {
 	Attributes             map[string]string `json:"attrs"`
 }
 
+// wql: https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-5-issue-credentials#wql-some-query-language
+// https://github.com/hyperledger/aries-cloudagent-python/blob/master/aries_cloudagent/storage/basic.py#L135
 func (c *Client) GetCredentials(max int, index int, wql string) ([]Credential, error) {
 	var results struct {
 		Credentials []Credential `json:"results"`
@@ -40,7 +42,7 @@ func (c *Client) GetCredential(credentialID string) (Credential, error) {
 }
 
 func (c *Client) IsCredentialRevoked(credentialID string) (bool, error) {
-	var result = struct{
+	var result = struct {
 		Revoked bool `json:"revoked"`
 	}{}
 	err := c.get(fmt.Sprintf("/credential/revoked/%s", credentialID), nil, &result)

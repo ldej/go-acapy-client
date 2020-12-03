@@ -70,7 +70,10 @@ func (app *App) ReadCommands() {
 			fmt.Print("Alias: ")
 			scanner.Scan()
 			alias := scanner.Text()
-			invitationResponse, _ := app.client.CreateInvitation(alias, true, false, true)
+			invitationResponse, err := app.client.CreateInvitation(alias, true, false, true)
+			if err != nil {
+				log.Fatal(err)
+			}
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
 		case "2":
@@ -236,7 +239,7 @@ func (app *App) ReadCommands() {
 				app.presentationExchange = presentationExchange
 			}
 		case "10":
-			credentials, err := app.client.GetPresentationCredentialsByID(app.presentationExchange.PresentationExchangeID, 10, "", nil, 0)
+			credentials, err := app.client.GetPresentationCredentialsByID(app.presentationExchange.PresentationExchangeID, 0, "", nil, 0)
 			if err != nil {
 				log.Println("Err: %v", err)
 			}
@@ -384,6 +387,7 @@ func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDRespons
 		"ENDORSER", // TODO
 	)
 	if err != nil {
+		log.Fatal(err)
 		return acapy.RegisterDIDResponse{}, err
 	}
 	app.label = alias

@@ -30,7 +30,7 @@ func (c *Client) post(path string, queryParam map[string]string, body interface{
 }
 
 func (c *Client) post_ledger(path string, queryParam map[string]string, body interface{}, response interface{}) error {
-	return c.request(http.MethodPost, path, queryParam, body, response)
+	return c.request(http.MethodPost, c.LedgerURL+path, queryParam, body, response)
 }
 
 func (c *Client) get(path string, queryParams map[string]string, response interface{}) error {
