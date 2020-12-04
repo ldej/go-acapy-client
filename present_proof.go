@@ -1,6 +1,7 @@
 package acapy
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -134,9 +135,9 @@ type PredicateType string
 
 const (
 	PredicateLT  PredicateType = "<"
-	PredicateLET PredicateType = "<="
+	PredicateLTE PredicateType = "<="
 	PredicateGT  PredicateType = ">"
-	PredicateGET PredicateType = ">="
+	PredicateGTE PredicateType = ">="
 )
 
 type Predicate struct {
@@ -186,41 +187,131 @@ type NonRevoked struct {
 	To   int64 `json:"to"`
 }
 
-type PredicateRestrictions struct {
-	SchemaVersion          string `json:"schema_version"`
-	CredentialDefinitionID string `json:"cred_def_id"`
-	SchemaName             string `json:"schema_name"`
-	SchemaIssuerDID        string `json:"schema_issuer_did"`
-	IssuerDID              string `json:"issuer_did"`
-	SchemaID               string `json:"schema_id"`
+type Restrictions struct {
+	SchemaVersion          string `json:"schema_version,omitempty"`
+	CredentialDefinitionID string `json:"cred_def_id,omitempty"`
+	SchemaName             string `json:"schema_name,omitempty"`
+	SchemaIssuerDID        string `json:"schema_issuer_did,omitempty"`
+	IssuerDID              string `json:"issuer_did,omitempty"`
+	SchemaID               string `json:"schema_id,omitempty"`
+	// TODO support `{"attr::attr1::value": "<some-value>"}`
 }
 
-// TODO constructor
+func (r Restrictions) IsEmpty() bool {
+	return r.SchemaVersion == "" &&
+		r.CredentialDefinitionID == "" &&
+		r.SchemaName == "" &&
+		r.SchemaIssuerDID == "" &&
+		r.IssuerDID == "" &&
+		r.SchemaID == ""
+}
+
+func NewRequestedPredicate(
+	restrictions *Restrictions,
+	name string,
+	names []string,
+	ptype PredicateType,
+	pvalue int,
+	nonRevoked NonRevoked,
+) (RequestedPredicate, error) {
+
+	restrictionsSlice := make([]Restrictions, 0)
+
+	if name != "" && len(names) > 0 {
+		return RequestedPredicate{}, errors.New("use either 'name' or 'names', but not both")
+	}
+	if len(names) > 0 {
+		if restrictions == nil || restrictions.IsEmpty() {
+			return RequestedPredicate{}, errors.New("restrictions cannot be empty when using 'names'")
+		}
+		restrictionsSlice = append(restrictionsSlice, *restrictions)
+	}
+
+	return RequestedPredicate{
+		Restrictions: restrictionsSlice,
+		Name:         name,
+		Names:        names,
+		PType:        ptype,
+		PValue:       pvalue,
+		NonRevoked:   nonRevoked,
+	}, nil
+}
+
 type RequestedPredicate struct {
-	Restrictions PredicateRestrictions `json:"restrictions"`
-	Name         string                `json:"name,omitempty"`  // XOR with Names
-	Names        []string              `json:"names,omitempty"` // XOR with Name | Requires non-empty restrictions
-	PType        string                `json:"p_type"`
-	PValue       int                   `json:"p_value"`
-	NonRevoked   NonRevoked            `json:"non_revoked"`
+	Restrictions []Restrictions `json:"restrictions"`    // Required when using Names, otherwise empty slice instead of nil
+	Name         string         `json:"name,omitempty"`  // XOR with Names
+	Names        []string       `json:"names,omitempty"` // XOR with Name | Requires non-empty restrictions
+	PType        PredicateType  `json:"p_type"`
+	PValue       int            `json:"p_value"`
+	NonRevoked   NonRevoked     `json:"non_revoked"` // Optional
 }
 
-// TODO constructor
+func NewRequestedAttribute(
+	restrictions *Restrictions,
+	name string,
+	names []string,
+	nonRevoked NonRevoked,
+) (RequestedAttribute, error) {
+
+	restrictionsSlice := make([]Restrictions, 0)
+
+	if name != "" && len(names) > 0 {
+		return RequestedAttribute{}, errors.New("use either 'name' or 'names', but not both")
+	}
+	if len(names) > 0 {
+		if restrictions == nil || restrictions.IsEmpty() {
+			return RequestedAttribute{}, errors.New("restrictions cannot be empty when using 'names'")
+		}
+		restrictionsSlice = append(restrictionsSlice, *restrictions)
+	}
+
+	return RequestedAttribute{
+		Restrictions: restrictionsSlice,
+		Name:         name,
+		Names:        names,
+		NonRevoked:   nonRevoked,
+	}, nil
+}
+
 type RequestedAttribute struct {
-	Restrictions []map[string]string `json:"restrictions"`    // valid key: cred_def_id
-	Name         string              `json:"name,omitempty"`  // XOR with Names
-	Names        []string            `json:"names,omitempty"` // XOR with Name | Requires non-empty restrictions
-	NonRevoked   NonRevoked          `json:"non_revoked"`
+	Restrictions []Restrictions `json:"restrictions"`    // Required when using Names, otherwise empty slice instead of nil
+	Name         string         `json:"name,omitempty"`  // XOR with Names
+	Names        []string       `json:"names,omitempty"` // XOR with Name | Requires non-empty restrictions
+	NonRevoked   NonRevoked     `json:"non_revoked"`     // Optional
 }
 
-// TODO constructor
+func NewProofRequest(
+	name string,
+	nonce string,
+	requestedPredicates map[string]RequestedPredicate,
+	requestedAttributes map[string]RequestedAttribute,
+	version string,
+	nonRevoked *NonRevoked,
+) ProofRequest {
+
+	if requestedPredicates == nil {
+		requestedPredicates = map[string]RequestedPredicate{}
+	}
+	if requestedAttributes == nil {
+		requestedAttributes = map[string]RequestedAttribute{}
+	}
+	return ProofRequest{
+		Name:                name,
+		Nonce:               nonce,
+		RequestedPredicates: requestedPredicates,
+		RequestedAttributes: requestedAttributes,
+		Version:             version,
+		NonRevoked:          nonRevoked,
+	}
+}
+
 type ProofRequest struct {
 	Name                string                        `json:"name"`
-	Nonce               string                        `json:"nonce"`
-	RequestedPredicates map[string]RequestedPredicate `json:"requested_predicates"` // TODO cannot be nil
-	RequestedAttributes map[string]RequestedAttribute `json:"requested_attributes"` // TODO cannot be nil
+	Nonce               string                        `json:"nonce"`                // TODO what is this nonce
+	RequestedPredicates map[string]RequestedPredicate `json:"requested_predicates"` // cannot be nil
+	RequestedAttributes map[string]RequestedAttribute `json:"requested_attributes"` // cannot be nil
 	Version             string                        `json:"version"`
-	NonRevoked          NonRevoked                    `json:"non_revoked"`
+	NonRevoked          *NonRevoked                   `json:"non_revoked,omitempty"`
 }
 
 type PresentationProofAttribute struct {

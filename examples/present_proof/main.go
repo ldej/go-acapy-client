@@ -173,31 +173,33 @@ func (app *App) ReadCommands() {
 			requestedAttributes := map[string]acapy.RequestedAttribute{}
 
 			for _, attr := range app.presentationExchange.PresentationProposalDict.PresentationProposal.Attributes {
-				requestedAttributes[attr.Name] = acapy.RequestedAttribute{
-					Restrictions: []map[string]string{},
-					Name:         attr.Name,
-					NonRevoked: acapy.NonRevoked{
+				requestedAttribute, _ := acapy.NewRequestedAttribute(
+					nil,
+					attr.Name,
+					nil,
+					acapy.NonRevoked{
 						From: time.Now().Add(-time.Hour * 24 * 7).Unix(),
 						To:   time.Now().Unix(),
 					},
-				}
+				)
+				requestedAttributes[attr.Name] = requestedAttribute
 			}
 
 			request := acapy.PresentationRequestRequest{
 				Trace:        false,
 				Comment:      comment,
 				ConnectionID: app.connection.ConnectionID,
-				ProofRequest: acapy.ProofRequest{
-					Name:                "Proof request",
-					RequestedAttributes: requestedAttributes,
-					RequestedPredicates: map[string]acapy.RequestedPredicate{},
-					Version:             "1.0",
-					Nonce:               "1234567890",
-					NonRevoked: acapy.NonRevoked{
+				ProofRequest: acapy.NewProofRequest(
+					"Proof request",
+					"1234567890",
+					nil,
+					requestedAttributes,
+					"1.0",
+					&acapy.NonRevoked{
 						From: time.Now().Add(-time.Hour * 24 * 7).Unix(),
 						To:   time.Now().Unix(),
 					},
-				},
+				),
 			}
 
 			presentationExchange, err := app.client.SendPresentationRequestByID(app.presentationExchange.PresentationExchangeID, request)
@@ -211,7 +213,8 @@ func (app *App) ReadCommands() {
 			credentials, _ := app.client.GetCredentials(10, 0, "")
 
 			for attrName, attr := range app.presentationExchange.PresentationRequest.RequestedAttributes {
-				credentialDefinitionID := attr.Restrictions[0]["cred_def_id"]
+				credentialDefinitionID := attr.Restrictions[0].CredentialDefinitionID
+
 				var referent string
 				for _, credential := range credentials {
 					if credential.CredentialDefinitionID == credentialDefinitionID && credential.Attributes[attr.Names[0]] != "" {
