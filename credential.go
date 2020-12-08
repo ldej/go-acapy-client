@@ -1,6 +1,7 @@
 package acapy
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 )
@@ -63,4 +64,45 @@ func (c *Client) CredentialMimeTypes(credentialID string) (map[string]string, er
 
 func (c *Client) RemoveCredential(credentialID string) error {
 	return c.delete(fmt.Sprintf("/credential/%s", credentialID))
+}
+
+func (c *Client) FindMatchingCredentials(request PresentationRequest) (map[string]PresentationProofAttribute, error) {
+
+	requestedAttributes := map[string]PresentationProofAttribute{}
+
+	for attrName, attr := range request.RequestedAttributes {
+		restrictions, err := json.Marshal(attr.Restrictions[0])
+		if err != nil {
+			return nil, err
+		}
+		credentials, err := c.GetCredentials(10, 0, string(restrictions))
+
+		if err != nil {
+			return nil, err
+		}
+
+		if len(credentials) == 0 {
+			return nil, fmt.Errorf("no credentials found for %s", attrName)
+		} else if len(credentials) > 1 {
+			return nil, fmt.Errorf("multiple credentials found for %s", attrName)
+		}
+
+		if containsAllAttributes(credentials[0], attr.Names) {
+			requestedAttributes[attrName] = PresentationProofAttribute{
+				Revealed: true,
+				//Timestamp:    time.Now().Unix(),
+				CredentialID: credentials[0].Referent,
+			}
+		}
+	}
+	return requestedAttributes, nil
+}
+
+func containsAllAttributes(credential Credential, attrs []string) bool {
+	for _, attr := range attrs {
+		if value, found := credential.Attributes[attr]; !found || value == "" {
+			return false
+		}
+	}
+	return true
 }

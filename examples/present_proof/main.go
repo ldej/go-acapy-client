@@ -135,7 +135,10 @@ func (app *App) ReadCommands() {
 				Trace:           false,
 				AutoRemove:      false,
 			}
-			app.credentialExchange, _ = app.client.SendCredential(credentialSendRequest)
+			credentialExchange, err := app.client.SendCredential(credentialSendRequest)
+			if err == nil {
+				app.credentialExchange = credentialExchange
+			}
 		case "6":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
@@ -196,8 +199,8 @@ func (app *App) ReadCommands() {
 					requestedAttributes,
 					"1.0",
 					&acapy.NonRevoked{
-						From: time.Now().Add(-time.Hour * 24 * 7).Unix(),
-						To:   time.Now().Unix(),
+						From: time.Now().Add(-time.Hour * 24 * 7).Unix(), // One week ago
+						To:   time.Now().Add(time.Hour * 24 * 7).Unix(),  // One week ahead
 					},
 				),
 			}
@@ -208,27 +211,7 @@ func (app *App) ReadCommands() {
 			}
 		case "8":
 			// What about the Revealed flag? -> in case of multiple credentials
-			requestedAttributes := map[string]acapy.PresentationProofAttribute{}
-
-			credentials, _ := app.client.GetCredentials(10, 0, "")
-
-			for attrName, attr := range app.presentationExchange.PresentationRequest.RequestedAttributes {
-				credentialDefinitionID := attr.Restrictions[0].CredentialDefinitionID
-
-				var referent string
-				for _, credential := range credentials {
-					if credential.CredentialDefinitionID == credentialDefinitionID && credential.Attributes[attr.Names[0]] != "" {
-						referent = credential.Referent
-						break
-					}
-				}
-
-				requestedAttributes[attrName] = acapy.PresentationProofAttribute{
-					Revealed:     true,
-					Timestamp:    time.Now().Unix(),
-					CredentialID: referent,
-				}
-			}
+			requestedAttributes, err := app.client.FindMatchingCredentials(app.presentationExchange.PresentationRequest)
 
 			proof := acapy.NewPresentationProof(requestedAttributes, nil, nil)
 
