@@ -216,6 +216,9 @@ func (app *App) StartWebserver() {
 		app.CredentialExchangeEventHandler,
 		nil,
 		nil,
+		nil,
+		nil,
+		nil,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)

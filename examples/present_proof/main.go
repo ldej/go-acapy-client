@@ -282,6 +282,9 @@ func (app *App) StartWebserver() {
 		app.CredentialExchangeEventHandler,
 		app.RevocationRegistryEventHandler,
 		app.PresentationExchangeEventHandler,
+		app.IssuerCredentialReceivedEventHandler,
+		nil,
+		nil,
 	)
 
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -343,6 +346,10 @@ func (app *App) PresentationExchangeEventHandler(event acapy.PresentationExchang
 	app.presentationExchange = event
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	fmt.Printf("\n -> Presentation Exchange update: %s - %s - %s\n", connection.TheirLabel, event.PresentationExchangeID, event.State)
+}
+
+func (app *App) IssuerCredentialReceivedEventHandler(event acapy.IssuerCredentialReceivedEvent) {
+	fmt.Printf("\n -> Issuer Credential Received: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
 }
 
 func main() {

@@ -141,6 +141,9 @@ func (app *App) StartWebserver() {
 		nil,
 		nil,
 		nil,
+		nil,
+		nil,
+		nil,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
