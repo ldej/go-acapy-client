@@ -42,7 +42,7 @@ func (c *Client) IsAlive() (bool, error) {
 	var result = struct {
 		Alive bool `json:"alive"`
 	}{}
-	err := c.get("/status/alive", nil, &result)
+	err := c.get("/status/live", nil, &result)
 	if err != nil {
 		return false, err
 	}
