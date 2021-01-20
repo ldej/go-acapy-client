@@ -240,6 +240,7 @@ func (app *App) StartACApy() {
 	id := strings.Replace(app.label+app.rand, " ", "_", -1)
 	cmd := exec.Command("aca-py",
 		"start",
+		"--auto-provision",
 		"-it", "http", "0.0.0.0", strconv.Itoa(app.port+1),
 		"-ot", "http",
 		"--admin", "0.0.0.0", strconv.Itoa(app.port+2),

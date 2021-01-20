@@ -37,21 +37,42 @@ func WebhookHandler(
 			var credentialExchangeEvent CredentialExchange
 			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
 			credentialExchangeEventHandler(credentialExchangeEvent)
+		case "issuer_cred_rev":
+			// TODO
+			// {
+			//		"created_at": "2021-01-20 10:20:31.317083Z",
+			//		"cred_def_id": "Vbs7XwP3vD1xc2JSCs4Hdx:3:CL:507:ForBob",
+			//		"cred_rev_id": "1",
+			//		"record_id": "a09c38fb-1daf-4923-a0c3-841b1696f6d1",
+			//		"rev_reg_id": "Vbs7XwP3vD1xc2JSCs4Hdx:4:Vbs7XwP3vD1xc2JSCs4Hdx:3:CL:507:ForBob:CL_ACCUM:cfadbbf9-30c0-4a81-b46c-e723c61af4a9",
+			//		"cred_ex_id": "b50b032f-9391-4e25-99b2-98cf45bb601d",
+			//		"state": "issued",
+			//		"updated_at": "2021-01-20 10:20:31.317083Z"
+			// }
 		case "revocation_registry":
 			var revocationRegistryEvent RevocationRegistry
 			json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
 			revocationRegistryEventHandler(revocationRegistryEvent)
-		case "oob-invitation":
+		case "oob_invitation":
 			// TODO
 		case "present_proof":
 			var presentationExchangeEvent PresentationExchange
 			json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
 			presentationExchangeEventHandler(presentationExchangeEvent)
+		case "ping":
+			// TODO
+			// {
+			//   "comment": context.message.comment,
+			//   "connection_id": context.message_receipt.connection_id,
+			//   "responded": context.message.response_requested,
+			//   "state": "received",
+			//   "thread_id": context.message._thread_id,
+			// }
 		default:
 			fmt.Printf("Topic not supported: %q\n", topic)
 			w.WriteHeader(404)
 			body, _ := ioutil.ReadAll(r.Body)
-			fmt.Printf(string(body))
+			fmt.Println(string(body))
 			return
 		}
 		w.WriteHeader(200)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -77,6 +78,12 @@ func (c *Client) request(method string, url string, queryParams map[string]strin
 
 	response, err := c.HTTPClient.Do(r)
 	if err != nil {
+		if response != nil {
+			log.Printf("Request failed: %s", response.Status)
+			if body, err := ioutil.ReadAll(response.Body); err != nil {
+				log.Printf("Response body: %s", body)
+			}
+		}
 		return err
 	}
 

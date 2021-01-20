@@ -4,6 +4,7 @@ type registerDIDRequest struct {
 	Alias string `json:"alias"`
 	Seed  string `json:"seed"`
 	Role  string `json:"role"`
+	DID   string `json:"did"`
 }
 
 type RegisterDIDResponse struct {
