@@ -96,10 +96,7 @@ func (app *App) ReadCommands() {
 			app.schema, _ = app.RegisterSchema(schemaName, version, attributes)
 			fmt.Printf("Schema: %+v\n", app.schema)
 		case "4":
-			fmt.Printf("Tag: ")
-			scanner.Scan()
-			tag := scanner.Text()
-			app.credentialDefinitionID, _ = app.client.CreateCredentialDefinition(tag, true, 10, app.schema.ID)
+			app.credentialDefinitionID, _ = app.client.CreateCredentialDefinition("tag", true, 10, app.schema.ID)
 			fmt.Printf("Credential Definition ID: %s\n", app.credentialDefinitionID)
 		case "5":
 			fmt.Printf("Comment: ")

@@ -21,82 +21,95 @@ import (
 )
 
 type App struct {
-	client *acapy.Client
-	server *http.Server
-	port   int
-	label  string
-	seed   string
-	rand   string
+	client       *acapy.Client
+	server       *http.Server
+	port         int
+	label        string
+	seed         string
+	rand         string
+	myDID        string
+	connectionID string
 }
 
 func (app *App) ReadCommands() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Printf("Your name: ")
-	scanner.Scan()
-	app.label = scanner.Text()
+	didResponse, err := app.RegisterDID(app.label, app.label+app.rand)
+	if err != nil {
+		app.Exit(err)
+	}
+	app.myDID = didResponse.DID
+	fmt.Printf("Hi %s, your registered DID is %s\n", app.label, didResponse.DID)
 
 	for {
-		fmt.Println(`Choose:
-	(1) Register DID and start ACA-py
-	(2) Register Schema
-	(3) Create invitation
-	(4) Receive invitation
-	(5) Accept invitation
-	(6) Accept request
-	(7) Send basic message
-	(8) Query connections
+		fmt.Println(`Options:
+	(1) Create invitation
+	(2) Receive invitation
+	(3) Accept invitation
+	(4) Accept request
+	(5) Send ping
+	(6) Send basic message
+	(7) Query connections
 	(exit) Exit
 `)
-		fmt.Print("Enter Command: ")
+		fmt.Print("Choose: ")
 		scanner.Scan()
 		command := scanner.Text()
 
 		switch command {
 		case "exit":
-			app.Exit()
+			app.Exit(nil)
 			return
 		case "1":
-			fmt.Print("Seed: ")
-			scanner.Scan()
-			seed := scanner.Text() + app.rand
-			didResponse, _ := app.RegisterDID(app.label, seed)
-			fmt.Printf("Registered DID: %s\n", didResponse.DID)
-		case "2":
-			app.RegisterSchema()
-		case "3":
-			fmt.Print("Alias: ")
-			scanner.Scan()
-			alias := scanner.Text()
-			invitationResponse, _ := app.CreateInvitation(alias, false, false, true)
+			invitationResponse, err := app.client.CreateOutOfBandInvitation(
+				acapy.CreateOutOfBandInvitationRequest{IncludeHandshake: true},
+				false,
+				false,
+			)
+			if err != nil {
+				app.Exit(err)
+			}
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
-		case "4":
+		case "2":
 			fmt.Print("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
-			connection, _ := app.ReceiveInvitation(invitation)
+			connection, err := app.ReceiveInvitation(invitation)
+			if err != nil {
+				app.Exit(err)
+			}
+			app.connectionID = connection.ConnectionID
 			fmt.Printf("Connection id: %s\n", connection.ConnectionID)
+		case "3":
+			_, err := app.client.DIDExchangeAcceptInvitation(app.connectionID, "", "")
+			if err != nil {
+				app.Exit(err)
+			}
+		case "4":
+			_, err := app.client.DIDExchangeAcceptRequest(app.connectionID, "")
+			if err != nil {
+				app.Exit(err)
+			}
 		case "5":
-			fmt.Print("Connection id: ")
-			scanner.Scan()
-			connectionID := scanner.Text()
-			_, _ = app.AcceptInvitation(connectionID)
+			_, err := app.client.SendPing(app.connectionID)
+			if err != nil {
+				app.Exit(err)
+			}
 		case "6":
-			fmt.Print("Connection id: ")
-			scanner.Scan()
-			connectionID := scanner.Text()
-			_, _ = app.AcceptRequest(connectionID)
-		case "7":
-			fmt.Print("Connection id: ")
-			scanner.Scan()
-			connectionID := scanner.Text()
 			fmt.Print("Message: ")
 			scanner.Scan()
 			message := scanner.Text()
-			_ = app.SendBasicMessage(connectionID, message)
-		case "8":
-			connections, _ := app.QueryConnections(acapy.QueryConnectionsParams{})
+
+			err := app.client.SendBasicMessage(app.connectionID, message)
+			if err != nil {
+				app.Exit(err)
+			}
+		case "7":
+			connections, err := app.client.QueryConnections(nil)
+			if err != nil {
+				app.Exit(err)
+			}
 			for _, connection := range connections {
 				fmt.Printf("%s - %s - %s - %s\n", connection.TheirLabel, connection.ConnectionID, connection.State, connection.TheirDID)
 			}
@@ -119,6 +132,7 @@ func (app *App) StartACApy() {
 		"--webhook-url", fmt.Sprintf("http://localhost:%d/webhooks", app.port),
 		"--label", app.label,
 		"--public-invites",
+		"--monitor-ping",
 		"--wallet-type", "indy",
 		"--wallet-name", id,
 		"--wallet-key", id,
@@ -142,8 +156,8 @@ func (app *App) StartWebserver() {
 		nil,
 		nil,
 		nil,
-		nil,
-		nil,
+		app.PingEventHandler,
+		app.OutOfBandEventHandler,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -161,12 +175,16 @@ func (app *App) StartWebserver() {
 	}()
 }
 
-func (app *App) Exit() {
+func (app *App) Exit(err error) {
+	if err != nil {
+		log.Println("ERROR:", err.Error())
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := app.server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+	os.Exit(0)
 }
 
 func (app *App) ConnectionsEventHandler(event acapy.Connection) {
@@ -174,12 +192,21 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
 		event.Alias = connection.TheirLabel
 	}
+	app.connectionID = event.ConnectionID
 	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
 }
 
 func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.TheirLabel, event.ConnectionID, event.Content)
+}
+
+func (app *App) OutOfBandEventHandler(event acapy.OutOfBandEvent) {
+	fmt.Printf("\n -> Out of Band Event: %q state %q\n", event.InvitationID, event.State)
+}
+
+func (app *App) PingEventHandler(event acapy.PingEvent) {
+	fmt.Printf("\n -> Ping Event: %q state: %q responsed: %t\n", event.ConnectionID, event.State, event.Responded)
 }
 
 func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
@@ -189,8 +216,10 @@ func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 func main() {
 	var port = 4455
 	var ledgerURL = "http://localhost:9000"
+	var name = ""
 
 	flag.IntVar(&port, "port", 4455, "port")
+	flag.StringVar(&name, "name", "Alice", "alice")
 	flag.Parse()
 
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
@@ -198,6 +227,7 @@ func main() {
 	app := App{
 		client: acapy.NewClient(ledgerURL, "", acapyURL),
 		port:   port,
+		label:  name,
 		rand:   strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}
 	app.StartWebserver()
@@ -219,59 +249,11 @@ func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDRespons
 	return didResponse, nil
 }
 
-func (app *App) RegisterSchema() (acapy.Schema, error) {
-	schemaResponse, err := app.client.RegisterSchema(
-		"Laurence",
-		"1.0",
-		[]string{"name"},
-	)
-	if err != nil {
-		log.Printf("Failed to register schema: %+v", err)
-		return acapy.Schema{}, err
-	}
-	fmt.Printf("Registered schema: %+v\n", schemaResponse)
-	return schemaResponse, nil
-}
-
-func (app *App) CreateInvitation(alias string, autoAccept bool, multiUse bool, public bool) (acapy.CreateInvitationResponse, error) {
-	invitationResponse, err := app.client.CreateInvitation(alias, autoAccept, multiUse, public)
-	if err != nil {
-		log.Printf("Failed to create invitation: %+v", err)
-		return acapy.CreateInvitationResponse{}, err
-	}
-	return invitationResponse, nil
-}
-
 func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {
-	var invitation acapy.Invitation
+	var invitation acapy.OutOfBandInvitation
 	err := json.Unmarshal(inv, &invitation)
 	if err != nil {
 		return acapy.Connection{}, err
 	}
-	return app.client.ReceiveInvitation(invitation, false)
-}
-
-func (app *App) AcceptInvitation(connectionID string) (acapy.Connection, error) {
-	return app.client.AcceptInvitation(connectionID)
-}
-
-func (app *App) AcceptRequest(connectionID string) (acapy.Connection, error) {
-	return app.client.AcceptRequest(connectionID)
-}
-
-func (app *App) SendPing(connectionID string) (acapy.Thread, error) {
-	return app.client.SendPing(connectionID)
-}
-
-func (app *App) SendBasicMessage(connectionID string, message string) error {
-	return app.client.SendBasicMessage(connectionID, message)
-}
-
-func (app *App) QueryConnections(params acapy.QueryConnectionsParams) ([]acapy.Connection, error) {
-	connections, err := app.client.QueryConnections(params)
-	if err != nil {
-		log.Printf("Failed to list connections: %+v", err)
-		return nil, err
-	}
-	return connections, nil
+	return app.client.ReceiveOutOfBandInvitation(invitation, false)
 }

@@ -87,9 +87,11 @@ func (c *Client) request(method string, url string, queryParams map[string]strin
 		return err
 	}
 
-	err = json.NewDecoder(response.Body).Decode(responseObject)
-	if err != nil {
-		return err
+	if responseObject != nil {
+		err = json.NewDecoder(response.Body).Decode(responseObject)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

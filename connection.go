@@ -6,17 +6,18 @@ import (
 )
 
 type Connection struct {
-	Accept              string `json:"accept"`
+	Accept              string `json:"accept"` // auto / manual
 	Alias               string `json:"alias"`
 	ConnectionID        string `json:"connection_id"`
 	CreatedAt           string `json:"created_at"`
 	ErrorMsg            string `json:"error_msg"`
 	InboundConnectionID string `json:"inbound_connection_id"`
-	Initiator           string `json:"initiator"`
 	InvitationKey       string `json:"invitation_key"`
-	InvitationMode      string `json:"invitation_mode"`
+	InvitationMode      string `json:"invitation_mode"` // once / multi
+	InvitationMessageID string `json:"invitation_msg_id"`
 	MyDID               string `json:"my_did"`
 	RequestID           string `json:"request_id"`
+	RFC23State          string `json:"rfc23_state"`
 	RoutingState        string `json:"routing_state"`
 	State               string `json:"state"`
 	TheirDID            string `json:"their_did"`
@@ -123,20 +124,24 @@ type QueryConnectionsParams struct {
 	TheirRole string `json:"their_role,omitempty"`
 }
 
-func (c *Client) QueryConnections(params QueryConnectionsParams) ([]Connection, error) {
+func (c *Client) QueryConnections(params *QueryConnectionsParams) ([]Connection, error) {
 	var results = struct {
 		Connections []Connection `json:"results"`
 	}{}
 
-	var queryParams = map[string]string{
-		"alias":            params.Alias,
-		"initiator":        params.Initiator,
-		"invitation_key":   params.InvitationKey,
-		"my_did":           params.MyDID,
-		"connection_state": params.State,
-		"their_did":        params.TheirDID,
-		"their_role":       params.TheirRole,
+	var queryParams = map[string]string{}
+	if params != nil {
+		queryParams = map[string]string{
+			"alias":            params.Alias,
+			"initiator":        params.Initiator,
+			"invitation_key":   params.InvitationKey,
+			"my_did":           params.MyDID,
+			"connection_state": params.State,
+			"their_did":        params.TheirDID,
+			"their_role":       params.TheirRole,
+		}
 	}
+
 	err := c.get("/connections", queryParams, &results)
 	if err != nil {
 		return nil, err
