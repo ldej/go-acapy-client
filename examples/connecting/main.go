@@ -206,7 +206,7 @@ func (app *App) OutOfBandEventHandler(event acapy.OutOfBandEvent) {
 }
 
 func (app *App) PingEventHandler(event acapy.PingEvent) {
-	fmt.Printf("\n -> Ping Event: %q state: %q responsed: %t\n", event.ConnectionID, event.State, event.Responded)
+	fmt.Printf("\n -> Ping Event: %q state: %q responded: %t\n", event.ConnectionID, event.State, event.Responded)
 }
 
 func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {

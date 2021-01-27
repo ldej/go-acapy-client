@@ -108,6 +108,8 @@ Examples can be found in the [examples](./examples) folder.
 
 `{id}` = connection identifier
 
+`{ref_id}` = inbound connection identifier
+
 | Function Name     | Method | Endpoint                                     | Implemented        |
 | ----------------- | ------ | -------------------------------------------- | ------------------ |
 | QueryConnections  | GET    | /connections                                 | :heavy_check_mark: |
@@ -144,14 +146,14 @@ Examples can be found in the [examples](./examples) folder.
 | RemoveCredential    | DELETE | /credential/{id}            | :heavy_check_mark: |
 | GetCredentials      | GET    | /credentials                | :heavy_check_mark: |
 
-### DID-Exchange
+### DID Exchange
 
 `{id}` = connection identifier
 
-| Function Name | Method | Endpoint                            | Implemented   |
-| ------------- | ------ | ----------------------------------- | ------------- |
-| -             | POST   | /didexchange/{id}/accept-invitation | :exclamation: |
-| -             | POST   | /didexchange/{id}/accept-request    | :exclamation: |
+| Function Name               | Method | Endpoint                            | Implemented        |
+| --------------------------- | ------ | ----------------------------------- | ------------------ |
+| DIDExchangeAcceptInvitation | POST   | /didexchange/{id}/accept-invitation | :heavy_check_mark: |
+| DIDExchangeAcceptRequest    | POST   | /didexchange/{id}/accept-request    | :heavy_check_mark: |
 
 ### Introduction
 
@@ -215,10 +217,10 @@ Examples can be found in the [examples](./examples) folder.
 
 ### Out-of-Band
 
-| Function Name | Method | Endpoint                        | Implemented   |
-| ------------- | ------ | ------------------------------- | ------------- |
-| -             | POST   | /out-of-band/create-invitation  | :exclamation: |
-| -             | POST   | /out-of-band/receive-invitation | :exclamation: |
+| Function Name              | Method | Endpoint                        | Implemented        |
+| -------------------------- | ------ | ------------------------------- | ------------------ |
+| CreateOutOfBandInvitation  | POST   | /out-of-band/create-invitation  | :heavy_check_mark: |
+| ReceiveOutOfBandInvitation | POST   | /out-of-band/receive-invitation | :heavy_check_mark: |
 
 ### Present Proof
 
@@ -312,44 +314,59 @@ Examples can be found in the [examples](./examples) folder.
 When an event occurs in ACA-py, for example a connection request has been received, a webhook is called on your controller on a certain topic. `go-acapy-client` provides a webhook handler where you can register your own functions to handle these events. Based on an event happening you can update your UI or inform the user about the event.
 
 ```go
-func ConnectionsEventHandler(event acapy.ConnectionsEvent) {
-	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
-}
-
-func BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
-	fmt.Printf("\n -> Received message on connection %s: %s\n", event.ConnectionID, event.Content)
-}
-
-func ProblemReportEventHandler(event acapy.ProblemReportEvent) {
-	fmt.Printf("\n -> Received problem report: %+v\n", event)
-}
-
-func CredentialExchangeEventHandler(event acapy.CredentialExchange) {
-	fmt.Printf("\n -> Credential Exchange update: %s - %s\n", event.CredentialExchangeID, event.State)
-}
-
-func RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
-	fmt.Printf("\n -> Revocation Registry update: %s - %s\n", event.RevocationRegistryID, event.State)
-}
-
-func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
-    fmt.Printf("\n -> Presentation Exchange update: %s - %s\n", event.PresentationExchangeID, event.State)
-}
-
 func main() {
     r := mux.NewRouter()
-    webhooksHandler := acapy.WebhookHandler(
+    webhookHandler := acapy.WebhookHandler(
         ConnectionsEventHandler,
         BasicMessagesEventHandler,
         ProblemReportEventHandler,
         CredentialExchangeEventHandler,
         RevocationRegistryEventHandler,
         PresentationExchangeEventHandler,
+		IssuerCredentialReceivedEventHandler,
+		PingEventHandler,
+        OutOfBandEventHandler,
     )
     
-    r.HandleFunc("/webhooks/topic/{topic}/", webhooksHandler).Methods(http.MethodPost)
+    r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
     
     // and so on
+}
+
+func ConnectionsEventHandler(event acapy.ConnectionsEvent) {
+    fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
+}
+
+func BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
+    fmt.Printf("\n -> Received message on connection %s: %s\n", event.ConnectionID, event.Content)
+}
+
+func ProblemReportEventHandler(event acapy.ProblemReportEvent) {
+    fmt.Printf("\n -> Received problem report: %+v\n", event)
+}
+
+func CredentialExchangeEventHandler(event acapy.CredentialExchange) {
+    fmt.Printf("\n -> Credential Exchange update: %s - %s\n", event.CredentialExchangeID, event.State)
+}
+
+func RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
+    fmt.Printf("\n -> Revocation Registry update: %s - %s\n", event.RevocationRegistryID, event.State)
+}
+
+func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
+    fmt.Printf("\n -> Presentation Exchange update: %s - %s\n", event.PresentationExchangeID, event.State)
+}
+
+func IssuerCredentialReceivedEventHandler(event acapy.IssuerCredentialReceivedEvent) {
+    fmt.Printf("\n -> Issuer Credential Received: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
+}
+
+func PingEventHandler(event acapy.PingEvent) {
+    fmt.Printf("\n -> Ping Event: %q state: %q responded: %t\n", event.ConnectionID, event.State, event.Responded)
+}
+
+func OutOfBandEventHandler(event acapy.OutOfBandEvent) {
+    fmt.Printf("\n -> Out of Band Event: %q state %q\n", event.InvitationID, event.State)
 }
 ```
 
@@ -370,7 +387,7 @@ The `acapy.WebhookHandler` is web framework agnostic and reads the topic from th
 - [ ] Payment decorators https://github.com/hyperledger/aries-rfcs/tree/master/features/0075-payment-decorators
 - [ ] Constructors for JSON-LD types
 - [ ] Add types for roles, states, predicates
-- [ ] Allow for a connection-less proof by making a QR code of a payload below. The base64 payload is the result of your call to  /present-proof/create-request.
+- [ ] Allow for a connection-less proof by making a QR code of a payload below. The base64 payload is the result of your call to  `/present-proof/create-request`.
 ```json
 {
     "@id": "3b67c4bf-3953-4ace-94ef-28e0969288c5",
