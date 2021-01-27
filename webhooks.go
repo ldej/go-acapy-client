@@ -39,8 +39,6 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&problemReportEvent)
 			problemReportEventHandler(problemReportEvent)
 		case "issue_credential":
-			body, _ := ioutil.ReadAll(r.Body) // TODO
-			fmt.Println(string(body))
 			var credentialExchangeEvent CredentialExchange
 			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
 			credentialExchangeEventHandler(credentialExchangeEvent)

@@ -27,26 +27,26 @@ type App struct {
 	label  string
 	seed   string
 	rand   string
+	myDID  string
+
+	connectionID           string
+	schema                 acapy.Schema
+	credentialDefinitionID string
+	credentialExchange     acapy.CredentialExchange
 }
 
 func (app *App) ReadCommands() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Printf("Your name: ")
-	scanner.Scan()
-	app.label = scanner.Text()
-
-	fmt.Printf("Seed: ")
-	scanner.Scan()
-	app.seed = scanner.Text()
-
-	didResponse, _ := app.RegisterDID(app.label, app.seed)
-	fmt.Printf("Registered DID: %s\n", didResponse.DID)
-
-	var schema acapy.Schema
+	didResponse, err := app.RegisterDID(app.label, app.label+app.rand)
+	if err != nil {
+		app.Exit(err)
+	}
+	app.myDID = didResponse.DID
+	fmt.Printf("Hi %s, your registered DID is %s\n", app.label, didResponse.DID)
 
 	for {
-		fmt.Println(`Choose:
+		fmt.Println(`Options:
 	(1) Create invitation
 	(2) Receive invitation
 	(3) Register schema
@@ -58,61 +58,68 @@ func (app *App) ReadCommands() {
 	(9) List credentials
 	(exit) Exit
 `)
-		fmt.Print("Enter Command: ")
+		fmt.Print("Choose: ")
 		scanner.Scan()
 		command := scanner.Text()
 
 		switch command {
 		case "exit":
-			app.Exit()
-			return
+			app.Exit(nil)
 		case "1":
-			fmt.Print("Alias: ")
-			scanner.Scan()
-			alias := scanner.Text()
-			invitationResponse, _ := app.CreateInvitation(alias, true, false, true)
+			invitationResponse, err := app.client.CreateOutOfBandInvitation(
+				acapy.CreateOutOfBandInvitationRequest{IncludeHandshake: true},
+				true,
+				false,
+			)
+			if err != nil {
+				app.Exit(err)
+			}
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
 		case "2":
 			fmt.Print("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
-			connection, _ := app.ReceiveInvitation(invitation)
-			fmt.Printf("Connection ID: %s\n", connection.ConnectionID)
+			connection, err := app.ReceiveInvitation(invitation)
+			if err != nil {
+				app.Exit(err)
+			}
+			app.connectionID = connection.ConnectionID
+			fmt.Printf("Connection id: %s\n", connection.ConnectionID)
 		case "3":
 			fmt.Print("Schema name: ")
 			scanner.Scan()
 			schemaName := scanner.Text()
+
 			fmt.Printf("Version: ")
 			scanner.Scan()
 			version := scanner.Text()
-			fmt.Printf("Attributes: ")
+
+			fmt.Printf("Attributes (comma separated, i.e.: name,age): ")
 			scanner.Scan()
 			attributesString := scanner.Text()
 			attributes := strings.Split(attributesString, ",")
-			schema, _ = app.RegisterSchema(schemaName, version, attributes)
-			fmt.Printf("Schema: %+v\n", schema)
-		case "4":
-			fmt.Printf("Tag: ")
-			scanner.Scan()
-			tag := scanner.Text()
-			fmt.Printf("Schema ID: ")
-			scanner.Scan()
-			schemaID := scanner.Text()
-			definition, _ := app.client.CreateCredentialDefinition(tag, false, 0, schemaID)
-			fmt.Printf("Credential Definition ID: %s\n", definition)
-		case "5":
-			fmt.Printf("Credential Definition ID: ")
-			scanner.Scan()
-			credentialDefinitionID := scanner.Text()
 
-			fmt.Printf("Connection ID: ")
+			app.schema, err = app.RegisterSchema(schemaName, version, attributes)
+			if err != nil {
+				app.Exit(err)
+			}
+			fmt.Printf("Schema: %+v\n", app.schema)
+		case "4":
+			fmt.Println("This is slow, it takes a couple of seconds.")
+			app.credentialDefinitionID, err = app.client.CreateCredentialDefinition("tag", false, 0, app.schema.ID)
+			if err != nil {
+				app.Exit(err)
+			}
+			fmt.Printf("Credential Definition ID: %s\n", app.credentialDefinitionID)
+		case "5":
+			fmt.Printf("Comment: ")
 			scanner.Scan()
-			connectionID := scanner.Text()
+			comment := scanner.Text()
 
 			var attributes []acapy.CredentialPreviewAttribute
 
-			for _, attr := range schema.AttributeNames {
+			for _, attr := range app.schema.AttributeNames {
 				fmt.Printf("Attribute %q value: ", attr)
 				scanner.Scan()
 				val := scanner.Text()
@@ -124,13 +131,9 @@ func (app *App) ReadCommands() {
 				})
 			}
 
-			fmt.Printf("Comment: ")
-			scanner.Scan()
-			comment := scanner.Text()
-
 			var offer = acapy.CredentialOfferRequest{
-				CredentialDefinitionID: credentialDefinitionID,
-				ConnectionID:           connectionID,
+				CredentialDefinitionID: app.credentialDefinitionID,
+				ConnectionID:           app.connectionID,
 				CredentialPreview: acapy.CredentialPreview{
 					Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
 					Attributes: attributes,
@@ -140,35 +143,35 @@ func (app *App) ReadCommands() {
 				AutoRemove: false,
 				AutoIssue:  false,
 			}
-			exchangeOffer, _ := app.client.SendCredentialOffer(offer)
-			fmt.Printf("Credential Exchange ID: %s\n", exchangeOffer.CredentialExchangeID)
+			app.credentialExchange, err = app.client.SendCredentialOffer(offer)
+			if err != nil {
+				app.Exit(err)
+			}
+			fmt.Printf("Credential Exchange ID: %s\n", app.credentialExchange.CredentialExchangeID)
 		case "6":
-			fmt.Printf("Credential Exchange ID: ")
-			scanner.Scan()
-			credentialExchangeID := scanner.Text()
-			_, _ = app.client.SendCredentialRequestByID(credentialExchangeID)
+			_, err := app.client.SendCredentialRequestByID(app.credentialExchange.CredentialExchangeID)
+			if err != nil {
+				app.Exit(err)
+			}
 		case "7":
-			fmt.Printf("Credential Exchange ID: ")
-			scanner.Scan()
-			credentialExchangeID := scanner.Text()
-
 			fmt.Printf("Comment: ")
 			scanner.Scan()
 			comment := scanner.Text()
 
-			_, _ = app.client.IssueCredentialByID(credentialExchangeID, comment)
+			_, err := app.client.IssueCredentialByID(app.credentialExchange.CredentialExchangeID, comment)
+			if err != nil {
+				app.Exit(err)
+			}
 		case "8":
-			fmt.Printf("Credential Exchange ID: ")
-			scanner.Scan()
-			credentialExchangeID := scanner.Text()
-
-			fmt.Printf("Credential ID: ")
-			scanner.Scan()
-			credentialID := scanner.Text()
-
-			_, _ = app.client.StoreCredentialByID(credentialExchangeID, credentialID)
+			_, err = app.client.StoreCredentialByID(app.credentialExchange.CredentialExchangeID, app.credentialExchange.Credential.Referent)
+			if err != nil {
+				app.Exit(err)
+			}
 		case "9":
-			credentials, _ := app.client.GetCredentials(10, 0, "")
+			credentials, err := app.client.GetCredentials(10, 0, "")
+			if err != nil {
+				app.Exit(err)
+			}
 			for _, cred := range credentials {
 				fmt.Printf("%s - %s", cred.Referent, cred.Attributes)
 			}
@@ -211,14 +214,14 @@ func (app *App) StartWebserver() {
 	r := mux.NewRouter()
 	webhookHandler := acapy.WebhookHandler(
 		app.ConnectionsEventHandler,
-		app.BasicMessagesEventHandler,
+		nil,
 		app.ProblemReportEventHandler,
 		app.CredentialExchangeEventHandler,
 		nil,
 		nil,
 		nil,
 		nil,
-		nil,
+		app.OutOfBandEventHandler,
 	)
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -236,12 +239,16 @@ func (app *App) StartWebserver() {
 	}()
 }
 
-func (app *App) Exit() {
+func (app *App) Exit(err error) {
+	if err != nil {
+		log.Println("ERROR:", err.Error())
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := app.server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+	os.Exit(0)
 }
 
 func (app *App) ConnectionsEventHandler(event acapy.Connection) {
@@ -249,16 +256,13 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
 		event.Alias = connection.TheirLabel
 	}
+	app.connectionID = event.ConnectionID
 	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
-}
-
-func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
-	connection, _ := app.client.GetConnection(event.ConnectionID)
-	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.TheirLabel, event.ConnectionID, event.Content)
 }
 
 func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
+	app.credentialExchange = event
 	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.TheirLabel, event.State)
 }
 
@@ -266,11 +270,17 @@ func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 	fmt.Printf("\n -> Received problem report: %+v\n", event)
 }
 
+func (app *App) OutOfBandEventHandler(event acapy.OutOfBandEvent) {
+	fmt.Printf("\n -> Out of Band Event: %q state %q\n", event.InvitationID, event.State)
+}
+
 func main() {
 	var port = 4455
 	var ledgerURL = "http://localhost:9000"
+	var name = ""
 
 	flag.IntVar(&port, "port", 4455, "port")
+	flag.StringVar(&name, "name", "Alice", "alice")
 	flag.Parse()
 
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
@@ -278,6 +288,7 @@ func main() {
 	app := App{
 		client: acapy.NewClient(ledgerURL, "", acapyURL),
 		port:   port,
+		label:  name,
 		rand:   strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}
 	app.StartWebserver()
@@ -309,12 +320,12 @@ func (app *App) CreateInvitation(alias string, autoAccept bool, multiUse bool, p
 }
 
 func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {
-	var invitation acapy.Invitation
+	var invitation acapy.OutOfBandInvitation
 	err := json.Unmarshal(inv, &invitation)
 	if err != nil {
 		return acapy.Connection{}, err
 	}
-	return app.client.ReceiveInvitation(invitation, true)
+	return app.client.ReceiveOutOfBandInvitation(invitation, true)
 }
 
 func (app *App) RegisterSchema(name string, version string, attributes []string) (acapy.Schema, error) {
