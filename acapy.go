@@ -77,7 +77,7 @@ func (c *Client) request(method string, url string, queryParams map[string]strin
 	r.URL.RawQuery = q.Encode()
 
 	response, err := c.HTTPClient.Do(r)
-	if err != nil {
+	if err != nil || response.StatusCode >= 300 {
 		if response != nil {
 			log.Printf("Request failed: %s", response.Status)
 			if body, err := ioutil.ReadAll(response.Body); err != nil {
