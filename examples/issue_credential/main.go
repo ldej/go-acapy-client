@@ -17,7 +17,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	acapy "github.com/ldej/go-acapy-client"
+	"github.com/ldej/go-acapy-client"
 )
 
 type App struct {
@@ -29,7 +29,7 @@ type App struct {
 	rand   string
 	myDID  string
 
-	connectionID           string
+	connection             acapy.Connection
 	schema                 acapy.Schema
 	credentialDefinitionID string
 	credentialExchange     acapy.CredentialExchange
@@ -84,7 +84,7 @@ func (app *App) ReadCommands() {
 			if err != nil {
 				app.Exit(err)
 			}
-			app.connectionID = connection.ConnectionID
+			app.connection = connection
 			fmt.Printf("Connection id: %s\n", connection.ConnectionID)
 		case "3":
 			fmt.Print("Schema name: ")
@@ -133,7 +133,7 @@ func (app *App) ReadCommands() {
 
 			var offer = acapy.CredentialOfferRequest{
 				CredentialDefinitionID: app.credentialDefinitionID,
-				ConnectionID:           app.connectionID,
+				ConnectionID:           app.connection.ConnectionID,
 				CredentialPreview: acapy.CredentialPreview{
 					Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
 					Attributes: attributes,
@@ -256,7 +256,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
 		event.Alias = connection.TheirLabel
 	}
-	app.connectionID = event.ConnectionID
+	app.connection = event
 	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
 }
 
@@ -308,15 +308,6 @@ func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDRespons
 	app.seed = didResponse.Seed
 	app.StartACApy()
 	return didResponse, nil
-}
-
-func (app *App) CreateInvitation(alias string, autoAccept bool, multiUse bool, public bool) (acapy.CreateInvitationResponse, error) {
-	invitationResponse, err := app.client.CreateInvitation(alias, autoAccept, multiUse, public)
-	if err != nil {
-		log.Printf("Failed to create invitation: %+v", err)
-		return acapy.CreateInvitationResponse{}, err
-	}
-	return invitationResponse, nil
 }
 
 func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {

@@ -40,7 +40,10 @@ type App struct {
 func (app *App) ReadCommands() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	didResponse, _ := app.RegisterDID(app.label, app.label+app.rand)
+	didResponse, err := app.RegisterDID(app.label, app.label+app.rand)
+	if err != nil {
+		app.Exit(err)
+	}
 	app.myDID = didResponse.DID
 	fmt.Printf("Hi %s, your registered DID is %s\n", app.label, didResponse.DID)
 
@@ -64,15 +67,16 @@ func (app *App) ReadCommands() {
 
 		switch command {
 		case "exit":
-			app.Exit()
+			app.Exit(nil)
 			return
 		case "1":
-			fmt.Print("Alias: ")
-			scanner.Scan()
-			alias := scanner.Text()
-			invitationResponse, err := app.client.CreateInvitation(alias, true, false, true)
+			invitationResponse, err := app.client.CreateOutOfBandInvitation(
+				acapy.CreateOutOfBandInvitationRequest{IncludeHandshake: true},
+				true,
+				false,
+			)
 			if err != nil {
-				log.Fatal(err)
+				app.Exit(err)
 			}
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
@@ -80,30 +84,44 @@ func (app *App) ReadCommands() {
 			fmt.Print("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
-			app.connection, _ = app.ReceiveInvitation(invitation)
+			connection, err := app.ReceiveInvitation(invitation)
+			if err != nil {
+				app.Exit(err)
+			}
+			app.connection = connection
 			fmt.Printf("Connection ID: %s\n", app.connection.ConnectionID)
 		case "3":
 			fmt.Print("Schema name: ")
 			scanner.Scan()
 			schemaName := scanner.Text()
+
 			fmt.Printf("Version: ")
 			scanner.Scan()
 			version := scanner.Text()
-			fmt.Printf("Attribute: ")
+
+			fmt.Printf("Attributes (comma separated, i.e.: name,age): ")
 			scanner.Scan()
 			attributesString := scanner.Text()
 			attributes := strings.Split(attributesString, ",")
-			app.schema, _ = app.RegisterSchema(schemaName, version, attributes)
+
+			app.schema, err = app.RegisterSchema(schemaName, version, attributes)
+			if err != nil {
+				app.Exit(err)
+			}
 			fmt.Printf("Schema: %+v\n", app.schema)
 		case "4":
-			app.credentialDefinitionID, _ = app.client.CreateCredentialDefinition("tag", true, 10, app.schema.ID)
+			fmt.Println("This is slow, it takes a couple of seconds.")
+			app.credentialDefinitionID, err = app.client.CreateCredentialDefinition("tag", true, 10, app.schema.ID)
+			if err != nil {
+				app.Exit(err)
+			}
 			fmt.Printf("Credential Definition ID: %s\n", app.credentialDefinitionID)
 		case "5":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
 			comment := scanner.Text()
 
-			attributes := []acapy.CredentialPreviewAttribute{}
+			var attributes []acapy.CredentialPreviewAttribute
 
 			for _, attr := range app.schema.AttributeNames {
 				fmt.Printf("Attribute %q value: \n", attr)
@@ -133,9 +151,10 @@ func (app *App) ReadCommands() {
 				AutoRemove:      false,
 			}
 			credentialExchange, err := app.client.SendCredential(credentialSendRequest)
-			if err == nil {
-				app.credentialExchange = credentialExchange
+			if err != nil {
+				app.Exit(err)
 			}
+			app.credentialExchange = credentialExchange
 		case "6":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
@@ -162,9 +181,10 @@ func (app *App) ReadCommands() {
 				Trace:               false,
 			}
 			presentationExchange, err := app.client.SendPresentationProposal(proposal)
-			if err == nil {
-				app.presentationExchange = presentationExchange
+			if err != nil {
+				app.Exit(err)
 			}
+			app.presentationExchange = presentationExchange
 		case "7":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
@@ -203,9 +223,10 @@ func (app *App) ReadCommands() {
 			}
 
 			presentationExchange, err := app.client.SendPresentationRequestByID(app.presentationExchange.PresentationExchangeID, request)
-			if err == nil {
-				app.presentationExchange = presentationExchange
+			if err != nil {
+				app.Exit(err)
 			}
+			app.presentationExchange = presentationExchange
 		case "8":
 			// What about the Revealed flag? -> in case of multiple credentials
 			requestedAttributes, err := app.client.FindMatchingCredentials(app.presentationExchange.PresentationRequest)
@@ -213,18 +234,20 @@ func (app *App) ReadCommands() {
 			proof := acapy.NewPresentationProof(requestedAttributes, nil, nil)
 
 			presentationExchange, err := app.client.SendPresentationByID(app.presentationExchange.PresentationExchangeID, proof)
-			if err == nil {
-				app.presentationExchange = presentationExchange
+			if err != nil {
+				app.Exit(err)
 			}
+			app.presentationExchange = presentationExchange
 		case "9":
 			presentationExchange, err := app.client.VerifyPresentationByID(app.presentationExchange.PresentationExchangeID)
-			if err == nil {
-				app.presentationExchange = presentationExchange
+			if err != nil {
+				app.Exit(err)
 			}
+			app.presentationExchange = presentationExchange
 		case "10":
 			credentials, err := app.client.GetPresentationCredentialsByID(app.presentationExchange.PresentationExchangeID, 0, "", nil, 0)
 			if err != nil {
-				log.Println("Err: %v", err)
+				app.Exit(err)
 			}
 			for _, credential := range credentials {
 				fmt.Printf("Credential %s: %+v\n", credential.CredentialInfo.Referent, credential.CredentialInfo.Attrs)
@@ -274,14 +297,14 @@ func (app *App) StartWebserver() {
 	r := mux.NewRouter()
 	webhookHandler := acapy.WebhookHandler(
 		app.ConnectionsEventHandler,
-		app.BasicMessagesEventHandler,
+		nil,
 		app.ProblemReportEventHandler,
 		app.CredentialExchangeEventHandler,
 		app.RevocationRegistryEventHandler,
 		app.PresentationExchangeEventHandler,
 		app.IssuerCredentialReceivedEventHandler,
 		nil,
-		nil,
+		app.OutOfBandEventHandler,
 	)
 
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -302,12 +325,16 @@ func (app *App) StartWebserver() {
 	}()
 }
 
-func (app *App) Exit() {
+func (app *App) Exit(err error) {
+	if err != nil {
+		log.Println("ERROR:", err.Error())
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := app.server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
+	os.Exit(0)
 }
 
 func (app *App) ConnectionsEventHandler(event acapy.Connection) {
@@ -317,11 +344,6 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	}
 	app.connection = event
 	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
-}
-
-func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
-	connection, _ := app.client.GetConnection(event.ConnectionID)
-	fmt.Printf("\n -> Received message from %q (%s): %s\n", connection.TheirLabel, event.ConnectionID, event.Content)
 }
 
 func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
@@ -347,6 +369,10 @@ func (app *App) PresentationExchangeEventHandler(event acapy.PresentationExchang
 
 func (app *App) IssuerCredentialReceivedEventHandler(event acapy.IssuerCredentialReceivedEvent) {
 	fmt.Printf("\n -> Issuer Credential Received: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
+}
+
+func (app *App) OutOfBandEventHandler(event acapy.OutOfBandEvent) {
+	fmt.Printf("\n -> Out of Band Event: %q state %q\n", event.InvitationID, event.State)
 }
 
 func main() {
@@ -402,10 +428,10 @@ func (app *App) RegisterSchema(name string, version string, attributes []string)
 }
 
 func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {
-	var invitation acapy.Invitation
+	var invitation acapy.OutOfBandInvitation
 	err := json.Unmarshal(inv, &invitation)
 	if err != nil {
 		return acapy.Connection{}, err
 	}
-	return app.client.ReceiveInvitation(invitation, true)
+	return app.client.ReceiveOutOfBandInvitation(invitation, true)
 }

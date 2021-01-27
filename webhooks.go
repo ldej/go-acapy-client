@@ -33,8 +33,6 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&basicMessagesEvent)
 			basicMessagesEventHandler(basicMessagesEvent)
 		case "problem_report":
-			body, _ := ioutil.ReadAll(r.Body) // TODO
-			fmt.Println(string(body))
 			var problemReportEvent ProblemReportEvent
 			json.NewDecoder(r.Body).Decode(&problemReportEvent)
 			problemReportEventHandler(problemReportEvent)
@@ -43,14 +41,10 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
 			credentialExchangeEventHandler(credentialExchangeEvent)
 		case "issuer_cred_rev":
-			body, _ := ioutil.ReadAll(r.Body) // TODO
-			fmt.Println(string(body))
 			var issuerCredentialReceivedEvent IssuerCredentialReceivedEvent
 			json.NewDecoder(r.Body).Decode(&issuerCredentialReceivedEvent)
 			issuerCredentialReceivedEventHandler(issuerCredentialReceivedEvent)
 		case "revocation_registry":
-			body, _ := ioutil.ReadAll(r.Body) // TODO
-			fmt.Println(string(body))
 			var revocationRegistryEvent RevocationRegistry
 			json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
 			revocationRegistryEventHandler(revocationRegistryEvent)
@@ -59,8 +53,6 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&outOfBandEvent)
 			outOfBandEventHandler(outOfBandEvent)
 		case "present_proof":
-			body, _ := ioutil.ReadAll(r.Body) // TODO
-			fmt.Println(string(body))
 			var presentationExchangeEvent PresentationExchange
 			json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
 			presentationExchangeEventHandler(presentationExchangeEvent)
