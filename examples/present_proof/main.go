@@ -302,7 +302,7 @@ func (app *App) StartWebserver() {
 		app.CredentialExchangeEventHandler,
 		app.RevocationRegistryEventHandler,
 		app.PresentationExchangeEventHandler,
-		app.IssuerCredentialReceivedEventHandler,
+		app.IssuerCredentialRevocationEventHandler,
 		nil,
 		app.OutOfBandEventHandler,
 	)
@@ -343,7 +343,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		event.Alias = connection.TheirLabel
 	}
 	app.connection = event
-	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
+	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
 func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
@@ -367,8 +367,8 @@ func (app *App) PresentationExchangeEventHandler(event acapy.PresentationExchang
 	fmt.Printf("\n -> Presentation Exchange update: %s - %s - %s\n", connection.TheirLabel, event.PresentationExchangeID, event.State)
 }
 
-func (app *App) IssuerCredentialReceivedEventHandler(event acapy.IssuerCredentialReceivedEvent) {
-	fmt.Printf("\n -> Issuer Credential Received: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
+func (app *App) IssuerCredentialRevocationEventHandler(event acapy.IssuerCredentialRevocationEvent) {
+	fmt.Printf("\n -> Issuer Credential Revocation: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
 }
 
 func (app *App) OutOfBandEventHandler(event acapy.OutOfBandEvent) {

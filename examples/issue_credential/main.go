@@ -56,6 +56,7 @@ func (app *App) ReadCommands() {
 	(7) Issue credential
 	(8) Store credential
 	(9) List credentials
+	(10) Problem report
 	(exit) Exit
 `)
 		fmt.Print("Choose: ")
@@ -175,6 +176,15 @@ func (app *App) ReadCommands() {
 			for _, cred := range credentials {
 				fmt.Printf("%s - %s", cred.Referent, cred.Attributes)
 			}
+		case "10":
+			fmt.Printf("Message: ")
+			scanner.Scan()
+			message := scanner.Text()
+
+			err := app.client.ReportCredentialExchangeProblem(app.credentialExchange.CredentialExchangeID, message)
+			if err != nil {
+				app.Exit(err)
+			}
 		}
 	}
 }
@@ -257,7 +267,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		event.Alias = connection.TheirLabel
 	}
 	app.connection = event
-	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
+	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
 func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {

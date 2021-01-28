@@ -323,7 +323,7 @@ func main() {
         CredentialExchangeEventHandler,
         RevocationRegistryEventHandler,
         PresentationExchangeEventHandler,
-		IssuerCredentialReceivedEventHandler,
+		IssuerCredentialRevocationEventHandler,
 		PingEventHandler,
         OutOfBandEventHandler,
     )
@@ -334,7 +334,7 @@ func main() {
 }
 
 func ConnectionsEventHandler(event acapy.ConnectionsEvent) {
-    fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
+    fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
 func BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
@@ -357,8 +357,8 @@ func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
     fmt.Printf("\n -> Presentation Exchange update: %s - %s\n", event.PresentationExchangeID, event.State)
 }
 
-func IssuerCredentialReceivedEventHandler(event acapy.IssuerCredentialReceivedEvent) {
-    fmt.Printf("\n -> Issuer Credential Received: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
+func IssuerCredentialRevocationEventHandler(event acapy.IssuerCredentialRevocationEvent) {
+    fmt.Printf("\n -> Issuer Credential Revocation: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
 }
 
 func PingEventHandler(event acapy.PingEvent) {

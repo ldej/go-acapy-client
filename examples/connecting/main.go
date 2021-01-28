@@ -193,7 +193,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		event.Alias = connection.TheirLabel
 	}
 	app.connectionID = event.ConnectionID
-	fmt.Printf("\n -> Connection %q (%s), update to state %q\n", event.Alias, event.ConnectionID, event.State)
+	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
 func (app *App) BasicMessagesEventHandler(event acapy.BasicMessagesEvent) {
