@@ -45,11 +45,13 @@ Start an Aries-Cloud-Agent-Python (ACA-py) instance and configure the right comm
 - [Becoming a Hyperledger Aries Developer - Part 1: Terminology](https://ldej.nl/post/becoming-aries-developer-part-1-terminology/)
 - [Becoming a Hyperledger Aries Developer - Part 2: Development Environment](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-2-development-environment/)
 - [Becoming a Hyperledger Aries Developer - Part 3: Connecting using Swagger](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-3-connecting-using-swagger/)
+- [Becoming a Hyperledger Aries Developer - Part 3: Connecting using DIDComm Exchange](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-3-connecting-using-didcomm-exchange/)
 - [Becoming a Hyperledger Aries Developer - Part 4: Connecting using go-acapy-client](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-4-connecting-using-go-acapy-client/)
 - [Becoming a Hyperledger Aries Developer - Part 5: Issue Credentials](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-5-issue-credentials/)
 - [Becoming a Hyperledger Aries Developer - Part 6: Revocation](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-6-revocation/)
 - [Becoming a Hyperledger Aries Developer - Part 7: Present Proof](https://ldej.nl/post/becoming-a-hyperledger-aries-developer-part-7-present-proof/)
 - [Connecting ACA-py to Development Ledgers](https://ldej.nl/post/connecting-acapy-to-development-ledgers/)
+- [Aries Cloud Agent Python (ACA-py) Webhooks](https://ldej.nl/post/aries-cloudagent-python-webhooks/)
 
 ## Examples
 
@@ -312,6 +314,8 @@ Examples can be found in the [examples](./examples) folder.
 ## Webhooks
 
 When an event occurs in ACA-py, for example a connection request has been received, a webhook is called on your controller on a certain topic. `go-acapy-client` provides a webhook handler where you can register your own functions to handle these events. Based on an event happening you can update your UI or inform the user about the event.
+
+Read more about [ACA-py webhooks](https://ldej.nl/post/aries-cloudagent-python-webhooks/) on my blog.
 
 ```go
 func main() {
