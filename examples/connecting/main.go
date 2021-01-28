@@ -133,6 +133,7 @@ func (app *App) StartACApy() {
 		"--label", app.label,
 		"--public-invites",
 		"--monitor-ping",
+		"--auto-respond-messages",
 		"--wallet-type", "indy",
 		"--wallet-name", id,
 		"--wallet-key", id,

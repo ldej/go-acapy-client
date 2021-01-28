@@ -22,7 +22,7 @@ $ go get -u github.com/ldej/go-acapy-client
 
 ## Compatibility
 
-Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports v0.5.6 of ACA-py.
+Both [ACA-py](https://github.com/hyperledger/aries-cloudagent-python) and `go-acapy-client` are under active development and might be incompatible. Currently `go-acapy-client` supports v0.6.0-pre of ACA-py.
 
 ## Development
 
@@ -250,14 +250,14 @@ Examples can be found in the [examples](./examples) folder.
 | GetActiveRevocationRegistry         | GET    | /revocation/active-registry/{cred_def_id} | :heavy_check_mark: |
 | ClearPendingRevocations             | POST   | /revocation/clear-pending-revocations     | :heavy_check_mark: |
 | CreateRevocationRegistry            | POST   | /revocation/create-registry               | :heavy_check_mark: |
-| GetCredentialRevocationStatus       | GET    | /revocation/credential-record             | :exclamation:      |
+| GetCredentialRevocationStatus       | GET    | /revocation/credential-record             | :heavy_check_mark: |
 | PublishRevocations                  | POST   | /revocation/publish-revocations           | :heavy_check_mark: |
 | QueryRevocationRegistries           | GET    | /revocation/registries/created            | :heavy_check_mark: |
 | GetRevocationRegistry               | GET    | /revocation/registry/{id}                 | :heavy_check_mark: |
 | UpdateRevocationRegistryTailsURI    | PATCH  | /revocation/registry/{id}                 | :heavy_check_mark: |
 | PublishRevocationRegistryDefinition | POST   | /revocation/registry/{id}/definition      | :heavy_check_mark: |
 | PublishRevocationRegistryEntry      | POST   | /revocation/registry/{id}/entry           | :heavy_check_mark: |
-| GetNumberOfIssuedCredentials        | GET    | /revocation/registry/{id}/issued          | :exclamation:      |
+| GetNumberOfIssuedCredentials        | GET    | /revocation/registry/{id}/issued          | :heavy_check_mark: |
 | SetRevocationRegistryState          | PATCH  | /revocation/registry/{id}/set-state       | :heavy_check_mark: |
 | UploadRegistryTailsFile             | PUT    | /revocation/registry/{id}/tails-file      | :heavy_check_mark: |
 | DownloadRegistryTailsFile           | GET    | /revocation/registry/{id}/tails-file      | :heavy_check_mark: |
@@ -362,7 +362,7 @@ func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
 }
 
 func IssuerCredentialRevocationEventHandler(event acapy.IssuerCredentialRevocationEvent) {
-    fmt.Printf("\n -> Issuer Credential Revocation: %s - %s - %s", event.CredentialExchangeID, event.RecordID, event.State)
+    fmt.Printf("\n -> Issuer Credential Revocation: %s - %s - %s\n", event.CredentialExchangeID, event.RecordID, event.State)
 }
 
 func PingEventHandler(event acapy.PingEvent) {

@@ -42,6 +42,7 @@ func (c *Client) GetCredential(credentialID string) (Credential, error) {
 	return credential, nil
 }
 
+// TODO from/to query params
 func (c *Client) IsCredentialRevoked(credentialID string) (bool, error) {
 	var result = struct {
 		Revoked bool `json:"revoked"`

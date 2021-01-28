@@ -29,7 +29,9 @@ type App struct {
 	rand   string
 	myDID  string
 
-	connection             acapy.Connection
+	holderProverConnection acapy.Connection
+	issuerConnection       acapy.Connection
+	verifierConnection     acapy.Connection
 	schema                 acapy.Schema
 	credentialDefinitionID string
 	credentialExchange     acapy.CredentialExchange
@@ -50,15 +52,19 @@ func (app *App) ReadCommands() {
 	for {
 		fmt.Println(`Choose:
 	(1) Create invitation
-	(2) Receive invitation
-	(3) Register schema
-	(4) Create credential definition
-	(5) Issue credential
-	(6) Send presentation proposal
-	(7) Send presentation request
-	(8) Send presentation
-	(9) Verify presentation
-	(10) List presentation proofs
+	(2) Receive issuer invitation
+	(3) Receive verifier invitation
+	(4) Register schema
+	(5) Create credential definition
+	(6) Issue credential
+	(7) Send presentation proposal
+	(8) Send presentation request
+	(9) Send presentation
+	(10) Revoke issued credential
+	(11) Publish revoked credentials
+	(12) Issuer revocation status
+	(13) Number of issued credentials
+	(14) Holder revocation status
 	(exit) Exit
 `)
 		fmt.Print("Enter Command: ")
@@ -81,16 +87,26 @@ func (app *App) ReadCommands() {
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
 		case "2":
-			fmt.Print("Invitation json: ")
+			fmt.Print("Issuer invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
 			connection, err := app.ReceiveInvitation(invitation)
 			if err != nil {
 				app.Exit(err)
 			}
-			app.connection = connection
-			fmt.Printf("Connection ID: %s\n", app.connection.ConnectionID)
+			app.issuerConnection = connection
+			fmt.Printf("Connection ID: %s\n", app.issuerConnection.ConnectionID)
 		case "3":
+			fmt.Print("Verifier invitation json: ")
+			scanner.Scan()
+			invitation := scanner.Bytes()
+			connection, err := app.ReceiveInvitation(invitation)
+			if err != nil {
+				app.Exit(err)
+			}
+			app.verifierConnection = connection
+			fmt.Printf("Connection ID: %s\n", app.verifierConnection.ConnectionID)
+		case "4":
 			fmt.Print("Schema name: ")
 			scanner.Scan()
 			schemaName := scanner.Text()
@@ -109,14 +125,14 @@ func (app *App) ReadCommands() {
 				app.Exit(err)
 			}
 			fmt.Printf("Schema: %+v\n", app.schema)
-		case "4":
+		case "5":
 			fmt.Println("This is slow, it takes a couple of seconds.")
 			app.credentialDefinitionID, err = app.client.CreateCredentialDefinition("tag", true, 10, app.schema.ID)
 			if err != nil {
 				app.Exit(err)
 			}
 			fmt.Printf("Credential Definition ID: %s\n", app.credentialDefinitionID)
-		case "5":
+		case "6":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
 			comment := scanner.Text()
@@ -136,7 +152,7 @@ func (app *App) ReadCommands() {
 
 			credentialSendRequest := acapy.CredentialSendRequest{
 				CredentialDefinitionID: app.credentialDefinitionID,
-				ConnectionID:           app.connection.ConnectionID,
+				ConnectionID:           app.holderProverConnection.ConnectionID,
 				IssuerDID:              app.myDID,
 				Comment:                comment,
 				CredentialPreview: acapy.CredentialPreview{
@@ -155,7 +171,7 @@ func (app *App) ReadCommands() {
 				app.Exit(err)
 			}
 			app.credentialExchange = credentialExchange
-		case "6":
+		case "7":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
 			comment := scanner.Text()
@@ -177,7 +193,7 @@ func (app *App) ReadCommands() {
 				Comment:             comment,
 				AutoPresent:         false,
 				PresentationPreview: acapy.NewPresentationPreview(attributes, nil),
-				ConnectionID:        app.connection.ConnectionID,
+				ConnectionID:        app.verifierConnection.ConnectionID,
 				Trace:               false,
 			}
 			presentationExchange, err := app.client.SendPresentationProposal(proposal)
@@ -185,12 +201,15 @@ func (app *App) ReadCommands() {
 				app.Exit(err)
 			}
 			app.presentationExchange = presentationExchange
-		case "7":
+		case "8":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
 			comment := scanner.Text()
 
 			requestedAttributes := map[string]acapy.RequestedAttribute{}
+
+			location, _ := time.LoadLocation("Local")
+			localTime := time.Now().In(location).Unix()
 
 			for _, attr := range app.presentationExchange.PresentationProposalDict.PresentationProposal.Attributes {
 				requestedAttribute, _ := acapy.NewRequestedAttribute(
@@ -198,8 +217,8 @@ func (app *App) ReadCommands() {
 					attr.Name,
 					nil,
 					acapy.NonRevoked{
-						From: time.Now().Add(-time.Hour * 24 * 7).Unix(),
-						To:   time.Now().Unix(),
+						From: localTime,
+						To:   localTime,
 					},
 				)
 				requestedAttributes[attr.Name] = requestedAttribute
@@ -208,7 +227,7 @@ func (app *App) ReadCommands() {
 			request := acapy.PresentationRequestRequest{
 				Trace:        false,
 				Comment:      comment,
-				ConnectionID: app.connection.ConnectionID,
+				ConnectionID: app.holderProverConnection.ConnectionID,
 				ProofRequest: acapy.NewProofRequest(
 					"Proof request",
 					"1234567890",
@@ -216,8 +235,8 @@ func (app *App) ReadCommands() {
 					requestedAttributes,
 					"1.0",
 					&acapy.NonRevoked{
-						From: time.Now().Add(-time.Hour * 24 * 7).Unix(), // One week ago
-						To:   time.Now().Add(time.Hour * 24 * 7).Unix(),  // One week ahead
+						From: localTime,
+						To:   localTime,
 					},
 				),
 			}
@@ -227,9 +246,17 @@ func (app *App) ReadCommands() {
 				app.Exit(err)
 			}
 			app.presentationExchange = presentationExchange
-		case "8":
+		case "9":
 			// What about the Revealed flag? -> in case of multiple credentials
 			requestedAttributes, err := app.client.FindMatchingCredentials(app.presentationExchange.PresentationRequest)
+
+			location, _ := time.LoadLocation("Local")
+			localTime := time.Now().In(location).Unix()
+
+			for i, attr := range requestedAttributes {
+				attr.Timestamp = localTime
+				requestedAttributes[i] = attr
+			}
 
 			proof := acapy.NewPresentationProof(requestedAttributes, nil, nil)
 
@@ -238,20 +265,36 @@ func (app *App) ReadCommands() {
 				app.Exit(err)
 			}
 			app.presentationExchange = presentationExchange
-		case "9":
-			presentationExchange, err := app.client.VerifyPresentationByID(app.presentationExchange.PresentationExchangeID)
-			if err != nil {
-				app.Exit(err)
-			}
-			app.presentationExchange = presentationExchange
 		case "10":
-			credentials, err := app.client.GetPresentationCredentialsByID(app.presentationExchange.PresentationExchangeID, 0, "", nil, 0)
+			err := app.client.RevokeIssuedCredential(app.credentialExchange.CredentialExchangeID, "", "", false)
 			if err != nil {
 				app.Exit(err)
 			}
-			for _, credential := range credentials {
-				fmt.Printf("Credential %s: %+v\n", credential.CredentialInfo.Referent, credential.CredentialInfo.Attrs)
+			fmt.Printf("Revoked credential for credential exchange %s\n", app.credentialExchange.CredentialExchangeID)
+		case "11":
+			err := app.client.PublishRevocations(nil)
+			if err != nil {
+				app.Exit(err)
 			}
+			fmt.Println("Published revocations")
+		case "12":
+			status, err := app.client.GetCredentialRevocationStatus(app.credentialExchange.CredentialExchangeID, "", "")
+			if err != nil {
+				app.Exit(err)
+			}
+			fmt.Printf("Credential Exchange: %s State: %s\n", status.CredentialExchangeID, status.State)
+		case "13":
+			count, err := app.client.GetNumberOfIssuedCredentials(app.credentialExchange.RevocationRegistryID)
+			if err != nil {
+				app.Exit(err)
+			}
+			fmt.Printf("Number of issued credentials for revocation registry %s: %d\n", app.credentialExchange.RevocationRegistryID, count)
+		case "14":
+			revoked, err := app.client.IsCredentialRevoked(app.credentialExchange.Credential.Referent)
+			if err != nil {
+				app.Exit(err)
+			}
+			fmt.Printf("Credential %s revoked: %t\n", app.credentialExchange.Credential.Referent, revoked)
 		}
 	}
 }
@@ -281,6 +324,9 @@ func (app *App) StartACApy() {
 		"--auto-respond-credential-offer",
 		"--auto-respond-credential-request",
 		"--auto-store-credential",
+		// "--auto-respond-presentation-proposal",
+		"--auto-respond-presentation-request",
+		"--auto-verify-presentation",
 		"--tails-server-base-url", app.client.TailsServerURL,
 		"--preserve-exchange-records",
 	)
@@ -342,7 +388,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 		connection, _ := app.client.GetConnection(event.ConnectionID)
 		event.Alias = connection.TheirLabel
 	}
-	app.connection = event
+	app.holderProverConnection = event
 	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 

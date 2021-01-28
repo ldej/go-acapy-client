@@ -15,7 +15,7 @@ func WebhookHandler(
 	credentialExchangeEventHandler func(event CredentialExchange),
 	revocationRegistryEventHandler func(event RevocationRegistry),
 	presentationExchangeEventHandler func(event PresentationExchange),
-	issuerCredentialReceivedEventHandler func(event IssuerCredentialRevocationEvent),
+	credentialRevocationEventHandler func(event CredentialRevocationRecord),
 	pingEventHandler func(event PingEvent),
 	outOfBandEventHandler func(event OutOfBandEvent),
 ) func(w http.ResponseWriter, r *http.Request) {
@@ -41,9 +41,9 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
 			credentialExchangeEventHandler(credentialExchangeEvent)
 		case "issuer_cred_rev":
-			var issuerCredentialRevocationEvent IssuerCredentialRevocationEvent
-			json.NewDecoder(r.Body).Decode(&issuerCredentialRevocationEvent)
-			issuerCredentialReceivedEventHandler(issuerCredentialRevocationEvent)
+			var credentialRevocationEvent CredentialRevocationRecord
+			json.NewDecoder(r.Body).Decode(&credentialRevocationEvent)
+			credentialRevocationEventHandler(credentialRevocationEvent)
 		case "revocation_registry":
 			var revocationRegistryEvent RevocationRegistry
 			json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
@@ -69,17 +69,6 @@ func WebhookHandler(
 		}
 		w.WriteHeader(200)
 	}
-}
-
-type IssuerCredentialRevocationEvent struct {
-	CreatedAt              string `json:"created_at"`
-	UpdatedAt              string `json:"updated_at"`
-	CredentialDefinitionID string `json:"cred_def_id"`
-	CredentialRevisionID   string `json:"1"`
-	RecordID               string `json:"record_id"`
-	RevocationRegistryID   string `json:"rev_reg_id"`
-	CredentialExchangeID   string `json:"cred_ex_id"`
-	State                  string `json:"state"`
 }
 
 type PingEvent struct {

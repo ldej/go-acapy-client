@@ -2,7 +2,6 @@ package acapy
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type RevocationRegistry struct {
@@ -49,6 +48,17 @@ type Value struct {
 type RevocationRegistryEntry struct {
 	Ver   string                            `json:"ver"`
 	Value RevocationRegistryDefinitionValue `json:"value"`
+}
+
+type CredentialRevocationRecord struct {
+	CreatedAt              string `json:"created_at"`
+	UpdatedAt              string `json:"updated_at"`
+	CredentialDefinitionID string `json:"cred_def_id"`
+	CredentialRevocationID string `json:"cred_rev_id"`
+	RecordID               string `json:"record_id"`
+	RevocationRegistryID   string `json:"rev_reg_id"`
+	CredentialExchangeID   string `json:"cred_ex_id"`
+	State                  string `json:"state"` // issued/revoked
 }
 
 func (c *Client) CreateRevocationRegistry(credentialDefinitionID string, maxCredNum int) (RevocationRegistry, error) {
@@ -168,13 +178,21 @@ func (c *Client) SetRevocationRegistryState(revocationRegistryID string, state s
 	return result.RevocationRegistry, nil
 }
 
-func (c *Client) RevokeIssuedCredential(credentialRevocationID string, revocationRegistryID string, publish bool) error {
-	queryParams := map[string]string{
-		"cred_rev_id": credentialRevocationID,
-		"rev_reg_id":  revocationRegistryID,
-		"publish":     strconv.FormatBool(publish),
+func (c *Client) RevokeIssuedCredential(credentialExchangeID string, credentialRevocationID string, revocationRegistryID string, publish bool) error {
+	// either (RevocationRegistryID and CredentialRevocationID) OR
+	// CredentialExchangeID
+	var body = struct {
+		CredentialExchangeID   string `json:"cred_ex_id,omitempty"`
+		CredentialRevocationID string `json:"cred_rev_id,omitempty"`
+		RevocationRegistryID   string `json:"rev_reg_id,omitempty"`
+		Publish                bool   `json:"publish"`
+	}{
+		CredentialExchangeID:   credentialExchangeID,
+		CredentialRevocationID: credentialRevocationID,
+		RevocationRegistryID:   revocationRegistryID,
+		Publish:                publish,
 	}
-	return c.post("/revocation/revoke", queryParams, nil, nil)
+	return c.post("/revocation/revoke", nil, body, nil)
 }
 
 // A map from revocation registry identifier to credential revocation identifiers
@@ -187,6 +205,9 @@ type PendingRevocations map[string][]string
 // PublishRevocations
 // Pass nil in case you want to publish all pending revocations
 func (c *Client) PublishRevocations(revocations PendingRevocations) error {
+	if revocations == nil {
+		revocations = PendingRevocations{}
+	}
 	var body = struct {
 		Body PendingRevocations `json:"rrid2crid"`
 	}{
@@ -198,6 +219,9 @@ func (c *Client) PublishRevocations(revocations PendingRevocations) error {
 // ClearPendingRevocations
 // Pass nil in case you want to clear all pending revocations
 func (c *Client) ClearPendingRevocations(revocations PendingRevocations) (PendingRevocations, error) {
+	if revocations == nil {
+		revocations = PendingRevocations{}
+	}
 	var result = struct {
 		Result PendingRevocations `json:"rrid2crid"`
 	}{}
@@ -214,12 +238,31 @@ func (c *Client) ClearPendingRevocations(revocations PendingRevocations) (Pendin
 	return result.Result, nil
 }
 
-func (c *Client) GetCredentialRevocationStatus(credentialExchangeID string, credentialRevocationID string, revocationRegistryID string) error {
-	// TODO
-	return nil
+func (c *Client) GetCredentialRevocationStatus(credentialExchangeID string, credentialRevocationID string, revocationRegistryID string) (CredentialRevocationRecord, error) {
+	// either (RevocationRegistryID and CredentialRevocationID) OR
+	// CredentialExchangeID
+	var queryParams = map[string]string{
+		"cred_ex_id":  credentialExchangeID,
+		"cred_rev_id": credentialRevocationID,
+		"rev_reg_id":  revocationRegistryID,
+	}
+	var result = struct {
+		Result CredentialRevocationRecord `json:"result"`
+	}{}
+	err := c.get("/revocation/credential-record", queryParams, &result)
+	if err != nil {
+		return CredentialRevocationRecord{}, err
+	}
+	return result.Result, nil
 }
 
 func (c *Client) GetNumberOfIssuedCredentials(revocationRegistryID string) (int, error) {
-	// TODO
-	return 0, nil
+	var result = struct {
+		Result int `json:"result"`
+	}{}
+	err := c.get(fmt.Sprintf("/revocation/registry/%s/issued", revocationRegistryID), nil, &result)
+	if err != nil {
+		return 0, err
+	}
+	return result.Result, nil
 }
