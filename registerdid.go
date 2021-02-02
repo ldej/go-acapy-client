@@ -1,5 +1,11 @@
 package acapy
 
+import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+)
+
 type registerDIDRequest struct {
 	Alias string `json:"alias"`
 	Seed  string `json:"seed"`
@@ -22,18 +28,27 @@ const (
 	NetworkMonitor DIDRole = "NETWORK_MONITOR"
 )
 
-func (c *Client) RegisterDID(alias string, seed string, role DIDRole) (RegisterDIDResponse, error) {
-	var registerDID registerDIDRequest
-	var registerDIDResponse RegisterDIDResponse
+func RegisterDID(ledgerURL string, alias string, seed string, role DIDRole) (RegisterDIDResponse, error) {
+	var request registerDIDRequest
+	var response RegisterDIDResponse
 
-	registerDID = registerDIDRequest{
+	request = registerDIDRequest{
 		Alias: alias,
 		Seed:  seed, // Should be random in develop mode
 		Role:  string(role),
 	}
-	err := c.post_ledger("/register", nil, registerDID, &registerDIDResponse)
+	body, err := json.Marshal(request)
 	if err != nil {
 		return RegisterDIDResponse{}, err
 	}
-	return registerDIDResponse, nil
+	resp, err := http.Post(ledgerURL, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return RegisterDIDResponse{}, err
+	}
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return RegisterDIDResponse{}, err
+	}
+
+	return response, nil
 }

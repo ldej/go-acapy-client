@@ -7,31 +7,26 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type Client struct {
-	LedgerURL      string
 	TailsServerURL string
 	ACApyURL       string
 
 	HTTPClient http.Client
 }
 
-func NewClient(ledgerURL string, tailsServerURL string, acapyURL string) *Client {
+func NewClient(acapyURL string, tailsServerURL string) *Client {
 	return &Client{
-		LedgerURL:      ledgerURL,
 		TailsServerURL: tailsServerURL,
-		ACApyURL:       acapyURL,
+		ACApyURL:       strings.TrimRight(acapyURL, "/"),
 		HTTPClient:     http.Client{},
 	}
 }
 
 func (c *Client) post(path string, queryParam map[string]string, body interface{}, response interface{}) error {
 	return c.request(http.MethodPost, c.ACApyURL+path, queryParam, body, response)
-}
-
-func (c *Client) post_ledger(path string, queryParam map[string]string, body interface{}, response interface{}) error {
-	return c.request(http.MethodPost, c.LedgerURL+path, queryParam, body, response)
 }
 
 func (c *Client) get(path string, queryParams map[string]string, response interface{}) error {

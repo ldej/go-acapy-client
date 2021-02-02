@@ -21,13 +21,14 @@ import (
 )
 
 type App struct {
-	client *acapy.Client
-	server *http.Server
-	port   int
-	label  string
-	seed   string
-	rand   string
-	myDID  string
+	client    *acapy.Client
+	server    *http.Server
+	ledgerURL string
+	port      int
+	label     string
+	seed      string
+	rand      string
+	myDID     string
 
 	holderProverConnection acapy.Connection
 	issuerConnection       acapy.Connection
@@ -308,7 +309,7 @@ func (app *App) StartACApy() {
 		"-ot", "http",
 		"--admin", "0.0.0.0", strconv.Itoa(app.port+2),
 		"--admin-insecure-mode",
-		"--genesis-url", fmt.Sprintf("%s/genesis", app.client.LedgerURL),
+		"--genesis-url", fmt.Sprintf("%s/genesis", app.ledgerURL),
 		"--seed", app.seed,
 		"--endpoint", fmt.Sprintf("http://localhost:%d/", app.port+1),
 		"--webhook-url", fmt.Sprintf("http://localhost:%d/webhooks", app.port),
@@ -434,20 +435,22 @@ func main() {
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
 
 	app := App{
-		client: acapy.NewClient(ledgerURL, tailsServerURL, acapyURL),
-		port:   port,
-		label:  name,
-		rand:   strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
+		client:    acapy.NewClient(acapyURL, tailsServerURL),
+		ledgerURL: ledgerURL,
+		port:      port,
+		label:     name,
+		rand:      strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}
 	app.StartWebserver()
 	app.ReadCommands()
 }
 
 func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDResponse, error) {
-	didResponse, err := app.client.RegisterDID(
+	didResponse, err := acapy.RegisterDID(
+		app.ledgerURL+"/register",
 		alias,
 		seed,
-		"ENDORSER", // TODO
+		acapy.Endorser,
 	)
 	if err != nil {
 		log.Fatal(err)
