@@ -21,14 +21,15 @@ import (
 )
 
 type App struct {
-	client    *acapy.Client
-	server    *http.Server
-	ledgerURL string
-	port      int
-	label     string
-	seed      string
-	rand      string
-	myDID     string
+	client         *acapy.Client
+	server         *http.Server
+	ledgerURL      string
+	tailsServerURL string
+	port           int
+	label          string
+	seed           string
+	rand           string
+	myDID          string
 
 	connection             acapy.Connection
 	schema                 acapy.Schema
@@ -282,7 +283,7 @@ func (app *App) StartACApy() {
 		"--auto-respond-credential-offer",
 		"--auto-respond-credential-request",
 		"--auto-store-credential",
-		"--tails-server-base-url", app.client.TailsServerURL,
+		"--tails-server-base-url", app.tailsServerURL,
 		"--preserve-exchange-records",
 	)
 	cmd.Stderr = os.Stderr
@@ -389,11 +390,12 @@ func main() {
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
 
 	app := App{
-		client:    acapy.NewClient(acapyURL, tailsServerURL),
-		ledgerURL: ledgerURL,
-		port:      port,
-		label:     name,
-		rand:      strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
+		client:         acapy.NewClient(acapyURL),
+		ledgerURL:      ledgerURL,
+		tailsServerURL: tailsServerURL,
+		port:           port,
+		label:          name,
+		rand:           strconv.Itoa(rand.New(rand.NewSource(time.Now().UnixNano())).Intn(100000)),
 	}
 	app.StartWebserver()
 	app.ReadCommands()

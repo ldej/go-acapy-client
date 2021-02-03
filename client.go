@@ -11,17 +11,14 @@ import (
 )
 
 type Client struct {
-	TailsServerURL string
-	ACApyURL       string
-
+	ACApyURL   string
 	HTTPClient http.Client
 }
 
-func NewClient(acapyURL string, tailsServerURL string) *Client {
+func NewClient(acapyURL string) *Client {
 	return &Client{
-		TailsServerURL: tailsServerURL,
-		ACApyURL:       strings.TrimRight(acapyURL, "/"),
-		HTTPClient:     http.Client{},
+		ACApyURL:   strings.TrimRight(acapyURL, "/"),
+		HTTPClient: http.Client{},
 	}
 }
 

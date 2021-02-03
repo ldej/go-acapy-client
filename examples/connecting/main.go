@@ -227,7 +227,7 @@ func main() {
 	acapyURL := fmt.Sprintf("http://localhost:%d", port+2)
 
 	app := App{
-		client:    acapy.NewClient(acapyURL, ""),
+		client:    acapy.NewClient(acapyURL),
 		ledgerURL: ledgerURL,
 		port:      port,
 		label:     name,

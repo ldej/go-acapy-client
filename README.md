@@ -64,11 +64,10 @@ import "github.com/ldej/go-acapy-client"
 
 func main() {
     var ledgerURL = "http://localhost:9000"
-    var tailsServerURL = "http://localhost:6543"
     var acapyURL = "http://localhost:8000"
-    client := acapy.NewClient(ledgerURL, tailsServerURL, acapyURL)
+    client := acapy.NewClient(acapyURL)
     
-    didResponse, err := client.RegisterDID("Alice", "Alice", "ENDORSER")
+    didResponse, err := acapy.RegisterDID(ledgerURL, "Alice", "000000000000000000000000MySeed01", acapy.Endorser)
     if err != nil {
     	// handle error
     }
