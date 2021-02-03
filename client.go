@@ -12,6 +12,7 @@ import (
 
 type Client struct {
 	ACApyURL   string
+	APIKey     string
 	HTTPClient http.Client
 }
 
@@ -20,6 +21,11 @@ func NewClient(acapyURL string) *Client {
 		ACApyURL:   strings.TrimRight(acapyURL, "/"),
 		HTTPClient: http.Client{},
 	}
+}
+
+func (c *Client) SetAPIKey(apiKey string) *Client {
+	c.APIKey = apiKey
+	return c
 }
 
 func (c *Client) post(path string, queryParam map[string]string, body interface{}, response interface{}) error {
@@ -57,6 +63,9 @@ func (c *Client) request(method string, url string, queryParams map[string]strin
 	r, err := http.NewRequest(method, url, input)
 	if err != nil {
 		return err
+	}
+	if c.APIKey != "" {
+		r.Header.Add("X-API-KEY", c.APIKey)
 	}
 	r.Header.Add("Content-Type", "application/json")
 

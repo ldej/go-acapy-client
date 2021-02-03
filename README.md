@@ -384,7 +384,7 @@ The `acapy.WebhookHandler` is web framework agnostic and reads the topic from th
 
 - [ ] godoc
 - [ ] Proper error handling
-- [ ] Admin API Key
+- [x] Admin API Key
 - [ ] Tracing via global config
 - [ ] Automation of steps via global config
 - [ ] Payment decorators https://github.com/hyperledger/aries-rfcs/tree/master/features/0075-payment-decorators
