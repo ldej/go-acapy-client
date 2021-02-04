@@ -133,18 +133,19 @@ func (app *App) ReadCommands() {
 				})
 			}
 
-			app.credentialExchange, err = app.client.SendCredentialOffer(
+			if credentialExchange, err := app.client.OfferCredential(
 				app.credentialDefinitionID,
 				app.connection.ConnectionID,
 				acapy.NewCredentialPreview(attributes),
 				comment,
-			)
-			if err != nil {
+			); err != nil {
 				app.Exit(err)
+			} else {
+				app.credentialExchange = credentialExchange
 			}
 			fmt.Printf("Credential Exchange ID: %s\n", app.credentialExchange.CredentialExchangeID)
 		case "6":
-			_, err := app.client.SendCredentialRequestByID(app.credentialExchange.CredentialExchangeID)
+			_, err := app.client.RequestCredentialByID(app.credentialExchange.CredentialExchangeID)
 			if err != nil {
 				app.Exit(err)
 			}

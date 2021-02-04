@@ -152,7 +152,7 @@ func (app *App) ReadCommands() {
 				})
 			}
 
-			if credentialExchange, err := app.client.SendCredential(
+			if credentialExchange, err := app.client.IssueCredential(
 				app.credentialDefinitionID,
 				app.holderProverConnection.ConnectionID,
 				app.myDID,
