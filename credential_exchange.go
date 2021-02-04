@@ -101,8 +101,15 @@ type RawCredential struct {
 	Description string `json:"raw_credential"`
 }
 
+func NewCredentialPreview(attributes []CredentialPreviewAttribute) CredentialPreview {
+	return CredentialPreview{
+		Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+		Attributes: attributes,
+	}
+}
+
 type CredentialPreview struct {
-	Type       string                       `json:"@type"` // TODO did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview
+	Type       string                       `json:"@type"`
 	Attributes []CredentialPreviewAttribute `json:"attributes"`
 }
 

@@ -157,16 +157,13 @@ func (app *App) ReadCommands() {
 				ConnectionID:           app.holderProverConnection.ConnectionID,
 				IssuerDID:              app.myDID,
 				Comment:                comment,
-				CredentialPreview: acapy.CredentialPreview{
-					Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
-					Attributes: attributes,
-				},
-				SchemaName:      app.schema.Name,
-				SchemaVersion:   app.schema.Version,
-				SchemaID:        app.schema.ID,
-				SchemaIssuerDID: app.myDID,
-				Trace:           false,
-				AutoRemove:      false,
+				CredentialPreview:      acapy.NewCredentialPreview(attributes),
+				SchemaName:             app.schema.Name,
+				SchemaVersion:          app.schema.Version,
+				SchemaID:               app.schema.ID,
+				SchemaIssuerDID:        app.myDID,
+				Trace:                  false,
+				AutoRemove:             false,
 			}
 			credentialExchange, err := app.client.SendCredential(credentialSendRequest)
 			if err != nil {

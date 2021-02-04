@@ -136,14 +136,11 @@ func (app *App) ReadCommands() {
 			var offer = acapy.CredentialOfferRequest{
 				CredentialDefinitionID: app.credentialDefinitionID,
 				ConnectionID:           app.connection.ConnectionID,
-				CredentialPreview: acapy.CredentialPreview{
-					Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
-					Attributes: attributes,
-				},
-				Comment:    comment,
-				Trace:      false,
-				AutoRemove: false,
-				AutoIssue:  false,
+				CredentialPreview:      acapy.NewCredentialPreview(attributes),
+				Comment:                comment,
+				Trace:                  false,
+				AutoRemove:             false,
+				AutoIssue:              false,
 			}
 			app.credentialExchange, err = app.client.SendCredentialOffer(offer)
 			if err != nil {
