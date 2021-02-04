@@ -18,37 +18,32 @@ type CredentialPreview struct {
 
 type CredentialPreviewAttribute struct {
 	Name     string `json:"name"`
-	MimeType string `json:"mime-type"`
+	MimeType string `json:"mime-type"` // optional
 	Value    string `json:"value"`
 }
 
 type createCredentialExchangeRecordRequest struct {
-	CredentialDefinitionID string `json:"cred_def_id"`
-	IssuerDID              string `json:"issuer_did"`
-	Comment                string `json:"comment"`
-	SchemaID               string `json:"schema_id"`
+	CredentialDefinitionID string            `json:"cred_def_id"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"`
+	IssuerDID              string            `json:"issuer_did"`
+	Comment                string            `json:"comment"`
+	SchemaID               string            `json:"schema_id"`
+	Trace                  bool              `json:"trace"`
+	AutoRemove             bool              `json:"auto_remove"`
 
-	// filled automatically
-	CredentialPreview CredentialPreview `json:"credential_proposal"`
-	SchemaName        string            `json:"schema_name"`
-	SchemaVersion     string            `json:"schema_version"`
-	SchemaIssuerDID   string            `json:"schema_issuer_did"`
-	Trace             bool              `json:"trace"`
-	AutoRemove        bool              `json:"auto_remove"`
+	// not supported
+	SchemaName      string `json:"schema_name"`
+	SchemaVersion   string `json:"schema_version"`
+	SchemaIssuerDID string `json:"schema_issuer_did"`
 }
 
 func (c *Client) CreateCredentialExchangeRecord(
-	credentialDefinitionID string,
-	issuerDID string,
-	schemaID string,
-	credentialPreview CredentialPreview,
-	comment string,
+	credentialPreview CredentialPreview, // required
+	credentialDefinitionID string, // optional
+	issuerDID string, // optional
+	schemaID string, // optional
+	comment string, // optional
 ) (CredentialExchangeRecord, error) {
-
-	var schemaIssuerDID, _, schemaName, schemaVersion, err = SchemaIDToParts(schemaID)
-	if err != nil {
-		return CredentialExchangeRecord{}, err
-	}
 
 	var request = createCredentialExchangeRecordRequest{
 		CredentialDefinitionID: credentialDefinitionID,
@@ -56,14 +51,11 @@ func (c *Client) CreateCredentialExchangeRecord(
 		SchemaID:               schemaID,
 		CredentialPreview:      credentialPreview,
 		Comment:                comment,
-		SchemaIssuerDID:        schemaIssuerDID,
-		SchemaName:             schemaName,
-		SchemaVersion:          schemaVersion,
 		Trace:                  c.tracing,
 		AutoRemove:             !c.preserveExchangeRecords,
 	}
 	var credentialExchange CredentialExchangeRecord
-	err = c.post("/issue-credential/create", nil, request, &credentialExchange)
+	err := c.post("/issue-credential/create", nil, request, &credentialExchange)
 	if err != nil {
 		return CredentialExchangeRecord{}, err
 	}
@@ -77,30 +69,26 @@ type credentialProposalRequest struct {
 	Comment                string            `json:"comment"`
 	CredentialPreview      CredentialPreview `json:"credential_proposal"`
 	SchemaID               string            `json:"schema_id"`
+	Trace                  bool              `json:"trace"`
+	AutoRemove             bool              `json:"auto_remove"`
 
-	// filled automatically
+	// not supported
 	SchemaName      string `json:"schema_name"`
 	SchemaVersion   string `json:"schema_version"`
 	SchemaIssuerDID string `json:"schema_issuer_did"`
-	Trace           bool   `json:"trace"`
-	AutoRemove      bool   `json:"auto_remove"`
 }
 
 // ProposeCredential tells the issuer what the holder hopes to receive
 func (c *Client) ProposeCredential(
-	credentialDefinitionID string,
-	connectionID string,
-	issuerDID string,
-	comment string,
-	credentialPreview CredentialPreview,
-	schemaID string,
+	connectionID string, // required
+	credentialPreview CredentialPreview, // required
+	comment string, // optional
+	credentialDefinitionID string, // optional
+	issuerDID string, // optional
+	schemaID string, // optional
 ) (CredentialExchangeRecord, error) {
 
 	var response CredentialExchangeRecord
-	var schemaIssuerDID, _, schemaName, schemaVersion, err = SchemaIDToParts(schemaID)
-	if err != nil {
-		return CredentialExchangeRecord{}, err
-	}
 
 	var request = credentialProposalRequest{
 		CredentialDefinitionID: credentialDefinitionID,
@@ -109,15 +97,11 @@ func (c *Client) ProposeCredential(
 		Comment:                comment,
 		CredentialPreview:      credentialPreview,
 		SchemaID:               schemaID,
-
-		SchemaName:      schemaName,
-		SchemaVersion:   schemaVersion,
-		SchemaIssuerDID: schemaIssuerDID,
-		Trace:           c.tracing,
-		AutoRemove:      !c.preserveExchangeRecords,
+		Trace:                  c.tracing,
+		AutoRemove:             !c.preserveExchangeRecords,
 	}
 
-	err = c.post("/issue-credential/send-proposal", nil, request, &response)
+	err := c.post("/issue-credential/send-proposal", nil, request, &response)
 	if err != nil {
 		return CredentialExchangeRecord{}, err
 	}
@@ -139,10 +123,10 @@ type credentialOfferRequest struct {
 // OfferCredential sends to the holder what the issuer can offer
 // TODO support payment decorator
 func (c *Client) OfferCredential(
-	credentialDefinitionID string,
-	connectionID string,
-	credentialPreview CredentialPreview,
-	comment string,
+	connectionID string, // required
+	credentialPreview CredentialPreview, // required
+	comment string, // optional
+	credentialDefinitionID string, // optional
 ) (CredentialExchangeRecord, error) {
 	var offer = credentialOfferRequest{
 		CredentialDefinitionID: credentialDefinitionID,
@@ -188,30 +172,26 @@ type issueCredentialRequest struct {
 	Comment                string            `json:"comment"`
 	CredentialPreview      CredentialPreview `json:"credential_proposal"`
 	SchemaID               string            `json:"schema_id"`
+	Trace                  bool              `json:"trace"`
+	AutoRemove             bool              `json:"auto_remove"`
 
-	// filled automatically
+	// not supported
 	SchemaName      string `json:"schema_name"`
 	SchemaVersion   string `json:"schema_version"`
 	SchemaIssuerDID string `json:"schema_issuer_did"`
-	Trace           bool   `json:"trace"`
-	AutoRemove      bool   `json:"auto_remove"`
 }
 
 // IssueCredential issues a credential to the holder
 func (c *Client) IssueCredential(
-	credentialDefinitionID string,
-	connectionID string,
-	issuerDID string,
-	comment string,
-	credentialPreview CredentialPreview,
-	schemaID string,
+	connectionID string, // required
+	credentialPreview CredentialPreview, // required
+	comment string, // optional
+	credentialDefinitionID string, // optional
+	issuerDID string, // optional
+	schemaID string, // optional
 ) (CredentialExchangeRecord, error) {
 
 	var credentialExchange CredentialExchangeRecord
-	var schemaIssuerDID, _, schemaName, schemaVersion, err = SchemaIDToParts(schemaID)
-	if err != nil {
-		return CredentialExchangeRecord{}, err
-	}
 
 	var request = issueCredentialRequest{
 		CredentialDefinitionID: credentialDefinitionID,
@@ -220,15 +200,11 @@ func (c *Client) IssueCredential(
 		Comment:                comment,
 		CredentialPreview:      credentialPreview,
 		SchemaID:               schemaID,
-
-		SchemaName:      schemaName,
-		SchemaVersion:   schemaVersion,
-		SchemaIssuerDID: schemaIssuerDID,
-		Trace:           c.tracing,
-		AutoRemove:      !c.preserveExchangeRecords,
+		Trace:                  c.tracing,
+		AutoRemove:             !c.preserveExchangeRecords,
 	}
 
-	err = c.post("/issue-credential/send", nil, request, &credentialExchange)
+	err := c.post("/issue-credential/send", nil, request, &credentialExchange)
 	if err != nil {
 		return CredentialExchangeRecord{}, err
 	}

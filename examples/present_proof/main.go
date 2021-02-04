@@ -137,11 +137,11 @@ func (app *App) ReadCommands() {
 			}
 
 			if credentialExchange, err := app.client.IssueCredential(
-				app.credentialDefinitionID,
 				app.connection.ConnectionID,
-				app.myDID,
-				comment,
 				acapy.NewCredentialPreview(attributes),
+				comment,
+				app.credentialDefinitionID,
+				app.myDID,
 				app.schema.ID,
 			); err != nil {
 				app.Exit(err)

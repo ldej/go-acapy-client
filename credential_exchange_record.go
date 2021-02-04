@@ -41,7 +41,7 @@ type CredentialOffer struct {
 }
 
 type CredentialOfferMap struct {
-	Type              string            `json:"@type"`
+	Type              string            `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/offer-credential
 	ID                string            `json:"@id"`
 	Thread            Thread            `json:"~thread"`
 	CredentialPreview CredentialPreview `json:"credential_preview"`
@@ -57,7 +57,7 @@ type CredentialOfferMap struct {
 
 type CredentialProposal struct {
 	ID                     string            `json:"@id"`
-	Type                   string            `json:"@type"`
+	Type                   string            `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/propose-credential
 	CredentialDefinitionID string            `json:"cred_def_id"`
 	SchemaID               string            `json:"schema_id"`
 	IssuerDID              string            `json:"issuer_did"`

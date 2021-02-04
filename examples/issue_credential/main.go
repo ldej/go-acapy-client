@@ -134,9 +134,9 @@ func (app *App) ReadCommands() {
 			}
 
 			if credentialExchange, err := app.client.OfferCredential(
-				app.credentialDefinitionID,
 				app.connection.ConnectionID,
 				acapy.NewCredentialPreview(attributes),
+				app.credentialDefinitionID,
 				comment,
 			); err != nil {
 				app.Exit(err)
