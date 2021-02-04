@@ -183,6 +183,26 @@ Examples can be found in the [examples](./examples) folder.
 | SendCredentialOffer             | POST   | /issue-credential/send-offer                  | :heavy_check_mark: |
 | SendCredentialProposal          | POST   | /issue-credential/send-proposal               | :heavy_check_mark: |
 
+### Issue Credentials (Credential Exchange v2.0)
+
+`{id}` = credential exchange identifier
+
+| Function Name | Method | Endpoint                                          | Implemented   |
+| ------------- | ------ | ------------------------------------------------- | ------------- |
+| -             | POST   | /issue-credential-2.0/create                      | :exclamation: |
+| -             | GET    | /issue-credential-2.0/records                     | :exclamation: |
+| -             | GET    | /issue-credential-2.0/records/{id}                | :exclamation: |
+| -             | DELETE | /issue-credential-2.0/records/{id}                | :exclamation: |
+| -             | POST   | /issue-credential-2.0/records/{id}/issue          | :exclamation: |
+| -             | POST   | /issue-credential-2.0/records/{id}/problem-report | :exclamation: |
+| -             | POST   | /issue-credential-2.0/records/{id}/send-offer     | :exclamation: |
+| -             | POST   | /issue-credential-2.0/records/{id}/send-request   | :exclamation: |
+| -             | POST   | /issue-credential-2.0/records/{id}/store          | :exclamation: |
+| -             | POST   | /issue-credential-2.0/send                        | :exclamation: |
+| -             | POST   | /issue-credential-2.0/send-offer                  | :exclamation: |
+| -             | POST   | /issue-credential-2.0/send-proposal               | :exclamation: |
+
+
 ### Ledger
 
 | Function Name            | Method | Endpoint                          | Implemented        |
