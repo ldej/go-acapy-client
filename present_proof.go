@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type PresentationExchange struct {
+type PresentationExchangeRecord struct {
 	PresentationExchangeID   string                  `json:"presentation_exchange_id"`
 	ConnectionID             string                  `json:"connection_id"`
 	ThreadID                 string                  `json:"thread_id"`
@@ -353,29 +353,29 @@ type PresentationProof struct {
 	Trace                  bool                                  `json:"trace"`
 }
 
-func (c *Client) SendPresentationProposal(request PresentationProposalRequest) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) SendPresentationProposal(request PresentationProposalRequest) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.post("/present-proof/send-proposal", nil, request, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, err
+		return PresentationExchangeRecord{}, err
 	}
 	return presentationExchange, nil
 }
 
-func (c *Client) CreatePresentationRequest(request PresentationRequestRequest) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) CreatePresentationRequest(request PresentationRequestRequest) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.post("/present-proof/create-request", nil, request, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, err
+		return PresentationExchangeRecord{}, err
 	}
 	return presentationExchange, nil
 }
 
-func (c *Client) SendPresentationRequest(request PresentationRequestRequest) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) SendPresentationRequest(request PresentationRequestRequest) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.post("/present-proof/send-request", nil, request, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, err
+		return PresentationExchangeRecord{}, err
 	}
 	return presentationExchange, nil
 }
@@ -387,9 +387,9 @@ type QueryPresentationExchangeParams struct {
 	ThreadID     string
 }
 
-func (c *Client) QueryPresentationExchange(params QueryPresentationExchangeParams) ([]PresentationExchange, error) {
+func (c *Client) QueryPresentationExchange(params QueryPresentationExchangeParams) ([]PresentationExchangeRecord, error) {
 	var result = struct {
-		PresentationExchanges []PresentationExchange `json:"results"`
+		PresentationExchanges []PresentationExchangeRecord `json:"results"`
 	}{}
 	queryParams := map[string]string{
 		"connection_id": params.ConnectionID,
@@ -404,38 +404,38 @@ func (c *Client) QueryPresentationExchange(params QueryPresentationExchangeParam
 	return result.PresentationExchanges, nil
 }
 
-func (c *Client) GetPresentationExchangeByID(presentationExchangeID string) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) GetPresentationExchangeByID(presentationExchangeID string) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.get(fmt.Sprintf("/present-proof/records/%s", presentationExchangeID), nil, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, nil
+		return PresentationExchangeRecord{}, nil
 	}
 	return presentationExchange, nil
 }
 
-func (c *Client) SendPresentationRequestByID(presentationExchangeID string, request PresentationRequestRequest) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) SendPresentationRequestByID(presentationExchangeID string, request PresentationRequestRequest) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.post(fmt.Sprintf("/present-proof/records/%s/send-request", presentationExchangeID), nil, request, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, nil
+		return PresentationExchangeRecord{}, nil
 	}
 	return presentationExchange, nil
 }
 
-func (c *Client) SendPresentationByID(presentationExchangeID string, proof PresentationProof) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) SendPresentationByID(presentationExchangeID string, proof PresentationProof) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.post(fmt.Sprintf("/present-proof/records/%s/send-presentation", presentationExchangeID), nil, proof, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, nil
+		return PresentationExchangeRecord{}, nil
 	}
 	return presentationExchange, nil
 }
 
-func (c *Client) VerifyPresentationByID(presentationExchangeID string) (PresentationExchange, error) {
-	var presentationExchange PresentationExchange
+func (c *Client) VerifyPresentationByID(presentationExchangeID string) (PresentationExchangeRecord, error) {
+	var presentationExchange PresentationExchangeRecord
 	err := c.post(fmt.Sprintf("/present-proof/records/%s/verify-presentation", presentationExchangeID), nil, nil, &presentationExchange)
 	if err != nil {
-		return PresentationExchange{}, nil
+		return PresentationExchangeRecord{}, nil
 	}
 	return presentationExchange, nil
 }

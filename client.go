@@ -11,37 +11,60 @@ import (
 )
 
 type Client struct {
-	ACApyURL   string
-	APIKey     string
-	HTTPClient http.Client
+	acapyURL                   string
+	apiKey                     string
+	tracing                    bool
+	preserveExchangeRecords    bool
+	autoRespondCredentialOffer bool
+	HTTPClient                 http.Client
 }
 
 func NewClient(acapyURL string) *Client {
 	return &Client{
-		ACApyURL:   strings.TrimRight(acapyURL, "/"),
+		acapyURL:   strings.TrimRight(acapyURL, "/"),
 		HTTPClient: http.Client{},
 	}
 }
 
 func (c *Client) SetAPIKey(apiKey string) *Client {
-	c.APIKey = apiKey
+	c.apiKey = apiKey
+	return c
+}
+
+func (c *Client) EnableTracing() *Client {
+	c.tracing = true
+	return c
+}
+
+func (c *Client) DisableTracing() *Client {
+	c.tracing = false
+	return c
+}
+
+func (c *Client) PreserveExchangeRecords() *Client {
+	c.preserveExchangeRecords = true
+	return c
+}
+
+func (c *Client) AutoRespondCredentialOffer() *Client {
+	c.autoRespondCredentialOffer = true
 	return c
 }
 
 func (c *Client) post(path string, queryParam map[string]string, body interface{}, response interface{}) error {
-	return c.request(http.MethodPost, c.ACApyURL+path, queryParam, body, response)
+	return c.request(http.MethodPost, c.acapyURL+path, queryParam, body, response)
 }
 
 func (c *Client) get(path string, queryParams map[string]string, response interface{}) error {
-	return c.request(http.MethodGet, c.ACApyURL+path, queryParams, nil, response)
+	return c.request(http.MethodGet, c.acapyURL+path, queryParams, nil, response)
 }
 
 func (c *Client) patch(path string, queryParams map[string]string, body interface{}, response interface{}) error {
-	return c.request(http.MethodPatch, c.ACApyURL+path, queryParams, body, response)
+	return c.request(http.MethodPatch, c.acapyURL+path, queryParams, body, response)
 }
 
 func (c *Client) put(path string) error {
-	return c.request(http.MethodPut, c.ACApyURL+path, nil, nil, nil)
+	return c.request(http.MethodPut, c.acapyURL+path, nil, nil, nil)
 }
 
 func (c *Client) delete(url string) error {
@@ -64,8 +87,8 @@ func (c *Client) request(method string, url string, queryParams map[string]strin
 	if err != nil {
 		return err
 	}
-	if c.APIKey != "" {
-		r.Header.Add("X-API-KEY", c.APIKey)
+	if c.apiKey != "" {
+		r.Header.Add("X-API-KEY", c.apiKey)
 	}
 	r.Header.Add("Content-Type", "application/json")
 

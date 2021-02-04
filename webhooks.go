@@ -12,9 +12,9 @@ func WebhookHandler(
 	connectionsEventHandler func(event Connection),
 	basicMessagesEventHandler func(event BasicMessagesEvent),
 	problemReportEventHandler func(event ProblemReportEvent),
-	credentialExchangeEventHandler func(event CredentialExchange),
+	credentialExchangeEventHandler func(event CredentialExchangeRecord),
 	revocationRegistryEventHandler func(event RevocationRegistry),
-	presentationExchangeEventHandler func(event PresentationExchange),
+	presentationExchangeEventHandler func(event PresentationExchangeRecord),
 	credentialRevocationEventHandler func(event CredentialRevocationRecord),
 	pingEventHandler func(event PingEvent),
 	outOfBandEventHandler func(event OutOfBandEvent),
@@ -37,7 +37,7 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&problemReportEvent)
 			problemReportEventHandler(problemReportEvent)
 		case "issue_credential":
-			var credentialExchangeEvent CredentialExchange
+			var credentialExchangeEvent CredentialExchangeRecord
 			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
 			credentialExchangeEventHandler(credentialExchangeEvent)
 		case "issuer_cred_rev":
@@ -53,7 +53,7 @@ func WebhookHandler(
 			json.NewDecoder(r.Body).Decode(&outOfBandEvent)
 			outOfBandEventHandler(outOfBandEvent)
 		case "present_proof":
-			var presentationExchangeEvent PresentationExchange
+			var presentationExchangeEvent PresentationExchangeRecord
 			json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
 			presentationExchangeEventHandler(presentationExchangeEvent)
 		case "ping":

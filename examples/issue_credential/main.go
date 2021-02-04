@@ -33,7 +33,7 @@ type App struct {
 	connection             acapy.Connection
 	schema                 acapy.Schema
 	credentialDefinitionID string
-	credentialExchange     acapy.CredentialExchange
+	credentialExchange     acapy.CredentialExchangeRecord
 }
 
 func (app *App) ReadCommands() {
@@ -133,16 +133,12 @@ func (app *App) ReadCommands() {
 				})
 			}
 
-			var offer = acapy.CredentialOfferRequest{
-				CredentialDefinitionID: app.credentialDefinitionID,
-				ConnectionID:           app.connection.ConnectionID,
-				CredentialPreview:      acapy.NewCredentialPreview(attributes),
-				Comment:                comment,
-				Trace:                  false,
-				AutoRemove:             false,
-				AutoIssue:              false,
-			}
-			app.credentialExchange, err = app.client.SendCredentialOffer(offer)
+			app.credentialExchange, err = app.client.SendCredentialOffer(
+				app.credentialDefinitionID,
+				app.connection.ConnectionID,
+				acapy.NewCredentialPreview(attributes),
+				comment,
+			)
 			if err != nil {
 				app.Exit(err)
 			}
@@ -268,7 +264,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
-func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
+func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchangeRecord) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	app.credentialExchange = event
 	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.TheirLabel, event.State)

@@ -1,7 +1,9 @@
 package acapy
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 )
 
 type Schema struct {
@@ -22,6 +24,18 @@ type schemaRequest struct {
 type schemaResponse struct {
 	SchemaID string `json:"schema_id"`
 	Schema   Schema `json:"schema"`
+}
+
+var ErrInvalidSchemaID = errors.New("invalid schema ID")
+
+// SchemaIDToParts takes a schemaID, for example 6qnvgJtqwK44D8LFYnV5Yf:2:registration.dflow:1.0.0
+// and returns the schema's issuer DID, the `ver`, the schema name and the schema version.
+func SchemaIDToParts(schemaID string) (string, string, string, string, error) {
+	parts := strings.Split(schemaID, ":")
+	if len(parts) != 4 {
+		return "", "", "", "", ErrInvalidSchemaID
+	}
+	return parts[0], parts[1], parts[2], parts[3], nil
 }
 
 func (c *Client) RegisterSchema(name string, version string, attributes []string) (Schema, error) {

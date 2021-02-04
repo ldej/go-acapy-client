@@ -10,7 +10,7 @@ type Attachment struct {
 // CreateOutOfBandInvitationRequest must have IncludeHandshake true or, Attachments should be filled, or both
 type CreateOutOfBandInvitationRequest struct {
 	// When I put something in Attachments it crashes,
-	// the CredentialExchange or PresentationExchange should probably be in the right state
+	// the CredentialExchangeRecord or PresentationExchangeRecord should probably be in the right state
 	Attachments      []Attachment `json:"attachments,omitempty"`
 	IncludeHandshake bool         `json:"include_handshake"`
 	Metadata         struct{}     `json:"metadata,omitempty"` // TODO

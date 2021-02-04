@@ -34,8 +34,8 @@ type App struct {
 	connection             acapy.Connection
 	schema                 acapy.Schema
 	credentialDefinitionID string
-	credentialExchange     acapy.CredentialExchange
-	presentationExchange   acapy.PresentationExchange
+	credentialExchange     acapy.CredentialExchangeRecord
+	presentationExchange   acapy.PresentationExchangeRecord
 	revocationRegistry     acapy.RevocationRegistry
 }
 
@@ -136,24 +136,19 @@ func (app *App) ReadCommands() {
 				})
 			}
 
-			credentialSendRequest := acapy.CredentialSendRequest{
-				CredentialDefinitionID: app.credentialDefinitionID,
-				ConnectionID:           app.connection.ConnectionID,
-				IssuerDID:              app.myDID,
-				Comment:                comment,
-				CredentialPreview:      acapy.NewCredentialPreview(attributes),
-				SchemaName:             app.schema.Name,
-				SchemaVersion:          app.schema.Version,
-				SchemaID:               app.schema.ID,
-				SchemaIssuerDID:        app.myDID,
-				Trace:                  false,
-				AutoRemove:             false,
-			}
-			credentialExchange, err := app.client.SendCredential(credentialSendRequest)
-			if err != nil {
+			if credentialExchange, err := app.client.SendCredential(
+				app.credentialDefinitionID,
+				app.connection.ConnectionID,
+				app.myDID,
+				comment,
+				acapy.NewCredentialPreview(attributes),
+				app.schema.ID,
+			); err != nil {
 				app.Exit(err)
+			} else {
+				app.credentialExchange = credentialExchange
 			}
-			app.credentialExchange = credentialExchange
+
 		case "6":
 			fmt.Printf("Comment: ")
 			scanner.Scan()
@@ -345,7 +340,7 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
-func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchange) {
+func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchangeRecord) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	app.credentialExchange = event
 	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.TheirLabel, event.State)
@@ -360,7 +355,7 @@ func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {
 	fmt.Printf("\n -> Received problem report: %+v\n", event)
 }
 
-func (app *App) PresentationExchangeEventHandler(event acapy.PresentationExchange) {
+func (app *App) PresentationExchangeEventHandler(event acapy.PresentationExchangeRecord) {
 	app.presentationExchange = event
 	connection, _ := app.client.GetConnection(event.ConnectionID)
 	fmt.Printf("\n -> Presentation Exchange update: %s - %s - %s\n", connection.TheirLabel, event.PresentationExchangeID, event.State)
