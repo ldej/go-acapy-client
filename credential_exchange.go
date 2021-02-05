@@ -23,18 +23,18 @@ type CredentialPreviewAttribute struct {
 }
 
 type createCredentialExchangeRecordRequest struct {
-	CredentialDefinitionID string            `json:"cred_def_id"`
-	CredentialPreview      CredentialPreview `json:"credential_proposal"`
-	IssuerDID              string            `json:"issuer_did"`
-	Comment                string            `json:"comment"`
-	SchemaID               string            `json:"schema_id"`
-	Trace                  bool              `json:"trace"`
-	AutoRemove             bool              `json:"auto_remove"`
+	CredentialDefinitionID string            `json:"cred_def_id,omitempty"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"` // required
+	IssuerDID              string            `json:"issuer_did,omitempty"`
+	Comment                string            `json:"comment,omitempty"`
+	SchemaID               string            `json:"schema_id,omitempty"`
+	Trace                  bool              `json:"trace,omitempty"`
+	AutoRemove             bool              `json:"auto_remove,omitempty"`
 
 	// not supported
-	SchemaName      string `json:"schema_name"`
-	SchemaVersion   string `json:"schema_version"`
-	SchemaIssuerDID string `json:"schema_issuer_did"`
+	SchemaName      string `json:"schema_name,omitempty"`
+	SchemaVersion   string `json:"schema_version,omitempty"`
+	SchemaIssuerDID string `json:"schema_issuer_did,omitempty"`
 }
 
 func (c *Client) CreateCredentialExchangeRecord(
@@ -63,19 +63,19 @@ func (c *Client) CreateCredentialExchangeRecord(
 }
 
 type credentialProposalRequest struct {
-	CredentialDefinitionID string            `json:"cred_def_id"`
-	ConnectionID           string            `json:"connection_id"`
-	IssuerDID              string            `json:"issuer_did"`
-	Comment                string            `json:"comment"`
-	CredentialPreview      CredentialPreview `json:"credential_proposal"`
-	SchemaID               string            `json:"schema_id"`
-	Trace                  bool              `json:"trace"`
-	AutoRemove             bool              `json:"auto_remove"`
+	CredentialDefinitionID string            `json:"cred_def_id,omitempty"`
+	ConnectionID           string            `json:"connection_id"` // required
+	IssuerDID              string            `json:"issuer_did,omitempty"`
+	Comment                string            `json:"comment,omitempty"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"` // required
+	SchemaID               string            `json:"schema_id,omitempty"`
+	Trace                  bool              `json:"trace,omitempty"`
+	AutoRemove             bool              `json:"auto_remove,omitempty"`
 
 	// not supported
-	SchemaName      string `json:"schema_name"`
-	SchemaVersion   string `json:"schema_version"`
-	SchemaIssuerDID string `json:"schema_issuer_did"`
+	SchemaName      string `json:"schema_name,omitempty"`
+	SchemaVersion   string `json:"schema_version,omitempty"`
+	SchemaIssuerDID string `json:"schema_issuer_did,omitempty"`
 }
 
 // ProposeCredential tells the issuer what the holder hopes to receive
@@ -109,15 +109,15 @@ func (c *Client) ProposeCredential(
 }
 
 type credentialOfferRequest struct {
-	CredentialDefinitionID string            `json:"cred_def_id"`
-	ConnectionID           string            `json:"connection_id"`
-	CredentialPreview      CredentialPreview `json:"credential_preview"`
-	Comment                string            `json:"comment"`
+	CredentialDefinitionID string            `json:"cred_def_id,omitempty"`
+	ConnectionID           string            `json:"connection_id"`      // required
+	CredentialPreview      CredentialPreview `json:"credential_preview"` // required
+	Comment                string            `json:"comment,omitempty"`
 
 	// filled automatically
-	Trace      bool `json:"trace"`
-	AutoRemove bool `json:"auto_remove"`
-	AutoIssue  bool `json:"auto_issue"`
+	Trace      bool `json:"trace,omitempty"`
+	AutoRemove bool `json:"auto_remove,omitempty"`
+	AutoIssue  bool `json:"auto_issue,omitempty"`
 }
 
 // OfferCredential sends to the holder what the issuer can offer
@@ -166,19 +166,19 @@ func (c *Client) RequestCredentialByID(credentialExchangeID string) (CredentialE
 }
 
 type issueCredentialRequest struct {
-	CredentialDefinitionID string            `json:"cred_def_id"`
-	ConnectionID           string            `json:"connection_id"`
-	IssuerDID              string            `json:"issuer_did"`
-	Comment                string            `json:"comment"`
-	CredentialPreview      CredentialPreview `json:"credential_proposal"`
-	SchemaID               string            `json:"schema_id"`
-	Trace                  bool              `json:"trace"`
-	AutoRemove             bool              `json:"auto_remove"`
+	CredentialDefinitionID string            `json:"cred_def_id,omitempty"`
+	ConnectionID           string            `json:"connection_id"` // required
+	IssuerDID              string            `json:"issuer_did,omitempty"`
+	Comment                string            `json:"comment,omitempty"`
+	CredentialPreview      CredentialPreview `json:"credential_proposal"` // required
+	SchemaID               string            `json:"schema_id,omitempty"`
+	Trace                  bool              `json:"trace,omitempty"`
+	AutoRemove             bool              `json:"auto_remove,omitempty"`
 
 	// not supported
-	SchemaName      string `json:"schema_name"`
-	SchemaVersion   string `json:"schema_version"`
-	SchemaIssuerDID string `json:"schema_issuer_did"`
+	SchemaName      string `json:"schema_name,omitempty"`
+	SchemaVersion   string `json:"schema_version,omitempty"`
+	SchemaIssuerDID string `json:"schema_issuer_did,omitempty"`
 }
 
 // IssueCredential issues a credential to the holder
