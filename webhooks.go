@@ -2,8 +2,7 @@ package acapy
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -25,46 +24,62 @@ func WebhookHandler(
 
 		switch topic {
 		case "connections":
-			var connectionsEvent Connection
-			json.NewDecoder(r.Body).Decode(&connectionsEvent)
-			connectionsEventHandler(connectionsEvent)
+			if connectionsEventHandler != nil {
+				var connectionsEvent Connection
+				json.NewDecoder(r.Body).Decode(&connectionsEvent)
+				connectionsEventHandler(connectionsEvent)
+			}
 		case "basicmessages":
-			var basicMessagesEvent BasicMessagesEvent
-			json.NewDecoder(r.Body).Decode(&basicMessagesEvent)
-			basicMessagesEventHandler(basicMessagesEvent)
+			if basicMessagesEventHandler != nil {
+				var basicMessagesEvent BasicMessagesEvent
+				json.NewDecoder(r.Body).Decode(&basicMessagesEvent)
+				basicMessagesEventHandler(basicMessagesEvent)
+			}
 		case "problem_report":
-			var problemReportEvent ProblemReportEvent
-			json.NewDecoder(r.Body).Decode(&problemReportEvent)
-			problemReportEventHandler(problemReportEvent)
+			if problemReportEventHandler != nil {
+				var problemReportEvent ProblemReportEvent
+				json.NewDecoder(r.Body).Decode(&problemReportEvent)
+				problemReportEventHandler(problemReportEvent)
+			}
 		case "issue_credential":
-			var credentialExchangeEvent CredentialExchangeRecord
-			json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
-			credentialExchangeEventHandler(credentialExchangeEvent)
+			if credentialExchangeEventHandler != nil {
+				var credentialExchangeEvent CredentialExchangeRecord
+				json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
+				credentialExchangeEventHandler(credentialExchangeEvent)
+			}
 		case "issuer_cred_rev":
-			var credentialRevocationEvent CredentialRevocationRecord
-			json.NewDecoder(r.Body).Decode(&credentialRevocationEvent)
-			credentialRevocationEventHandler(credentialRevocationEvent)
+			if credentialRevocationEventHandler != nil {
+				var credentialRevocationEvent CredentialRevocationRecord
+				json.NewDecoder(r.Body).Decode(&credentialRevocationEvent)
+				credentialRevocationEventHandler(credentialRevocationEvent)
+			}
 		case "revocation_registry":
-			var revocationRegistryEvent RevocationRegistry
-			json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
-			revocationRegistryEventHandler(revocationRegistryEvent)
+			if revocationRegistryEventHandler != nil {
+				var revocationRegistryEvent RevocationRegistry
+				json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
+				revocationRegistryEventHandler(revocationRegistryEvent)
+			}
 		case "oob_invitation":
-			var outOfBandEvent OutOfBandEvent
-			json.NewDecoder(r.Body).Decode(&outOfBandEvent)
-			outOfBandEventHandler(outOfBandEvent)
+			if outOfBandEventHandler != nil {
+				var outOfBandEvent OutOfBandEvent
+				json.NewDecoder(r.Body).Decode(&outOfBandEvent)
+				outOfBandEventHandler(outOfBandEvent)
+			}
 		case "present_proof":
-			var presentationExchangeEvent PresentationExchangeRecord
-			json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
-			presentationExchangeEventHandler(presentationExchangeEvent)
+			if presentationExchangeEventHandler != nil {
+				var presentationExchangeEvent PresentationExchangeRecord
+				json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
+				presentationExchangeEventHandler(presentationExchangeEvent)
+			}
 		case "ping":
-			var pingEvent PingEvent
-			json.NewDecoder(r.Body).Decode(&pingEvent)
-			pingEventHandler(pingEvent)
+			if pingEventHandler != nil {
+				var pingEvent PingEvent
+				json.NewDecoder(r.Body).Decode(&pingEvent)
+				pingEventHandler(pingEvent)
+			}
 		default:
-			fmt.Printf("Topic not supported: %q\n", topic)
+			log.Printf("Webhook topic not supported: %q\n", topic)
 			w.WriteHeader(404)
-			body, _ := ioutil.ReadAll(r.Body)
-			fmt.Println(string(body))
 			return
 		}
 		w.WriteHeader(200)
