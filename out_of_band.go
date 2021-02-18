@@ -2,6 +2,10 @@ package acapy
 
 import "strconv"
 
+const DIDExchangeV1 = "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/didexchange/1.0"
+
+var DefaultHandshakeProtocols = []string{DIDExchangeV1}
+
 type Attachment struct {
 	ID   string `json:"id"`   // either CredentialExchangeID or PresentationExchangeID
 	Type string `json:"type"` // either credential-offer or present-proof
@@ -11,10 +15,13 @@ type Attachment struct {
 type CreateOutOfBandInvitationRequest struct {
 	// When I put something in Attachments it crashes,
 	// the CredentialExchangeRecord or PresentationExchangeRecord should probably be in the right state
-	Attachments      []Attachment `json:"attachments,omitempty"`
-	IncludeHandshake bool         `json:"include_handshake"`
-	Metadata         struct{}     `json:"metadata,omitempty"` // TODO
-	UsePublicDID     bool         `json:"use_public_did"`
+	Alias              string                 `json:"alias"`
+	MyLabel            string                 `json:"my_label"`
+	Attachments        []Attachment           `json:"attachments,omitempty"`
+	HandshakeProtocols []string               `json:"handshake_protocols"`
+	MediationID        string                 `json:"mediation_id,omitempty"`
+	Metadata           map[string]interface{} `json:"metadata,omitempty"`
+	UsePublicDID       bool                   `json:"use_public_did"`
 }
 
 type OutOfBandInvitationResponse struct {

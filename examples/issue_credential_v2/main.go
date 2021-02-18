@@ -32,7 +32,7 @@ type App struct {
 	connection             acapy.Connection
 	schema                 acapy.Schema
 	credentialDefinitionID string
-	credentialExchange     acapy.CredentialExchangeRecord
+	credentialExchange     acapy.CredentialExchangeRecordResult
 }
 
 func (app *App) ReadCommands() {
@@ -126,23 +126,23 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			comment := scanner.Text()
 
-			var attributes []acapy.CredentialPreviewAttribute
+			var attributes []acapy.CredentialPreviewAttributeV2
 
 			for _, attr := range app.schema.AttributeNames {
 				fmt.Printf("Attribute %q value: ", attr)
 				scanner.Scan()
 				val := scanner.Text()
 
-				attributes = append(attributes, acapy.CredentialPreviewAttribute{
+				attributes = append(attributes, acapy.CredentialPreviewAttributeV2{
 					Name:     attr,
 					MimeType: "text/plain",
 					Value:    val,
 				})
 			}
 
-			if credentialExchange, err := app.client.OfferCredential(
+			if credentialExchange, err := app.client.OfferCredentialV2(
 				app.connection.ConnectionID,
-				acapy.NewCredentialPreview(attributes),
+				acapy.NewCredentialPreviewV2(attributes),
 				app.credentialDefinitionID,
 				comment,
 			); err != nil {
@@ -150,9 +150,9 @@ func (app *App) ReadCommands() {
 			} else {
 				app.credentialExchange = credentialExchange
 			}
-			fmt.Printf("Credential Exchange ID: %s\n", app.credentialExchange.CredentialExchangeID)
+			fmt.Printf("Credential Exchange ID: %s\n", app.credentialExchange.CredentialExchangeRecord.CredentialExchangeID)
 		case "6":
-			_, err := app.client.RequestCredentialByID(app.credentialExchange.CredentialExchangeID)
+			_, err := app.client.RequestCredentialByIDV2(app.credentialExchange.CredentialExchangeRecord.CredentialExchangeID)
 			if err != nil {
 				app.Exit(err)
 			}
@@ -161,12 +161,12 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			comment := scanner.Text()
 
-			_, err := app.client.IssueCredentialByID(app.credentialExchange.CredentialExchangeID, comment)
+			_, err := app.client.IssueCredentialByIDV2(app.credentialExchange.CredentialExchangeRecord.CredentialExchangeID, comment)
 			if err != nil {
 				app.Exit(err)
 			}
 		case "8":
-			_, err = app.client.StoreCredentialByID(app.credentialExchange.CredentialExchangeID, app.credentialExchange.Credential.Referent)
+			_, err = app.client.StoreCredentialByIDV2(app.credentialExchange.CredentialExchangeRecord.CredentialExchangeID, "")
 			if err != nil {
 				app.Exit(err)
 			}
@@ -183,7 +183,7 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			message := scanner.Text()
 
-			err := app.client.ReportCredentialExchangeProblem(app.credentialExchange.CredentialExchangeID, message)
+			err := app.client.ReportCredentialExchangeProblemV2(app.credentialExchange.CredentialExchangeRecord.CredentialExchangeID, message)
 			if err != nil {
 				app.Exit(err)
 			}
@@ -225,10 +225,12 @@ func (app *App) StartACApy() {
 func (app *App) StartWebserver() {
 	r := mux.NewRouter()
 	webhookHandler := acapy.CreateWebhooksHandler(acapy.WebhookHandlers{
-		ConnectionsEventHandler:        app.ConnectionsEventHandler,
-		ProblemReportEventHandler:      app.ProblemReportEventHandler,
-		CredentialExchangeEventHandler: app.CredentialExchangeEventHandler,
-		OutOfBandEventHandler:          app.OutOfBandEventHandler,
+		ConnectionsEventHandler:            app.ConnectionsEventHandler,
+		ProblemReportEventHandler:          app.ProblemReportEventHandler,
+		CredentialExchangeV2EventHandler:   app.CredentialExchangeV2EventHandler,
+		CredentialExchangeDIFEventHandler:  app.CredentialExchangeDIFEventHandler,
+		CredentialExchangeIndyEventHandler: app.CredentialExchangeIndyEventHandler,
+		OutOfBandEventHandler:              app.OutOfBandEventHandler,
 	})
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
@@ -267,10 +269,24 @@ func (app *App) ConnectionsEventHandler(event acapy.Connection) {
 	fmt.Printf("\n -> Connection %q (%s), update to state %q rfc23 state %q\n", event.Alias, event.ConnectionID, event.State, event.RFC23State)
 }
 
-func (app *App) CredentialExchangeEventHandler(event acapy.CredentialExchangeRecord) {
+func (app *App) CredentialExchangeV2EventHandler(event acapy.CredentialExchangeRecordV2) {
 	connection, _ := app.client.GetConnection(event.ConnectionID)
-	app.credentialExchange = event
-	fmt.Printf("\n -> Credential Exchange update: %s - %s - %s\n", event.CredentialExchangeID, connection.TheirLabel, event.State)
+	app.credentialExchange.CredentialExchangeRecord = event
+	fmt.Printf("\n -> Credential Exchange V2 update: %s - %s - %s\n", event.CredentialExchangeID, connection.TheirLabel, event.State)
+}
+
+func (app *App) CredentialExchangeDIFEventHandler(event acapy.CredentialExchangeDIF) {
+	record, _ := app.client.GetCredentialExchangeV2(event.CredentialExchangeID)
+	connection, _ := app.client.GetConnection(record.CredentialExchangeRecord.ConnectionID)
+	app.credentialExchange.DIF = event
+	fmt.Printf("\n -> Credential Exchange DIF Event: %s - %s - %s", connection.TheirLabel, event.CredentialExchangeID, event.State)
+}
+
+func (app *App) CredentialExchangeIndyEventHandler(event acapy.CredentialExchangeIndy) {
+	record, _ := app.client.GetCredentialExchangeV2(event.CredentialExchangeID)
+	connection, _ := app.client.GetConnection(record.CredentialExchangeRecord.ConnectionID)
+	app.credentialExchange.Indy = event
+	fmt.Printf("\n -> Credential Exchange Indy Event: %s - %s - %s", connection.TheirLabel, event.CredentialExchangeID, event.CredentialExchangeIndyID)
 }
 
 func (app *App) ProblemReportEventHandler(event acapy.ProblemReportEvent) {

@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-
 	"github.com/ldej/go-acapy-client"
 )
 
@@ -72,8 +71,16 @@ func (app *App) ReadCommands() {
 			app.Exit(nil)
 			return
 		case "1":
+			fmt.Println("Who/What is the invitation for?")
+			scanner.Scan()
+			theirLabel := scanner.Text()
+
 			invitationResponse, err := app.client.CreateOutOfBandInvitation(
-				acapy.CreateOutOfBandInvitationRequest{IncludeHandshake: true},
+				acapy.CreateOutOfBandInvitationRequest{
+					Alias:              theirLabel,
+					HandshakeProtocols: acapy.DefaultHandshakeProtocols,
+					MyLabel:            app.label,
+				},
 				true,
 				false,
 			)
@@ -83,7 +90,7 @@ func (app *App) ReadCommands() {
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
 		case "2":
-			fmt.Print("Invitation json: ")
+			fmt.Println("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
 			connection, err := app.ReceiveInvitation(invitation)
@@ -289,17 +296,15 @@ func (app *App) StartACApy() {
 
 func (app *App) StartWebserver() {
 	r := mux.NewRouter()
-	webhookHandler := acapy.WebhookHandler(
-		app.ConnectionsEventHandler,
-		nil,
-		app.ProblemReportEventHandler,
-		app.CredentialExchangeEventHandler,
-		app.RevocationRegistryEventHandler,
-		app.PresentationExchangeEventHandler,
-		app.CredentialRevocationEventHandler,
-		nil,
-		app.OutOfBandEventHandler,
-	)
+	webhookHandler := acapy.CreateWebhooksHandler(acapy.WebhookHandlers{
+		ConnectionsEventHandler:          app.ConnectionsEventHandler,
+		ProblemReportEventHandler:        app.ProblemReportEventHandler,
+		CredentialExchangeEventHandler:   app.CredentialExchangeEventHandler,
+		RevocationRegistryEventHandler:   app.RevocationRegistryEventHandler,
+		PresentationExchangeEventHandler: app.PresentationExchangeEventHandler,
+		CredentialRevocationEventHandler: app.CredentialRevocationEventHandler,
+		OutOfBandEventHandler:            app.OutOfBandEventHandler,
+	})
 
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(r.URL.Path)

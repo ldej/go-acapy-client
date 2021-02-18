@@ -125,8 +125,8 @@ type credentialOfferRequest struct {
 func (c *Client) OfferCredential(
 	connectionID string, // required
 	credentialPreview CredentialPreview, // required
-	comment string, // optional
 	credentialDefinitionID string, // optional
+	comment string, // optional
 ) (CredentialExchangeRecord, error) {
 	var offer = credentialOfferRequest{
 		CredentialDefinitionID: credentialDefinitionID,

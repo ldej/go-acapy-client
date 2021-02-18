@@ -2,80 +2,111 @@ package acapy
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 )
 
-func WebhookHandler(
-	connectionsEventHandler func(event Connection),
-	basicMessagesEventHandler func(event BasicMessagesEvent),
-	problemReportEventHandler func(event ProblemReportEvent),
-	credentialExchangeEventHandler func(event CredentialExchangeRecord),
-	revocationRegistryEventHandler func(event RevocationRegistry),
-	presentationExchangeEventHandler func(event PresentationExchangeRecord),
-	credentialRevocationEventHandler func(event CredentialRevocationRecord),
-	pingEventHandler func(event PingEvent),
-	outOfBandEventHandler func(event OutOfBandEvent),
-) func(w http.ResponseWriter, r *http.Request) {
+type WebhookHandlers struct {
+	ConnectionsEventHandler            func(event Connection)
+	BasicMessagesEventHandler          func(event BasicMessagesEvent)
+	ProblemReportEventHandler          func(event ProblemReportEvent)
+	CredentialExchangeEventHandler     func(event CredentialExchangeRecord)
+	CredentialExchangeV2EventHandler   func(event CredentialExchangeRecordV2)
+	CredentialExchangeDIFEventHandler  func(event CredentialExchangeDIF)
+	CredentialExchangeIndyEventHandler func(event CredentialExchangeIndy)
+	RevocationRegistryEventHandler     func(event RevocationRegistry)
+	PresentationExchangeEventHandler   func(event PresentationExchangeRecord)
+	CredentialRevocationEventHandler   func(event CredentialRevocationRecord)
+	PingEventHandler                   func(event PingEvent)
+	OutOfBandEventHandler              func(event OutOfBandEvent)
+}
+
+func CreateWebhooksHandler(handlers WebhookHandlers) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		path := strings.Split(strings.TrimSuffix(r.URL.Path, "/"), "/")
 		topic := path[len(path)-1]
 
+		defer r.Body.Close()
+
 		switch topic {
 		case "connections":
-			if connectionsEventHandler != nil {
+			if handlers.ConnectionsEventHandler != nil {
 				var connectionsEvent Connection
 				json.NewDecoder(r.Body).Decode(&connectionsEvent)
-				connectionsEventHandler(connectionsEvent)
+				handlers.ConnectionsEventHandler(connectionsEvent)
 			}
 		case "basicmessages":
-			if basicMessagesEventHandler != nil {
+			if handlers.BasicMessagesEventHandler != nil {
 				var basicMessagesEvent BasicMessagesEvent
 				json.NewDecoder(r.Body).Decode(&basicMessagesEvent)
-				basicMessagesEventHandler(basicMessagesEvent)
+				handlers.BasicMessagesEventHandler(basicMessagesEvent)
 			}
 		case "problem_report":
-			if problemReportEventHandler != nil {
+			if handlers.ProblemReportEventHandler != nil {
 				var problemReportEvent ProblemReportEvent
 				json.NewDecoder(r.Body).Decode(&problemReportEvent)
-				problemReportEventHandler(problemReportEvent)
+				handlers.ProblemReportEventHandler(problemReportEvent)
 			}
 		case "issue_credential":
-			if credentialExchangeEventHandler != nil {
+			if handlers.CredentialExchangeEventHandler != nil {
 				var credentialExchangeEvent CredentialExchangeRecord
 				json.NewDecoder(r.Body).Decode(&credentialExchangeEvent)
-				credentialExchangeEventHandler(credentialExchangeEvent)
+				handlers.CredentialExchangeEventHandler(credentialExchangeEvent)
 			}
 		case "issuer_cred_rev":
-			if credentialRevocationEventHandler != nil {
+			if handlers.CredentialRevocationEventHandler != nil {
 				var credentialRevocationEvent CredentialRevocationRecord
 				json.NewDecoder(r.Body).Decode(&credentialRevocationEvent)
-				credentialRevocationEventHandler(credentialRevocationEvent)
+				handlers.CredentialRevocationEventHandler(credentialRevocationEvent)
+			}
+		case "issue_credential_v2_0":
+			if handlers.CredentialExchangeV2EventHandler != nil {
+				var credentialExchangeV2Event CredentialExchangeRecordV2
+				json.NewDecoder(r.Body).Decode(&credentialExchangeV2Event)
+				handlers.CredentialExchangeV2EventHandler(credentialExchangeV2Event)
+			}
+		case "issue_credential_v2_0_dif":
+			body, _ := ioutil.ReadAll(r.Body)
+			fmt.Println(string(body))
+			if handlers.CredentialExchangeDIFEventHandler != nil {
+				var credentialExchangeDIFEvent CredentialExchangeDIF
+				if err := json.Unmarshal(body, &credentialExchangeDIFEvent); err != nil {
+					log.Fatal(err)
+				}
+				handlers.CredentialExchangeDIFEventHandler(credentialExchangeDIFEvent)
+			}
+		case "issue_credential_v2_0_indy":
+			if handlers.CredentialExchangeIndyEventHandler != nil {
+				var credentialExchangeIndyEvent CredentialExchangeIndy
+				json.NewDecoder(r.Body).Decode(&credentialExchangeIndyEvent)
+				handlers.CredentialExchangeIndyEventHandler(credentialExchangeIndyEvent)
 			}
 		case "revocation_registry":
-			if revocationRegistryEventHandler != nil {
+			if handlers.RevocationRegistryEventHandler != nil {
 				var revocationRegistryEvent RevocationRegistry
 				json.NewDecoder(r.Body).Decode(&revocationRegistryEvent)
-				revocationRegistryEventHandler(revocationRegistryEvent)
+				handlers.RevocationRegistryEventHandler(revocationRegistryEvent)
 			}
 		case "oob_invitation":
-			if outOfBandEventHandler != nil {
+			if handlers.OutOfBandEventHandler != nil {
 				var outOfBandEvent OutOfBandEvent
 				json.NewDecoder(r.Body).Decode(&outOfBandEvent)
-				outOfBandEventHandler(outOfBandEvent)
+				handlers.OutOfBandEventHandler(outOfBandEvent)
 			}
 		case "present_proof":
-			if presentationExchangeEventHandler != nil {
+			if handlers.PresentationExchangeEventHandler != nil {
 				var presentationExchangeEvent PresentationExchangeRecord
 				json.NewDecoder(r.Body).Decode(&presentationExchangeEvent)
-				presentationExchangeEventHandler(presentationExchangeEvent)
+				handlers.PresentationExchangeEventHandler(presentationExchangeEvent)
 			}
 		case "ping":
-			if pingEventHandler != nil {
+			if handlers.PingEventHandler != nil {
 				var pingEvent PingEvent
 				json.NewDecoder(r.Body).Decode(&pingEvent)
-				pingEventHandler(pingEvent)
+				handlers.PingEventHandler(pingEvent)
 			}
 		default:
 			log.Printf("Webhook topic not supported: %q\n", topic)

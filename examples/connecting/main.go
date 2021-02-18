@@ -16,8 +16,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-
-	acapy "github.com/ldej/go-acapy-client"
+	"github.com/ldej/go-acapy-client"
 )
 
 type App struct {
@@ -62,8 +61,16 @@ func (app *App) ReadCommands() {
 			app.Exit(nil)
 			return
 		case "1":
+			fmt.Println("Who/What is the invitation for?")
+			scanner.Scan()
+			theirLabel := scanner.Text()
+
 			invitationResponse, err := app.client.CreateOutOfBandInvitation(
-				acapy.CreateOutOfBandInvitationRequest{IncludeHandshake: true},
+				acapy.CreateOutOfBandInvitationRequest{
+					Alias:              theirLabel,
+					HandshakeProtocols: acapy.DefaultHandshakeProtocols,
+					MyLabel:            app.label,
+				},
 				false,
 				false,
 			)
@@ -73,7 +80,7 @@ func (app *App) ReadCommands() {
 			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
 		case "2":
-			fmt.Print("Invitation json: ")
+			fmt.Println("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
 			connection, err := app.ReceiveInvitation(invitation)
@@ -150,17 +157,13 @@ func (app *App) StartACApy() {
 
 func (app *App) StartWebserver() {
 	r := mux.NewRouter()
-	webhookHandler := acapy.WebhookHandler(
-		app.ConnectionsEventHandler,
-		app.BasicMessagesEventHandler,
-		app.ProblemReportEventHandler,
-		nil,
-		nil,
-		nil,
-		nil,
-		app.PingEventHandler,
-		app.OutOfBandEventHandler,
-	)
+	webhookHandler := acapy.CreateWebhooksHandler(acapy.WebhookHandlers{
+		ConnectionsEventHandler:   app.ConnectionsEventHandler,
+		BasicMessagesEventHandler: app.BasicMessagesEventHandler,
+		ProblemReportEventHandler: app.ProblemReportEventHandler,
+		PingEventHandler:          app.PingEventHandler,
+		OutOfBandEventHandler:     app.OutOfBandEventHandler,
+	})
 
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
 	fmt.Printf("Listening on %v\n", app.port)

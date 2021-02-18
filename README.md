@@ -187,20 +187,20 @@ Examples can be found in the [examples](./examples) folder.
 
 `{id}` = credential exchange identifier
 
-| Function Name | Method | Endpoint                                          | Implemented   |
-| ------------- | ------ | ------------------------------------------------- | ------------- |
-| -             | POST   | /issue-credential-2.0/create                      | :exclamation: |
-| -             | GET    | /issue-credential-2.0/records                     | :exclamation: |
-| -             | GET    | /issue-credential-2.0/records/{id}                | :exclamation: |
-| -             | DELETE | /issue-credential-2.0/records/{id}                | :exclamation: |
-| -             | POST   | /issue-credential-2.0/records/{id}/issue          | :exclamation: |
-| -             | POST   | /issue-credential-2.0/records/{id}/problem-report | :exclamation: |
-| -             | POST   | /issue-credential-2.0/records/{id}/send-offer     | :exclamation: |
-| -             | POST   | /issue-credential-2.0/records/{id}/send-request   | :exclamation: |
-| -             | POST   | /issue-credential-2.0/records/{id}/store          | :exclamation: |
-| -             | POST   | /issue-credential-2.0/send                        | :exclamation: |
-| -             | POST   | /issue-credential-2.0/send-offer                  | :exclamation: |
-| -             | POST   | /issue-credential-2.0/send-proposal               | :exclamation: |
+| Function Name                     | Method | Endpoint                                          | Implemented        |
+| --------------------------------- | ------ | ------------------------------------------------- | ------------------ |
+| CreateCredentialExchangeV2        | POST   | /issue-credential-2.0/create                      | :heavy_check_mark: |
+| QueryCredentialExchangeV2         | GET    | /issue-credential-2.0/records                     | :heavy_check_mark: |
+| GetCredentialExchangeV2           | GET    | /issue-credential-2.0/records/{id}                | :heavy_check_mark: |
+| RemoveCredentialExchangeV2        | DELETE | /issue-credential-2.0/records/{id}                | :heavy_check_mark: |
+| IssueCredentialByIDV2             | POST   | /issue-credential-2.0/records/{id}/issue          | :heavy_check_mark: |
+| ReportCredentialExchangeProblemV2 | POST   | /issue-credential-2.0/records/{id}/problem-report | :heavy_check_mark: |
+| SendCredentialOfferByIDV2         | POST   | /issue-credential-2.0/records/{id}/send-offer     | :heavy_check_mark: |
+| SendCredentialRequestByIDV2       | POST   | /issue-credential-2.0/records/{id}/send-request   | :heavy_check_mark: |
+| StoreReceivedCredentialV2         | POST   | /issue-credential-2.0/records/{id}/store          | :heavy_check_mark: |
+| SendCredentialV2                  | POST   | /issue-credential-2.0/send                        | :heavy_check_mark: |
+| SendCredentialOfferV2             | POST   | /issue-credential-2.0/send-offer                  | :heavy_check_mark: |
+| SendCredentialProposalV2          | POST   | /issue-credential-2.0/send-proposal               | :heavy_check_mark: |
 
 
 ### Ledger
@@ -339,17 +339,20 @@ Read more about [ACA-py webhooks](https://ldej.nl/post/aries-cloudagent-python-w
 ```go
 func main() {
     r := mux.NewRouter()
-    webhookHandler := acapy.WebhookHandler(
-        ConnectionsEventHandler,
-        BasicMessagesEventHandler,
-        ProblemReportEventHandler,
-        CredentialExchangeEventHandler,
-        RevocationRegistryEventHandler,
-        PresentationExchangeEventHandler,
-		IssuerCredentialRevocationEventHandler,
-		PingEventHandler,
-        OutOfBandEventHandler,
-    )
+	webhookHandler := acapy.CreateWebhooksHandler(acapy.WebhookHandlers{
+		ConnectionsEventHandler:            ConnectionsEventHandler,
+		BasicMessagesEventHandler:          BasicMessagesEventHandler,
+		ProblemReportEventHandler:          ProblemReportEventHandler,
+		CredentialExchangeEventHandler:     CredentialExchangeEventHandler,
+		CredentialExchangeV2EventHandler:   CredentialExchangeV2EventHandler,
+		CredentialExchangeDIFEventHandler:  CredentialExchangeDIFEventHandler,
+		CredentialExchangeIndyEventHandler: CredentialExchangeIndyEventHandler,
+		RevocationRegistryEventHandler:     RevocationRegistryEventHandler,
+		PresentationExchangeEventHandler:   PresentationExchangeEventHandler,
+		CredentialRevocationEventHandler:   CredentialRevocationEventHandler,
+		PingEventHandler:                   PingEventHandler,
+		OutOfBandEventHandler:              OutOfBandEventHandler,
+	})
     
     r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
     
@@ -372,6 +375,18 @@ func CredentialExchangeEventHandler(event acapy.CredentialExchange) {
     fmt.Printf("\n -> Credential Exchange update: %s - %s\n", event.CredentialExchangeID, event.State)
 }
 
+func CredentialExchangeV2EventHandler(event acapy.CredentialExchangeRecordV2) {
+	fmt.Printf("\n -> Credential Exchange V2 update: %s - %s\n", event.CredentialExchangeID, event.State)
+}
+
+func CredentialExchangeDIFEventHandler(event acapy.CredentialExchangeDIF) {
+	fmt.Printf("\n -> Credential Exchange DIF Event: %s - %s", event.CredentialExchangeID, event.State)
+}
+
+func CredentialExchangeIndyEventHandler(event acapy.CredentialExchangeIndy) {
+	fmt.Printf("\n -> Credential Exchange Indy Event: %s - %s", event.CredentialExchangeID, event.CredentialExchangeIndyID)
+}
+
 func RevocationRegistryEventHandler(event acapy.RevocationRegistry) {
     fmt.Printf("\n -> Revocation Registry update: %s - %s\n", event.RevocationRegistryID, event.State)
 }
@@ -380,7 +395,7 @@ func PresentationExchangeEventHandler(event acapy.PresentationExchange) {
     fmt.Printf("\n -> Presentation Exchange update: %s - %s\n", event.PresentationExchangeID, event.State)
 }
 
-func IssuerCredentialRevocationEventHandler(event acapy.IssuerCredentialRevocationEvent) {
+func CredentialRevocationEventHandler(event acapy.IssuerCredentialRevocationEvent) {
     fmt.Printf("\n -> Issuer Credential Revocation: %s - %s - %s\n", event.CredentialExchangeID, event.RecordID, event.State)
 }
 
