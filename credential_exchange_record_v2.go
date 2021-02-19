@@ -33,7 +33,7 @@ type CredentialExchangeRecordResult struct {
 
 func NewCredentialPreviewV2(attributes []CredentialPreviewAttributeV2) CredentialPreviewV2 {
 	return CredentialPreviewV2{
-		Type:       "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/2.0/credential-preview",
+		Type:       "issue-credential/2.0/credential-preview",
 		Attributes: attributes,
 	}
 }
