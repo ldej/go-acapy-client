@@ -5,7 +5,7 @@ import (
 )
 
 type createCredentialExchangeRecordRequestV2 struct {
-	CredentialPreview CredentialPreviewV2 `json:"credential_proposal"` // required
+	CredentialPreview CredentialPreviewV2 `json:"credential_preview"` // required
 	Filter            Filter              `json:"filter"`
 	Comment           string              `json:"comment,omitempty"`
 
@@ -46,7 +46,7 @@ func (c *Client) CreateCredentialExchangeRecordV2(
 type credentialProposalRequestV2 struct {
 	ConnectionID      string              `json:"connection_id"` // required
 	Comment           string              `json:"comment,omitempty"`
-	CredentialPreview CredentialPreviewV2 `json:"credential_proposal"` // required
+	CredentialPreview CredentialPreviewV2 `json:"credential_preview"` // required
 	Filter            Filter              `json:"filter"`
 
 	Trace      bool `json:"trace,omitempty"`
@@ -169,7 +169,7 @@ func (c *Client) RequestCredentialByIDV2(credentialExchangeID string) (Credentia
 type issueCredentialRequestV2 struct {
 	ConnectionID      string              `json:"connection_id"` // required
 	Comment           string              `json:"comment,omitempty"`
-	CredentialPreview CredentialPreviewV2 `json:"credential_proposal"` // required
+	CredentialPreview CredentialPreviewV2 `json:"credential_preview"` // required
 	Filter            Filter              `json:"filter"`
 
 	Trace      bool `json:"trace,omitempty"`
