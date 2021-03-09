@@ -49,8 +49,8 @@ type OutOfBandInvitation struct {
 
 type Service struct {
 	DID             string   `json:"did,omitempty"`
-	ID              string   `json:"id"`
-	Type            string   `json:"type"` // did-communication
+	ID              string   `json:"id,omitempty"`
+	Type            string   `json:"type,omitempty"` // did-communication
 	RecipientKeys   []string `json:"recipientKeys,omitempty"`
 	RoutingKeys     []string `json:"routingKeys,omitempty"`
 	ServiceEndpoint string   `json:"serviceEndpoint,omitempty"`

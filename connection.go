@@ -49,6 +49,7 @@ func (c *Client) CreateInvitation(alias string, autoAccept bool, multiUse bool, 
 		"multi_use":   strconv.FormatBool(multiUse),
 		"public":      strconv.FormatBool(public),
 	}
+	//var createInvitationRequest CreateInvitationRequest
 	err := c.post("/connections/create-invitation", queryParams, nil, &createInvitationResponse)
 	if err != nil {
 		return CreateInvitationResponse{}, err

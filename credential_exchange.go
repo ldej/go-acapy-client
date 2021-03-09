@@ -22,38 +22,21 @@ type CredentialPreviewAttribute struct {
 	Value    string `json:"value"`
 }
 
-type createCredentialExchangeRecordRequest struct {
+type CreateCredentialExchangeRecordRequest struct {
 	CredentialDefinitionID string            `json:"cred_def_id,omitempty"`
 	CredentialPreview      CredentialPreview `json:"credential_proposal"` // required
 	IssuerDID              string            `json:"issuer_did,omitempty"`
 	Comment                string            `json:"comment,omitempty"`
 	SchemaID               string            `json:"schema_id,omitempty"`
-	Trace                  bool              `json:"trace,omitempty"`
-	AutoRemove             bool              `json:"auto_remove,omitempty"`
+	SchemaVersion          string            `json:"schema_version,omitempty"`
+	SchemaIssuerDID        string            `json:"schema_issuer_did,omitempty"`
+	SchemaName             string            `json:"schema_name,omitempty"`
 
-	// not supported
-	SchemaName      string `json:"schema_name,omitempty"`
-	SchemaVersion   string `json:"schema_version,omitempty"`
-	SchemaIssuerDID string `json:"schema_issuer_did,omitempty"`
+	Trace      bool `json:"trace,omitempty"`
+	AutoRemove bool `json:"auto_remove,omitempty"`
 }
 
-func (c *Client) CreateCredentialExchangeRecord(
-	credentialPreview CredentialPreview, // required
-	credentialDefinitionID string, // optional
-	issuerDID string, // optional
-	schemaID string, // optional
-	comment string, // optional
-) (CredentialExchangeRecord, error) {
-
-	var request = createCredentialExchangeRecordRequest{
-		CredentialDefinitionID: credentialDefinitionID,
-		IssuerDID:              issuerDID,
-		SchemaID:               schemaID,
-		CredentialPreview:      credentialPreview,
-		Comment:                comment,
-		Trace:                  c.tracing,
-		AutoRemove:             !c.preserveExchangeRecords,
-	}
+func (c *Client) CreateCredentialExchangeRecord(request CreateCredentialExchangeRecordRequest) (CredentialExchangeRecord, error) {
 	var credentialExchange CredentialExchangeRecord
 	err := c.post("/issue-credential/create", nil, request, &credentialExchange)
 	if err != nil {
@@ -286,4 +269,38 @@ func (c *Client) ReportCredentialExchangeProblem(credentialExchangeID string, me
 		Message: message,
 	}
 	return c.post(fmt.Sprintf("/issue-credential/records/%s/problem-report", credentialExchangeID), nil, body, nil)
+}
+
+type OutOfBandCredential struct {
+	ID                string            `json:"@id"`
+	Type              string            `json:"@type"`
+	Comment           string            `json:"comment"`
+	Service           Service           `json:"~service"`
+	CredentialPreview CredentialPreview `json:"credential_preview"`
+	OffersAttach      []OfferAttach     `json:"offers~attach"`
+}
+
+func (c *Client) CreateOutOfBandCredential(request CreateCredentialExchangeRecordRequest) (OutOfBandCredential, error) {
+
+	record, err := c.CreateCredentialExchangeRecord(request)
+	if err != nil {
+		return OutOfBandCredential{}, err
+	}
+
+	invitation, err := c.CreateInvitation("", false, false, false)
+	if err != nil {
+		return OutOfBandCredential{}, err
+	}
+
+	return OutOfBandCredential{
+		Comment:           request.Comment,
+		Type:              record.CredentialOfferMap.Type,
+		CredentialPreview: record.CredentialOfferMap.CredentialPreview,
+		OffersAttach:      record.CredentialOfferMap.OffersAttach,
+		Service: Service{
+			RecipientKeys:   invitation.Invitation.RecipientKeys,
+			RoutingKeys:     invitation.Invitation.RoutingKeys,
+			ServiceEndpoint: invitation.Invitation.ServiceEndpoint,
+		},
+	}, nil
 }

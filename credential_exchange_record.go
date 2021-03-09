@@ -40,19 +40,21 @@ type CredentialOffer struct {
 	Nonce string `json:"nonce"`
 }
 
+type OfferAttach struct {
+	ID       string `json:"@id"` // libindy-cred-offer-0
+	MimeType string `json:"mime-type"`
+	Data     struct {
+		Base64 string `json:"base64"`
+	} `json:"data"`
+}
+
 type CredentialOfferMap struct {
 	Type              string            `json:"@type"` // did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/offer-credential
 	ID                string            `json:"@id"`
 	Thread            Thread            `json:"~thread"`
 	CredentialPreview CredentialPreview `json:"credential_preview"`
 	Comment           string            `json:"comment"`
-	OffersAttach      []struct {
-		ID       string `json:"@id"`
-		MimeType string `json:"mime-type"`
-		Data     struct {
-			Base64 string `json:"base64"`
-		} `json:"data"`
-	} `json:"offers~attach"`
+	OffersAttach      []OfferAttach     `json:"offers~attach"`
 }
 
 type CredentialProposal struct {

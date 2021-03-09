@@ -65,31 +65,37 @@ func (app *App) ReadCommands() {
 			scanner.Scan()
 			theirLabel := scanner.Text()
 
-			invitationResponse, err := app.client.CreateInvitation(theirLabel, false, false, true)
+			invitationResponse, err := app.client.CreateOutOfBandInvitation(
+				acapy.CreateOutOfBandInvitationRequest{
+					Alias:              theirLabel,
+					HandshakeProtocols: acapy.DefaultHandshakeProtocols,
+					MyLabel:            app.label,
+				},
+				false,
+				false,
+			)
 			if err != nil {
 				app.Exit(err)
 			}
-			invitation, err := json.Marshal(invitationResponse.Invitation)
-			if err != nil {
-				app.Exit(err)
-			}
+			invitation, _ := json.Marshal(invitationResponse.Invitation)
 			fmt.Printf("Invitation json: %s\n", string(invitation))
 		case "2":
-			fmt.Print("Invitation json: ")
+			fmt.Println("Invitation json: ")
 			scanner.Scan()
 			invitation := scanner.Bytes()
 			connection, err := app.ReceiveInvitation(invitation)
 			if err != nil {
 				app.Exit(err)
 			}
+			app.connectionID = connection.ConnectionID
 			fmt.Printf("Connection id: %s\n", connection.ConnectionID)
 		case "3":
-			_, err := app.client.AcceptInvitation(app.connectionID)
+			_, err := app.client.DIDExchangeAcceptInvitation(app.connectionID, "", "")
 			if err != nil {
 				app.Exit(err)
 			}
 		case "4":
-			_, err := app.client.AcceptRequest(app.connectionID)
+			_, err := app.client.DIDExchangeAcceptRequest(app.connectionID, "")
 			if err != nil {
 				app.Exit(err)
 			}
@@ -252,10 +258,10 @@ func (app *App) RegisterDID(alias string, seed string) (acapy.RegisterDIDRespons
 }
 
 func (app *App) ReceiveInvitation(inv []byte) (acapy.Connection, error) {
-	var invitation acapy.Invitation
+	var invitation acapy.OutOfBandInvitation
 	err := json.Unmarshal(inv, &invitation)
 	if err != nil {
 		return acapy.Connection{}, err
 	}
-	return app.client.ReceiveInvitation(invitation, false)
+	return app.client.ReceiveOutOfBandInvitation(invitation, false)
 }
