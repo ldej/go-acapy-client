@@ -1,4 +1,4 @@
-module github.com/ldej/go-acapy-client/examples/issue_credential
+module github.com/ldej/go-acapy-client/examples/issue_credential_v2
 
 go 1.15
 

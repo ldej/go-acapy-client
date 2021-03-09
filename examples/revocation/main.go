@@ -355,7 +355,8 @@ func (app *App) StartWebserver() {
 		fmt.Println(r.URL.Path)
 	})
 	r.HandleFunc("/webhooks/topic/{topic}/", webhookHandler).Methods(http.MethodPost)
-	fmt.Printf("Listening on %v\n", app.port)
+	fmt.Printf("Listening on http://localhost:%d\n", app.port)
+	fmt.Printf("ACA-py Admin API on http://localhost:%d\n", app.port+2)
 
 	app.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", app.port),

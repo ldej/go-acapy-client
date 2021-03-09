@@ -1,5 +1,3 @@
 module github.com/ldej/go-acapy-client
 
-go 1.15
-
-require github.com/gorilla/mux v1.8.0 // indirect
+go 1.16

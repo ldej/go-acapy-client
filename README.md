@@ -420,11 +420,12 @@ The `acapy.WebhookHandler` is web framework agnostic and reads the topic from th
 - [ ] godoc
 - [ ] Proper error handling
 - [x] Admin API Key
-- [ ] Tracing via global config
+- [x] Tracing via global config
 - [ ] Automation of steps via global config
 - [ ] Payment decorators https://github.com/hyperledger/aries-rfcs/tree/master/features/0075-payment-decorators
 - [ ] Constructors for JSON-LD types
 - [ ] Add types for roles, states, predicates
+- [ ] Allow for a connection-less credential exchange
 - [ ] Allow for a connection-less proof by making a QR code of a payload below. The base64 payload is the result of your call to  `/present-proof/create-request`.
 ```json
 {
