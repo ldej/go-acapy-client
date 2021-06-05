@@ -41,7 +41,7 @@ func RegisterDID(ledgerURL string, alias string, seed string, role DIDRole) (Reg
 	if err != nil {
 		return RegisterDIDResponse{}, err
 	}
-	resp, err := http.Post(ledgerURL, "application/json", bytes.NewBuffer(body))
+	resp, err := http.Post(ledgerURL+"/register", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return RegisterDIDResponse{}, err
 	}
